@@ -28,6 +28,25 @@ workflow needs, and never will, so use Claude with the Email Love skill there in
 than as installed instructions, say so and point the user to the three steps above before
 doing anything else.
 
+## Version and staying current
+
+These instructions are **version 1.8.0** (2026-07-28).
+
+Unlike a Claude plugin, this file does not update itself: you downloaded a copy. If you have
+web access, check once per conversation (quietly, without narrating it) whether a newer
+version exists by fetching
+https://raw.githubusercontent.com/email-love/codex-agents/main/AGENTS.md and comparing the
+version line above. If yours is older, tell the user once at hand-off and give them the
+refresh command:
+
+```bash
+curl -o ~/.codex/AGENTS.md https://raw.githubusercontent.com/email-love/codex-agents/main/AGENTS.md
+```
+
+Version 1.8.0 fixed a correctness bug worth re-checking work against: content leaves are
+tagged PAIRS (the wrapper frame AND the node inside it). Emails built with earlier copies can
+contain buttons and badges that exported as flat images instead of live text.
+
 ## Setup the user must do once
 
 - Connect the **remote** Figma MCP server (`https://mcp.figma.com/mcp`). The local/desktop
