@@ -30,7 +30,7 @@ doing anything else.
 
 ## Version and staying current
 
-These instructions are **version 1.8.1** (2026-07-28).
+These instructions are **version 1.9.0** (2026-07-28).
 
 Unlike a Claude plugin, this file does not update itself: you downloaded a copy. If you have
 web access, check once per conversation (quietly, without narrating it) whether a newer
@@ -409,6 +409,36 @@ primary CTA, make everything scannable. For sequences, each email must escalate 
 the story; if two emails in one recipient's path repeat a theme, rewrite the later one to
 build on the first. Match the brand voice from existing copy in the file. Never use em
 dashes. Never invent statistics; flag any placeholder figures clearly.
+
+### Component properties
+
+When you build a component, add Figma component properties for the parts a marketer will
+actually change. Instances then expose toggles and fields in Figma's properties panel, and
+because the plugin exports what is visible, a boolean that hides a region genuinely removes it
+from the sent email rather than just hiding it on the canvas.
+
+```js
+const showBtn = comp.addComponentProperty('Show Button', 'BOOLEAN', true)
+ctaFrame.componentPropertyReferences = { visible: showBtn }
+
+const headlineProp = comp.addComponentProperty('Headline', 'TEXT', textNode.characters)
+textNode.componentPropertyReferences = { characters: headlineProp }
+```
+
+Three types earn their place:
+
+- **BOOLEAN** on genuinely optional regions: an eyebrow, a second button, a supporting image,
+  a disclaimer. Bind to `visible`.
+- **TEXT** on the copy fields someone edits every campaign: headline, body, button label. Bind
+  to `characters`, so the copy is editable from the panel without hunting through layers.
+- **INSTANCE_SWAP** where a real choice exists, such as button style or icon.
+
+Restraint beats coverage: four well-chosen properties are more useful than twenty, and a
+cluttered panel gets ignored. Add a boolean only where the design shows that region is really
+optional (present in some variants of the source library, absent in others), text properties
+for the top-level copy, and nothing else. Properties can only be added to COMPONENT or
+COMPONENT_SET nodes, never to instances, and you must load a text node's font before reading
+its characters for a default value.
 
 ### Saving components into the plugin's design system
 
