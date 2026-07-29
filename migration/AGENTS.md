@@ -65,6 +65,57 @@ rows in already-converted batches.
   one.
 - Never use em dashes in any layer name, plugin data value, text characters, or report.
 
+## How long this takes, and what to tell the user first
+
+A migration is measured in sessions, not seconds, and most of the frustration around one comes
+from a user who expected a minute. **Before you start any run longer than a couple of minutes,
+which means foundations, any module batch, and the audit of a large library, say in one line
+what you are about to do and roughly how long it should take.** Then start. A short line at
+each module boundary is the right rhythm after that: not silence for forty minutes, not a
+running commentary on every node.
+
+**Where the time actually goes.** Almost all of it is round trips to Figma, not model
+thinking. Every node you create or read back is a call, so a module with forty nodes costs
+many times what a module with six costs, and **the node count predicts the time far better
+than how complicated the design looks**. The design-converter worker is not the slow part: it
+returns MJML JSON in a few seconds to about half a minute per design. If the user comes away
+thinking the AI is what is slow, they have the wrong picture. The AI is waiting on the canvas.
+
+**What has actually been measured.** On batches of five modules, working from converted MJML:
+
+| Pass over a batch of 5 modules | Observed |
+| --- | --- |
+| Rendering the batch from converted MJML | about 38 minutes |
+| Restructuring the batch | about 31 minutes |
+| Promoting the batch to components | about 28 minutes |
+| A sizing correction pass | about 18 minutes |
+| Adding component properties | about 14 minutes |
+
+Hold two things in mind before repeating those numbers. First, they come from several agents
+working in parallel **with an adversarial verification pass on every module**. A single agent
+following this file has a different profile: less parallelism, but also fewer passes, since it
+is not re-verifying someone else's work. Second, they are observations of past runs, not a
+rate card. Quote them as ranges, and never as a commitment.
+
+**Source shape moves the number more than anything else.** An email-native source (frames
+already at 600 or 640, auto layout in place) converts far faster than an unstructured one
+(groups, absolutely positioned layers, a scaled-up mockup), because in the unstructured case
+you first have to work out where each module even begins and ends before you can build
+anything. On a real unstructured file that came out at roughly **three times slower per
+module**. The audit already knows which kind of file this is, so use it: if it flagged loose
+groups, absolute positioning, or off-spec widths, widen the estimate before you give it.
+
+**The ranges to give:**
+
+- **The audit:** minutes, scaling with library size. It is read-only and creates nothing, so it
+  is the quick phase.
+- **Foundations:** a single pass, comparable in length to one module batch.
+- **A first batch of about five modules:** expect tens of minutes, and longer than that on an
+  unstructured source.
+- **A full library of a hundred modules or more:** multiple sessions. That is exactly why this
+  process is batched with a design review between batches rather than run as one long
+  unattended pass.
+
 ---
 
 # Phase 1: Audit (read-only)
@@ -219,6 +270,11 @@ real conventions in private plugin data you cannot read.
    "[Customer] Email Love Design System" via the Figma MCP.
 4. Which batch to run: "foundations", or a named batch of modules ("batch 1: the 5 modules
    listed in the audit's recommended next step", or an explicit list).
+
+Once you have those four, and **before the first write to the canvas**, tell the user what the
+run covers and roughly how long to expect, per "How long this takes, and what to tell the user
+first" above. Do this every batch, not just the first one, and adjust the estimate as the file
+teaches you what it costs.
 
 ## Phase 2: Foundations (run once per customer)
 
