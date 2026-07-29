@@ -6,7 +6,14 @@ inside your Figma file from your [Email Love](https://emaillove.com) design syst
 Codex has no skills system, so the instructions ship as [`AGENTS.md`](AGENTS.md), the file
 Codex loads automatically as persistent context.
 
+## Two instruction files
+
+- [`AGENTS.md`](AGENTS.md) — **building emails** from an existing Email Love design system. Install globally at `~/.codex/AGENTS.md`.
+- [`migration/AGENTS.md`](migration/AGENTS.md) — **migrating a legacy design system** to Email Love: read-only audit, then conversion. Install at the root of a migration project folder and run `codex` from there, so it does not load during everyday email work.
+
 ## Install
+
+
 
 **1. Save the instructions**
 
