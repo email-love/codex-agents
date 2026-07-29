@@ -30,7 +30,7 @@ doing anything else.
 
 ## Version and staying current
 
-These instructions are **version 1.10.0** (2026-07-28).
+These instructions are **version 1.11.0** (2026-07-28).
 
 Unlike a Claude plugin, this file does not update itself: you downloaded a copy. If you have
 web access, check once per conversation (quietly, without narrating it) whether a newer
@@ -348,6 +348,13 @@ in your report so the user can verify in the plugin's mobile preview.
 Beyond text, image, and button, the plugin has first-class element types. Use them rather than
 imitating them, because a faked element looks right on the canvas and exports wrong:
 
+- `mj-group` for elements that must stay **side by side on mobile**. Columns normally stack on
+  small screens; a group prevents that. It sits inside `mj-section` and contains `mj-column`s.
+  This is the right primitive for a badge beside text, an icon beside a label, or a two-up row
+  that must never break. Two rules: columns inside a group must be sized in **percentages, not
+  pixels**, and the group must be a child of a section, never of a column. (For the opposite
+  case, forcing a whole section not to stack, the section's `stackColumns` setting does it
+  without a group.)
 - `mj-divider` for a horizontal rule. Never fake one with a thin rectangle.
 - `mj-spacer` for vertical space. Never fake it with an empty frame.
 - `mj-navbar` containing `mj-navbar-link` for a link row.
