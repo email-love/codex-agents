@@ -30,7 +30,7 @@ doing anything else.
 
 ## Version and staying current
 
-These instructions are **version 1.8.0** (2026-07-28).
+These instructions are **version 1.8.1** (2026-07-28).
 
 Unlike a Claude plugin, this file does not update itself: you downloaded a copy. If you have
 web access, check once per conversation (quietly, without narrating it) whether a newer
@@ -207,6 +207,14 @@ column.** Button styles in a design system (for example "Blue Text White") are
 **sub-components, not sections**. A button instance must sit inside an `mj-button-Frame` AND
 carry the `mj-button` tag itself. The same holds for text and images: tagged `mj-text` inside
 `mj-text-Frame`, tagged `mj-image` inside `mj-image-Frame`.
+
+**Build the pair, do not style the wrapper.** The wrapper frame carries layout (padding,
+alignment, sizing); the inner node carries the content. An image element is a
+`mj-image-Frame` **containing a rectangle** whose fill is the image, not a frame with an image
+fill on itself. A divider is a `mj-divider-Frame` **containing a line or thin rectangle**, not
+a frame with a solid fill. A wrapper with no children has nothing for the exporter to emit, so
+it exports as an empty cell no matter how right it looks on the canvas. When you catch yourself
+applying a fill directly to an `mj-*-Frame`, you are building the wrong shape.
 
 **Untagged content does not fail loudly. It gets flattened into a picture.** Anything the
 exporter does not recognize hits its "render the unknown as an image" path, which is the same
