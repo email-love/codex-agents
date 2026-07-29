@@ -132,6 +132,67 @@ identical to an existing campaign's, that is a signal you matched the donor, not
 
 ## Step 4: Build
 
+### How the frame structure works
+
+The plugin resolves what each layer *is* from a plugin data key called `name`, and falls back
+to the Figma layer name when that key is absent. Getting this wrong produces a frame that
+looks perfect on the canvas and silently drops content on export, so it is worth understanding
+before you build anything.
+
+Every email nests in this order:
+
+```
+mainFrame                          the root; carries the marker and theme colors
+└── section component instance     Header, Hero, Copy block: your library's sections
+    └── mj-section
+        └── mj-column
+            └── mj-text-Frame | mj-image-Frame | mj-button-Frame
+                └── the content: a TEXT node, an image RECTANGLE, or an
+                    instance of a button style component
+```
+
+An `mj-wrapper` may sit above `mj-section` when a section needs a full-width background.
+
+**Rule 1: declare the tag, do not just name the layer after it.** There are two supported
+conventions, and you should prefer the first:
+
+- **Metadata (what the plugin itself uses, and the most robust).** Write the MJML tag into the
+  `name` key: `node.setSharedPluginData('emaillove', 'name', 'mj-section')`. The layer name is
+  then free, so you can label it anything a human will understand ("Report CTA row"). This is
+  why the design system's own sections have friendly names like "Hero — FARE Act" and still
+  export correctly, and why the docs say you can rename layers without breaking the export.
+- **Layer name (the fallback, used when no `name` key exists).** The layer name must resolve to
+  the tag on its own, either exactly (`mj-section`) or in the parenthesized form the plugin
+  parses (`Report CTA, (mjml:mj-section)`).
+
+The trap sits between the two. `mj-section — Report CTA` with no `name` key fails, because the
+entire string is read as the tag and matches nothing. Never append a suffix to a bare tag name;
+either set the metadata key or use the parenthesized form.
+
+**Rule 2: content lives in a leaf element frame, never directly in a column.** Button styles
+in a design system (for example "Blue Text White") are **sub-components, not sections**. They
+carry no email structure of their own, which is deliberate: the team updates the button style
+in one place and every email inherits it. A button instance must sit inside an
+`mj-button-Frame`, which is what the exporter recognizes. Dropping a button component straight
+into an `mj-column` exports nothing. The same holds for text and images, which belong in
+`mj-text-Frame` and `mj-image-Frame`.
+
+Because both mistakes are invisible on the canvas, the safest path is to **not hand-build this
+scaffold at all**. Duplicate a section that already has the correct structure and replace its
+content. Only assemble the hierarchy yourself when no existing section fits, and then copy the
+naming from a working section rather than inventing it.
+
+### Do not change the template's foundations
+
+Read these before building and preserve them exactly: the **email width** (the root frame's
+width, usually 600 or 640), the **breakpoint**, and the **fonts** already in use. These are
+brand decisions someone made, not defaults to improve on.
+
+Fonts deserve specific care. If a font in the file will not load in your environment, do not
+substitute a different one to get the edit through. Report that the font was unavailable and
+leave the layer as you found it, because a silent swap changes the brand's typography
+everywhere it lands and is easy to miss in review.
+
 ### Root frame
 
 **Preferred: duplicate an existing Email Love email frame.** The copy carries every plugin
@@ -181,6 +242,50 @@ usually 640px.
 - Leave final CTA URLs alone. Links are wired at export time in the plugin.
 - Lay out multiple emails side by side, each in its own frame.
 
+### Custom code sections (mj-raw)
+
+Some content cannot be built from components: ESP-specific markup, Handlebars or merge-field
+blocks, dynamic listing or product cards, tracking snippets. For those, build an **mj-raw**
+section, which the plugin passes through to the export verbatim.
+
+The structure the exporter looks for is exact:
+
+- A **frame** whose name is `mj-raw`. (The plugin resolves the name from the `name` plugin
+  data key first and falls back to the layer name, so naming the layer `mj-raw` is enough.)
+- Containing **exactly one text node** as its first child, conventionally named `mj-raw-text`.
+- That text node's characters are the raw code, emitted as-is into the email.
+
+Two things that will bite you:
+
+- **The frame must contain that text child.** The exporter reads the first child without
+  checking it exists, so an empty `mj-raw` frame breaks the export rather than exporting
+  nothing. Never create the frame without its text node.
+- **mj-raw content is skipped in the plugin's preview but included in the export.** A raw
+  section that looks missing in Preview is usually working correctly. Tell the user this
+  when you build one, so they do not report it as a bug.
+
+Keep raw sections small and purposeful. Everything that can be a component should be a
+component, because raw blocks skip the plugin's structure handling, mobile styles, and dark
+mode entirely. When you add one, say in your report what it contains and that it needs
+testing in a real inbox, since hand-written markup is where cross-client rendering breaks.
+
+### Dark mode
+
+The plugin supports per-node dark mode overrides, and they live in the same five keys as the
+root frame's theme colors, set on the individual node rather than the root: `contentColor`,
+`textColor`, `linkColor`, `buttonContentColor`, `buttonTextColor`. A node carrying any of
+these has a deliberate dark mode treatment that someone chose.
+
+Treat existing dark mode settings as read-only. Never clear or overwrite these keys on nodes
+that already have them, and do not strip them when you duplicate a donor frame; they should
+ride along with the copy. When your build inherits nodes that carry dark mode overrides, say
+so in your report and name the sections, so the user knows what is already handled and what
+still needs a designer.
+
+If the user explicitly asks you to set dark mode on a section, write those keys on that node
+and tell them to verify in the plugin's dark mode preview, because dark mode rendering varies
+enough across clients that it warrants a human check.
+
 ### Writing the content
 
 Write like a person, not a template. Front-load the value in the first section, keep one
@@ -197,7 +302,9 @@ spacing consistent with the file's real campaigns. Then check structure programm
 - Root frame is a duplicated Email Love frame, or carries the shared marker plus theme colors.
 - Every section is a component instance, `mj-raw` excepted. This includes inherited ones: no
   hand-built frames survived the donor vetting.
-- The `mj-raw` block is present if any email in the file has one.
+- The `mj-raw` block is present if any email in the file has one, and every `mj-raw` frame you
+  created contains its text child.
+- Dark mode overrides on inherited nodes are intact, not cleared.
 - No detached instances.
 - Exactly one visible CTA button per email, unless the user asked otherwise.
 
