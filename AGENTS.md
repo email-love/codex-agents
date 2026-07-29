@@ -242,6 +242,51 @@ usually 640px.
 - Leave final CTA URLs alone. Links are wired at export time in the plugin.
 - Lay out multiple emails side by side, each in its own frame.
 
+### Links, alt text, subject, and preheader
+
+These live in plugin data, so you can set them as you build rather than leaving them all to
+the user:
+
+```js
+// Link: on the element frame (mj-button-Frame, mj-image-Frame, hero image)
+el.setSharedPluginData('emaillove', 'href', 'https://example.com/pricing')
+// Alt text: on the same image frame
+el.setSharedPluginData('emaillove', 'altText', 'Two-bedroom in Park Slope')
+// Subject and preheader: on the ROOT frame
+root.setSharedPluginData('emaillove', 'emailSubject', '20% off Premium ends Sunday')
+root.setSharedPluginData('emaillove', 'emailPreHeader', 'Use code SPRING20 at checkout')
+```
+
+Put `href` and `altText` on the **element frame**, not the nested style component. Element
+types are read slightly differently and a couple of them look at the frame's first child
+instead, so when you are unsure write the same value to both the frame and its first child.
+Extra plugin data on a node nothing reads is harmless.
+
+**Existing values win, and you cannot change them.** The plugin reads its own private data
+first and falls back to the shared namespace only when the private value is empty. A link or
+alt text a person set by hand in the plugin lives in private data you can neither read nor
+overwrite, so your value is silently ignored. Setting these on elements that do not have them
+works; "changing" one that does will appear to succeed and do nothing. When a user asks you to
+change an existing link, say plainly that they need to change it in the plugin.
+
+Because you cannot verify which nodes already carry private values, treat every link you set as
+provisional: list them in your report so the user can spot any that did not take.
+
+### The full element vocabulary
+
+Beyond text, image, and button, the plugin has first-class element types. Use them rather than
+imitating them, because a faked element looks right on the canvas and exports wrong:
+
+- `mj-divider` for a horizontal rule. Never fake one with a thin rectangle.
+- `mj-spacer` for vertical space. Never fake it with an empty frame.
+- `mj-navbar` containing `mj-navbar-link` for a link row.
+- `mj-table` containing `mj-table-row` for tabular data.
+- `mj-hero` for a hero with a background image.
+- `mj-raw` for raw passthrough code, covered below.
+
+If the design system has a component for one of these, instantiate that instead of assembling
+the frame by hand; the library version carries styling the raw type does not.
+
 ### Custom code sections (mj-raw)
 
 Some content cannot be built from components: ESP-specific markup, Handlebars or merge-field
