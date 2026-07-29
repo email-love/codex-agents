@@ -31,9 +31,9 @@ doing anything else.
 
 ## Version and staying current
 
-These instructions are **version 2.3.2** (2026-07-29). They track the
-`emaillove-figma-builder` Claude skill at 2.3.0, plus the render spec that skill loads by
-reference, from the `emaillove-eds-converter` skill at 1.10.0. The appendix here is a copy of
+These instructions are **version 2.3.4** (2026-07-29). They track the
+`emaillove-figma-builder` Claude skill at 2.4.0, plus the render spec that skill loads by
+reference, from the `emaillove-eds-converter` skill at 1.12.0. The appendix here is a copy of
 that render spec, so it can gain a rule without the builder skill's own version moving: when
 that happens, only the patch number changes.
 
@@ -57,6 +57,21 @@ buttons, badges, and whole sections that exported as flat images instead of live
 **Version 2.3.1 added R3.3.1**, the slack rule for pinned columns that carry text. An email
 built with an earlier copy can have a badge, label, or two-up row that looks correct on the
 Figma canvas and wraps in the plugin Preview, so those rows are worth re-checking.
+
+**Version 2.3.3 added R0.6**, the rule that every number in the appendix is at email scale. It
+matters on Path B, where the design you convert can come from a source that was never drawn at
+email size: an email built from one of those is uniformly two or three times too big, and it
+passes every other check in the appendix while being unusable. B2 has the check to run before
+you send anything to the worker.
+
+**Version 2.3.4 added R0.7 and R4.2.1.** R0.7 is double padding: when the block above and the
+block below both pay for the gap between them the two values add, so the gap renders at about
+twice what the design shows while each padding on its own looks plausible. R4.2.1 is images from
+a source design: render the node and use the render, never the raw fill, because a crop transform
+and any clipping by overlapping siblings live outside the asset. Both bite on Path B, and both
+pass every other check in the appendix, so an email built with an earlier copy is worth
+re-measuring on two points: any leaf frame whose height exceeds its content by exactly one
+padding, and any image that carries dead space where the composition used to be tight.
 
 ## Setup the user must do once
 
@@ -373,6 +388,20 @@ Four questions, one batch, on top of the Step 1 brief:
   and convert that render. Let the Step 2 inspiration decide the section order and pacing;
   let the brand interview decide every color and typeface.
 
+**Check that the source is at email scale before you convert it.** A past email or a comp you
+wrote yourself is at email width by construction. A Figma design drawn for presentation, or a
+web-first canvas, is often some multiple of it, and the worker reads its numbers off the pixels
+you send, so a 1320px-wide frame comes back as a 1320px-wide email with 35px body copy. Two cheap
+derivations catch it: the frame width divided by the email width from B1, and the authored type
+sizes divided by the sizes email actually uses (a 35px body over 16, a 53px headline over 24).
+Land near 1 and the source is at email scale. Land near some other number and that number is your
+scale factor. When the two derivations disagree by more than a few percent, trust the type ramp: a
+designer picks type sizes deliberately off a ramp, while a canvas width absorbs bleed, margins,
+and whatever artboard someone happened to start on. Then do two things: scale the screenshot down
+to the email width before you send it, so the worker returns email-scale numbers in the first
+place, and pin `emailWidth` in `promptInputs` (B3). Tell the user the factor you derived; it is a
+judgment they may want to correct. R0.6 is the rule this protects.
+
 Rendering, whichever HTML you start from. Codex has a shell, so do it locally:
 
 ```bash
@@ -487,7 +516,10 @@ The worker returns structure, not a finished email. Four gaps, all observed repe
    renders a different font binary than the canvas does).
 3. **Every `src` is `"placeholder"`.** Place the customer's real logo and imagery yourself;
    use flat gray fills at the correct dimensions everywhere else and list them in your
-   report.
+   report. When an image comes out of their own Figma design, export the RENDERED node, never
+   the raw image fill behind it: a fill with `scaleMode: 'CROP'` loses its crop the moment you
+   take the underlying asset, and you get the whole photograph instead of the picture the
+   designer composed (R4.2.1, which also has the aspect-ratio rule).
 4. **Unpinned colors, radii, and fonts drift** by a few units between runs, and unpinned
    fonts flatten to Arial. Correct them against the brand foundations rather than accepting
    what came back.
@@ -728,6 +760,9 @@ consistent with the file's real campaigns. Then check structure:
   height except an `mj-spacer`, no FIXED width outside the load-bearing cases, every pinned
   width that carries text given slack (R3.3.1), all spacing expressed as padding, and every
   button's width chosen for how it should behave on mobile (R0).
+- **Scale, on Path B:** the root is at the email width from B1, and type sizes, paddings, and
+  image dimensions are at email scale rather than the source design's scale (R0.6). A frame
+  built at source scale passes every other check in this list.
 - **Path B naming and components:** every node carries the display name for its tag and a
   real tag in plugin data, with no friendly string in the plugin data key. Anything built for
   reuse is an `mj-wrapper` COMPONENT with **no `nodeType` key**, named for the module rather
@@ -866,12 +901,62 @@ that padding is also how you get a tap target of at least 44px.
 | Leaf pair wrapper | sparingly | Fine tuning one element, for example 10px above a button but not above the text over it |
 | `mj-button` `inner-padding` | from the MJML, symmetric only | The button's tap target, not layout spacing. Asymmetric values round-trip wrong (R4.3) |
 
-In a conversion the worker JSON paddings are authoritative: transcribe them exactly. The
+In a conversion the worker JSON paddings are authoritative: transcribe them exactly, **at the
+scale of the screenshot they came from (R0.6)**. The
 ranges above are for gaps you have to invent. Four things that keep padding honest: pick a
 base unit (8px) and use multiples of it; padding sits inside the box and eats content width
 (two 50 percent columns with 20px each side lose 80px total); Outlook ignores values under
 5px and handles even numbers more predictably; mobile padding is a separate override
 (`mobileStylesPadding*`), not a reason to compromise the desktop value.
+
+### R0.6 Every number here is at EMAIL scale, never source scale
+
+Widths, type sizes, paddings, radii, and image dimensions in this appendix are email pixels: a
+600 or 640 body, a 16px body copy, a 20px column padding. On Path A the design system already
+carries those numbers. On Path B the design you convert can come from a source that was never
+meant to export as email and is drawn at a multiple of it, so B2's scale check settles one factor
+before anything is sent to the worker.
+
+The worker's numbers are at the scale of the screenshot it was sent, so the cheapest way to stay
+honest is to send it a PNG already at the target email width and to pin `emailWidth` in
+`promptInputs`; then "transcribe the worker paddings exactly" (R0.5) and "build at email scale"
+are the same instruction. If the screenshot went in at source scale, divide every returned number
+by the factor before it becomes geometry, and never carry a source pixel across untouched.
+
+A frame built at source scale passes every other check in this appendix: it hugs, it is tagged,
+it exports. It is simply two or three times too big, which shows up as a body size no email uses
+and a root wider than the body, and on a single email there is nothing beside it to make that
+obvious. So check the two numbers rather than trusting the canvas. In a migration the audit
+settles the factor once, in its **Scale factor** section, and a fresh derivation there would
+overrule a decision a designer already made.
+
+### R0.7 DOUBLE PADDING: a gap belongs to ONE block, never to both
+
+The space between two stacked blocks is one decision, made once, on one node. When the block above
+already carries a `paddingBottom`, the block below must NOT add a `paddingTop` for the same gap,
+and the reverse. Setting both is not "a little more room": the two values add, so a 40 below the
+section above plus a 30 above the block below renders as 70, and the email reads as broken to the
+designer who drew it.
+
+**Failure signature**, in the order you notice it:
+
+- The gap looks roughly twice what the design shows, while each of the two paddings that produced
+  it is individually plausible. That plausibility is why this survives review.
+- A leaf frame's height exceeds its content by exactly the padding you wrote, and the email's total
+  height is over by the same number. An `mj-image-Frame` measuring 362 around a 332 rectangle is a
+  30 that should not exist.
+- Removing either value alone fixes the look. That is the proof there were two.
+
+**Where to put it: on the preceding block's `paddingBottom`.** Prefer trailing space over leading
+space so that each block owns the gap that follows it. Then a block switched off (`visible =
+false`, or a BOOLEAN component property, R8) takes its spacing away with it, instead of leaving a
+hole where lead-in space on the next block used to be paid for by a neighbor that is now gone.
+
+This holds at every level, not just section to section: wrapper to section, section to column,
+column to leaf pair. Before writing any padding, read what the sibling above it already carries. On
+Path B the worker JSON paddings are authoritative and already complete (R0.5), so a padding you add
+on top of them is almost always this bug. On Path A the component you instanced already carries its
+own spacing, so a padding you add around the instance is the same bug at wrapper level.
 
 ## R1. Non-negotiable ground rules
 
@@ -1300,17 +1385,65 @@ Inner RECTANGLE (direct child):
 - `resize(width, height)` from the MJML `width`/`height` attrs. Keep
   `layoutSizingHorizontal = 'FIXED'`. A RECTANGLE has no hug, and its pixel size is one of
   the four load-bearing FIXED widths.
-- Fill: if the worker `src` is a real URL, create the image via `figma.createImageAsync(src)`
-  and set an IMAGE fill, `scaleMode: 'FILL'`. If `src` is `"placeholder"` or unavailable,
-  substitute the customer's real asset when you have one; otherwise one SOLID light gray fill
-  (`#E8E8E8`). The exporter re-exports the node's own pixels, so a gray rect exports as a
-  gray image, which is correct placeholder behavior.
+- Fill: an IMAGE fill, `scaleMode: 'FILL'`, from an image already in the file.
+  `figma.createImageAsync(src)` is NOT available to you as an external agent, so a worker `src`
+  URL is not something you can turn into a fill directly, and R4.2.1 has the route for any image
+  coming from the design you converted from. The worker returns `"placeholder"` for every `src`
+  anyway, so substitute the customer's real asset when you have one; otherwise one SOLID light
+  gray fill (`#E8E8E8`). The exporter re-exports the node's own pixels, so a gray rect exports as
+  a gray image, which is correct placeholder behavior.
 - `cornerRadius` from `border-radius`.
 - Shared plugin data ON THE RECTANGLE (not the wrapper): `href` from MJML `href` (omit when
   absent; never write `#`), `altText` from MJML `alt`.
 - Sizing note: if the rectangle width is LESS than the column content width the exporter
   drops `fluid-on-mobile`; if equal it keeps it. So match the worker `width` exactly: a 560
   image in a 560 column stays fluid, a 134 logo does not.
+
+### R4.2.1 Bringing an image across from a source design: RENDER the node, never the raw fill
+
+This is the Path B rule for every image you take out of a design the customer already has, above
+all their own non-Email-Love Figma file (B2). An image in a design file is almost never the whole
+photograph the designer started from, and two things routinely sit between the raw bytes and what
+you see on the canvas. Neither one travels with the raw asset:
+
+- **A crop transform.** An image fill with `scaleMode: 'CROP'` carries an `imageTransform` matrix:
+  which part of the photograph is showing, and at what zoom. Export the raw fill and you get the
+  full frame back with that transform discarded, including everything the designer cropped away.
+  The symptom is dead space where the composition used to be tight: a subject that filled 56 to 59
+  percent of a band now occupies 27 percent and floats small inside it, or sits half out of view.
+  Nothing about the rectangle's geometry is wrong, which is exactly why this gets misdiagnosed and
+  reported as a spacing bug.
+- **Clipping by overlapping siblings.** Unstructured designs clip by z-order and not by masks: a
+  shape, a band of background, or another image sits on top and hides part of the picture. What you
+  see is a composite of several nodes, and those pixels exist in none of them on its own. Only a
+  render captures it.
+
+So, for every image you bring across: **render the node as it appears and use the render.** Never
+the raw fill, never the asset behind `fills[0].imageHash`.
+
+The route, since `figma.createImageAsync` is unavailable to an agent:
+
+1. `download_assets` on the NODE in the source file (`get_screenshot` on the node, or
+   `node.exportAsync`, do the same job), at 2x, to a local PNG. Reading `fills[0].imageHash` and
+   fetching that asset instead is the mistake, not the shortcut.
+2. `upload_assets` to place that PNG onto the `mj-image` rectangle in the build file. The crop is
+   baked into the pixels now, so the fill is a plain `scaleMode: 'FILL'` with an identity transform
+   and there is no crop left to reproduce.
+3. Verify against a screenshot of the SOURCE NODE, never against the source's raw asset.
+
+**Aspect ratio: preserve the render's, never stretch to fit a chosen width.** Measure the ratio on
+the rendered PNG and derive the height from the width you picked: `height = round(targetWidth *
+renderH / renderW)`. A 995 x 550 render placed at 600 wide is 332 tall, and 332 is not a number to
+round to something tidier. If a height was decided earlier and it disagrees with the render, the
+render wins and you re-derive the height. Forcing a render into the wrong box is either a
+`scaleMode: 'FILL'` quietly cropping it a second time or a visibly squashed photo.
+
+**Width is a decision, so make it deliberately and state it.** A source image narrower than its
+canvas (995 in a 1089 wide design, so about 91 percent) is inset by design, not full bleed. Either
+reproduce the inset as horizontal padding on the `mj-image-Frame`, at email scale (R0.6) and snapped
+to the spacing scale the brand already uses, or take it full bleed at the body width. Both are
+defensible. Pick against the brand's own established patterns, and say which you chose and why when
+you hand off. What this must never be is an accident of arithmetic.
 
 ### R4.3 mj-button: `mj-button-Frame` wrapping FRAME `mj-button` whose DIRECT child is a TEXT node
 
@@ -1394,6 +1527,7 @@ children.
 **R5.1 Padding.** Worker `padding-*` are explicit px strings; `parseFloat` them onto the
 OWNING frame. Container tags carry their own paddings; leaf tags carry theirs on the PAIR
 WRAPPER frame (the exporter reads `node.parent.padding*` for text, button, image, divider).
+A gap the block above already pays for is not yours to pay for again: R0.7.
 
 **R5.2 Colors.** All colors are hex strings. One SOLID fill per background; TEXT fills for
 text color. `transparent` or absent means `fills = []`.
@@ -1655,7 +1789,8 @@ foundations button component itself and let it surface through the instance.
 11. All vertical spacing is padding: no gaps produced by a taller frame, by `itemSpacing`, or
     by a manually positioned node.
 12. Root width equals the mj-body width; column px widths equal the worker attrs; section
-    paddings equal the worker attrs.
+    paddings equal the worker attrs. All of those numbers are at email scale, not source scale
+    (R0.6): the root is 600 or 640, and body copy is a size email actually uses.
 13. If it is a module: the root is a COMPONENT tagged `mj-wrapper`, a direct child of its
     category page, not inside a COMPONENT_SET or a Figma SECTION, with no stray instances
     left on the page, and no second `mj-wrapper` nested inside it.
@@ -1665,3 +1800,10 @@ foundations button component itself and let it surface through the instance.
 16. Compare a fresh screenshot against the design you converted from, for spacing, alignment,
     and color parity. Small color and font-metric differences are acceptable; missing
     content, zero-height sections, clipped text, and alignment flips are not.
+17. **No gap is paid for twice.** For every pair of stacked siblings, exactly one of them carries
+    the padding that separates them, and it is the one above (R0.7). Any frame whose height
+    exceeds its content by exactly a padding you wrote is this bug.
+18. **Every image taken from a source design is a render of its node, not a raw fill** (R4.2.1),
+    so any crop or z-order clipping is baked into the pixels. Each rectangle's height is the
+    render's aspect ratio at the width you chose, and the width itself was a stated decision
+    (full bleed or the source's inset), not an accident.

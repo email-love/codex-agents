@@ -22,9 +22,9 @@ doing anything else.
 
 ## Version and staying current
 
-These instructions are **version 1.10.1** (2026-07-29). They track the
-`emaillove-eds-converter` Claude skill at 1.10.1 and the `emaillove-migration-audit` skill at
-1.1.0.
+These instructions are **version 1.12.0** (2026-07-29). They track the
+`emaillove-eds-converter` Claude skill at 1.12.0 and the `emaillove-migration-audit` skill at
+1.3.0.
 
 This file does not update itself. If you have web access, check once per conversation
 (quietly, without narrating it)
@@ -45,6 +45,29 @@ plugin uploads as broken emails. Phase 3, step 0 explains how to spot one.
 converted with a 1.9.0 or earlier copy can have a badge, label, or two-up row that looks
 correct on the Figma canvas and wraps in the plugin Preview, so it is worth re-checking those
 rows in already-converted batches.
+
+**Version 1.11.0 changed what the audit produces, and Phases 2 and 3 now depend on it.** An
+audit written with a 1.10.x or earlier copy classified whole designs, one row per template, and
+said nothing about the scale the source was drawn at. Phase 3 converts MODULES, so those reports
+cannot be batched from. Phase 1 now produces a deduplicated **Module inventory** (Step 4) and a
+**Scale factor** (Step 3), and both are required sections. If you are picking up a migration
+whose audit predates this, re-run Phase 1 rather than improvising a module list out of a
+per-design table. Two specific risks in work already done: a batch built from a per-design table
+tends to contain components that are whole emails rather than reusable blocks, and a batch built
+from a source that was never at email scale is uniformly two or three times too big.
+
+**Version 1.12.0 added R0.7 and R4.2.1**, and with them two required Module inventory columns.
+R0.7 is double padding: when the block above and the block below both pay for the gap between
+them, the two values add, so the gap renders at about twice what the design shows. R4.2.1 is
+images: render the source node and use the render, never export the raw fill, because a crop
+transform and any clipping by overlapping siblings live outside the asset. Both were observed on
+a live conversion, and both pass every other check in this appendix, which is why they need
+naming. In batches converted with a 1.11.x or earlier copy, two things are worth re-measuring:
+any leaf frame whose height exceeds its content by exactly one padding you wrote, and any image
+that carries dead space where the composition used to be tight. Step 4 also now requires a
+**source ref** and a **build constraints** column on every Module inventory row, which is how a
+finding like "render the node, not the fill" reaches the module it constrains instead of dying
+in Flags.
 
 ## Setup
 
@@ -123,12 +146,15 @@ groups, absolute positioning, or off-spec widths, widen the estimate before you 
 Audit an existing Figma design system for migration to Email Love, and produce a migration
 report the customer and the Email Love team can act on. This is Phase 1 of a migration: it
 tells everyone what they have, what converts, what needs design judgment, and how big the job
-is. The actual conversion is done by Email Love's team as part of Enterprise onboarding.
+is. Phase 2 is the conversion, and this report is its input: **"Phases 2 and 3: Convert" below
+runs it** in this same file, or Email Love's team runs it for the customer as part of Enterprise
+onboarding. Step 7 is the hand-off, and it is part of the job, not an afterthought.
 
 **This phase is strictly read-only.** Never create, modify, rename, or delete anything in the
 customer's file. Every Figma call you make must be an inspection. If the user asks you to
-start converting, explain that conversion is the next phase and offer to connect them with
-Email Love (hello@emaillove.com).
+start converting, that is Phase 2: it happens in a separate target file, driven by "Phases 2
+and 3: Convert" below (Step 7 has the hand-off), and the source file stays read-only in that
+phase too.
 
 ## Step 1: Scope the input
 
@@ -150,15 +176,97 @@ Build the inventory with read-only calls:
    local paint styles (the palette and its naming taxonomy), variable collections, and any
    spacing or padding component sets. Note a fonts-fallback page if one exists; it means the
    team has already chosen email-safe substitutes.
-3. **Template census:** every candidate frame, with name, width, height, and component/frame
+3. **Design census:** every candidate frame, with name, width, height, and component/frame
    type. Group desktop and mobile twins (the same design at two widths, commonly 600 and 390);
    in Email Love these merge into ONE frame with Mobile Styles overrides, so count designs,
    not frames.
 
-## Step 3: Classify every template
+Record the authored type sizes and the design widths verbatim, in the numbers the file actually
+carries. Step 3 divides both, and it cannot do that from rounded or remembered figures.
 
-Inspect each design's structure (walk the tree: node types, auto-layout, text nodes, image
-fills, vectors, nested instances) and assign one verdict:
+## Step 3: Detect the scale factor
+
+Not every source library is drawn at email scale. A file that was never meant to export as
+email is often drawn at some multiple of it: a mockup enlarged for presentation, a web-first
+canvas, a slide artboard. The factor decides every number in every converted module (widths,
+type sizes, paddings, image dimensions), so getting it wrong makes the whole library uniformly
+wrong, and nobody notices until a converted module sits next to a real email.
+
+Compute BOTH derivations, always, and put both in the report:
+
+1. **From the canvas width:** the source design width divided by the email width they intend
+   (600 or 640). A 1089px design against 600 gives 1.815. If nobody has named a target width,
+   derive against 600, Email Love's default, and say in the report that you assumed it.
+2. **From the type ramp:** the authored type sizes divided by the standard email sizes they map
+   onto. Divide the whole ramp, not one style, and look for a cluster: a 35px body over a 16px
+   email body gives 2.19, a 26px caption over 12 gives 2.17, a 53px headline over 24 gives
+   2.21. Three styles landing near 2.2 is a signal; one style is a coincidence. Sanity check
+   the candidate by dividing the ramp back by it: if 2.2 turns the authored sizes into 16, 12,
+   and 24, the factor is real.
+
+If the two derivations agree within a few percent, say so, give the one number, and move on:
+there is nothing to decide. When they disagree, and on an unstructured source they usually do,
+the report carries the disagreement rather than hiding it:
+
+- **State both derivations with their arithmetic and name the gap in percent.** An observed
+  migration came out at 1.815 from the width and 2.2 from the type, a 21 percent gap, and 21
+  percent is the difference between a converted module a designer accepts and one nobody can
+  use.
+- **Recommend one, with the reasoning.** Prefer the type ramp when the authored sizes divide
+  cleanly into standard email sizes and the width ratio does not. In that observed migration
+  the type sizes divided to exactly the standard sizes while the width ratio landed on an
+  arbitrary 1.815, so the ramp was the trustworthy signal. The reason generalizes: a designer
+  picks type sizes deliberately off a ramp, while a canvas width absorbs bleed, margins, and
+  whatever artboard someone happened to start on, so the width carries noise the ramp does not.
+- **Mark it a designer decision, in those words.** It is a recommendation until their designer
+  confirms it, and because it changes every module it is the highest-leverage line in the
+  report.
+
+Two more things while you are in here: check that every design shares one factor (a single
+design drawn at a different scale is a flag, not a second factor), and state the email width as
+the TARGET width rather than the source canvas width. Conversion divides by the factor; it
+never carries source pixels across.
+
+Record the result in the report's **Scale factor** section (Step 6). Phase 2 reads that number
+instead of deriving its own, which is the whole point of settling it here.
+
+## Step 4: Split the designs into modules, then classify every module
+
+Email Love design systems are built from modules, not from whole designs. A module is one
+reusable block that gets dropped into many emails: a hero, a copy block, a 2-up product row, a
+footer. Phase 3 converts modules, one component per module, and batches them, so this step's job
+is to hand it a deduplicated **Module inventory**, which is the name both phases use for this
+artifact. A per-design verdict cannot do that job. On an observed migration, six finished emails
+turned out to be the same nine modules in a different order each time: the six-row per-design
+table said almost nothing, and the nine-row Module inventory said everything.
+
+Three passes:
+
+1. **Split each design into blocks.** Walk the tree (node types, auto-layout, text nodes, image
+   fills, vectors, nested instances) and cut at the natural block boundaries: a full-width
+   background change, a divider, a jump in vertical padding, a repeated row, a run of copy
+   followed by an image. On an email-native source the components and auto-layout frames tell
+   you where the cuts are. On an unstructured source (loose groups, absolute positioning, no
+   components, no styles) you are inferring them, so say so in the report and ask the designer
+   to confirm the split: the Module inventory is what gets built, so a wrong boundary is a wrong
+   component. **Then write the boundary down on the row.** Whoever converts the module has to
+   screenshot exactly the region you cut, and a boundary you found but did not record is a
+   boundary they have to infer again, differently. So record a source ref per module: the design to
+   convert from, plus the node name or node id you cut at, and on a source with no node to name (a
+   loose group, an absolutely positioned run) the position within that design, for instance "top 0
+   to 480" or "between the divider and the footer rule". One appearance is enough; it is the one
+   that gets built.
+2. **Deduplicate across designs.** The same block appearing in six designs is ONE module with
+   six appearances, never six rows. Near-duplicates are one module plus a note when the
+   difference is content, and two modules when the difference is structural (a different column
+   count, an added region).
+3. **Name each module the way it should appear in their library**, because the name carries
+   straight through conversion into the component name ("Hero, text led", "Footer, legal +
+   social"). Give each one a category from the sections their plugin already has (Pre-Header,
+   Header, Heroes, Single Column, Two Column, Three Column, Four Column, Buttons, Reviews,
+   Images, Lists, Order Tables, Footer) rather than one you invent.
+
+Then assign every module exactly one verdict:
 
 - **(A) Live-text convertible.** Auto-layout stacks of text, images, and buttons that map
   onto mj-section/mj-column/element-frame structure. Text stays selectable and editable in
@@ -176,6 +284,48 @@ fills, vectors, nested instances) and assign one verdict:
   thumbnail link), viewport-relative layouts, or app UI that has no email equivalent. List
   what would replace them.
 
+**The concession field on A: required on every A row, and deliberately not a fifth verdict
+letter.** A module can convert perfectly as live text except for one effect email cannot
+reproduce at all: a full-bleed treatment that has to stop at the content box, a blur, a blend
+mode, a shape email has no way to draw. That is not B (nothing needs to become an image), not C
+(there is no rich region to split off), and not D (it emails fine). Two modules on an observed
+unstructured source were exactly this, and with nowhere to put it the finding got smuggled into
+a C with a paragraph of explanation, which is how a decision a designer needed to make ends up
+buried.
+
+So record it on the verdict instead: write the verdict as **`A (concession: <the named
+concession>)`** and spell the concession out in the row's notes, both what is lost and the
+nearest email-safe substitute you propose. Every A row states either `none` or a named
+concession, so a blank is a missing answer rather than an implied no. Every named concession
+also gets its own line in Flags, for the designer to accept or reject before the module is
+built. **Why a field and not a letter:** the ladder answers how a module gets built, and these
+get built exactly like any other A, same technique and same effort. What differs is a decision a
+human has to accept. A fifth letter would fork the ladder, and every per-verdict count and
+effort row with it, on something orthogonal to construction. B and C rows may carry a concession
+too when one applies; on those the field is optional, because their verdict already carries an
+explanation.
+
+**A flag that constrains HOW a module gets built belongs on that module's row.** Flags is a prose
+section a human reads once. The Module inventory is what Phase 3 works from, row by row, and a
+converting agent that never opens Flags is the normal case rather than a careless one. So any
+finding that changes the technique for a specific module has to be written where that module gets
+built from: name it in the row's `build constraints` column and spell it out in the row's notes,
+and only then also in Flags when a human has to decide about it. Observed failure: an audit
+correctly flagged "images are clipped by z-order, not masks, so export rendered nodes rather than
+raw fills" in Flags alone. The conversion exported raw fills, every cropped image came across as
+the whole uncropped photograph, and the customer reported it as a spacing bug. The audit was right
+and the hand-off still failed, which is a defect in where the finding was written, not in the
+finding.
+
+Findings that are build constraints rather than observations, and therefore belong on the row:
+images that carry a crop transform or are clipped by overlapping siblings (the row says "render the
+node, not the fill", which is R4.2.1), an image that is inset rather than full bleed and the
+percentage it is inset by, copy that has to stay outside an image for accessibility, a font this
+module in particular leans on, a pinned width this module cannot keep, spacing that has to come
+from one side only. Write each one short and imperative: one clause a builder can act on without
+reading anything else. A constraint that applies to the whole library belongs in Brand foundations
+or Flags instead of being repeated on twenty rows.
+
 Signals that push a module from A toward B or C: vector logos and illustrations (email wants
 images), buttons built as nested app-style instances with state layers, stacked image fills,
 gradients and blend modes on text, and effects email clients do not render. Signals of A:
@@ -188,54 +338,119 @@ layered art; and sections support background images behind live columns. Reserve
 compositions where text and imagery genuinely interleave (text wrapping around cutouts,
 badges over product shots, hand-placed collage).
 
-## Step 4: Extract the brand foundations
+Finally, **roll the verdicts up per design**: for each design, the ordered list of module names
+it is made of and the worst verdict present in it. The Per-design roll-up is a view of the Module
+inventory, not a second classification, so it introduces no verdict that is not already on a
+module row. It exists so a customer can still ask "what happens to this email" and get an answer,
+and Phase 3 does not work from it.
+
+## Step 5: Extract the brand foundations
 
 From the survey, draft what the Email Love design system will carry:
 
 - **Type ramp mapping:** each of their text styles mapped to an email-safe equivalent, using
   their own fallback choices when a fallbacks page exists. Flag fonts that need web-font
-  hosting or substitution.
+  hosting or substitution. When the Step 3 scale factor is not 1, show the arithmetic in three
+  columns (authored size, factor, resulting email size) so a reader can audit it instead of
+  trusting it.
 - **Palette:** their named paint styles, and a proposed set of the six Email Love theme
   colors (backgroundColor, contentColor, textColor, linkColor, buttonTextColor,
   buttonContentColor) drawn from it, marked as a proposal for their designer to confirm.
-- **Spacing scale** from any padding/spacer components.
+- **Spacing scale** from any padding/spacer components, stated at email scale (divided by the
+  Step 3 factor) rather than at source scale.
 - **Buttons:** their button styles as candidates for the Email Love button component page.
-- **Email width** (their desktop template width) and anything that contradicts it.
+- **Target email width:** the width the converted system gets built at (600 or 640), which is
+  the source design width divided by the Step 3 factor when the source is not at email scale.
+  Label it as the target, and list anything in the file that contradicts it.
 
-## Step 5: Write the migration report
+## Step 6: Write the migration report
 
-Produce one markdown report, in this exact structure:
+Produce one markdown report, in this exact structure. **Scale factor and Module inventory are
+required sections**: they are what Phases 2 and 3 consume, and a report missing either one
+cannot be converted from.
 
 # Migration audit: [Design system name]
 ## Summary
 [Three sentences: what they have, how much converts cleanly, the one or two biggest items
-needing design judgment.]
+needing design judgment. If the source is not at email scale, say so here; it is the finding
+that changes the most work.]
 ## Inventory
-[Pages, style counts, component counts, template count as designs (with desktop/mobile pairs
-merged), fonts in play.]
-## Template classification
-[A table: design name | verdict A/B/C/D | width(s) | notes. One row per design.]
+[Pages, style counts, component counts, design count (with desktop/mobile pairs merged),
+distinct module count, fonts in play.]
+## Scale factor
+[REQUIRED. Both derivations with their arithmetic, the gap between them in percent, the
+recommended factor, the reasoning for choosing it, and "designer decision" in as many words.
+State the target email width the factor is measured against. One factor for the library; note
+any design that contradicts it. When the two derivations agree, say so and give the single
+number.]
+## Module inventory
+[REQUIRED, deduplicated, and this is the section Phase 3 works from. One row per DISTINCT
+module: module name | category | appears in (design names) | source ref | verdict A/B/C/D |
+concession | build constraints | effort S/M/L | notes. The name is the name the converted
+component will carry. **Source ref is REQUIRED on every row** and names the one appearance to
+convert from, precisely enough to screenshot without re-deriving the split (Step 4): a design name
+plus a node name or id, or, where there is no node to name, a position within that design ("top 0
+to 480", "between the divider and the footer rule"). Every A row states either `none` or a named
+concession in the concession column, with what is lost and the proposed substitute in the notes.
+**Build constraints is REQUIRED on every row and states either `none` or the short imperative
+constraints from Step 4** (for example "render nodes, not raw fills: images clipped by z-order" or
+"image is inset 91 percent, not full bleed"), so that nothing which changes how a module is built
+exists only in Flags. Order the rows so a batch plan can be read straight off them: highest reuse
+first.]
+## Per-design roll-up
+[One row per design: design name | width(s) | the module names it is made of, in order | worst
+verdict present. A roll-up of the Module inventory, not a second classification: no verdict
+appears here that is not already on a module row above.]
 ## Brand foundations
-[Type ramp mapping table, proposed theme colors, spacing scale, button styles.]
+[Type ramp mapping table (authored size, factor, email size), proposed theme colors, spacing
+scale at email scale, button styles, target email width.]
 ## Flags
 [Everything a human should look at: fonts unavailable for email, naming typos, empty pages,
-inconsistent widths, accessibility risks from image-heavy modules.]
+inconsistent widths, accessibility risks from image-heavy modules, module boundaries you
+inferred rather than read. Plus two that are decisions rather than observations: every named
+concession from the Module inventory, for the designer to accept or reject, and the scale-factor
+recommendation when the two derivations disagreed. Anything here that constrains how a specific
+module gets built must ALSO appear in that module's build constraints column (Step 4): Flags is
+where a human decides, the row is where a builder reads, and a build constraint that lives only
+here will be missed.]
 ## Effort estimate
-[Per-verdict counts and an S/M/L per design: A modules are mechanical; C modules need a
-design pass; D modules need product decisions. State the total in designer-days as a range,
-and say plainly that estimates firm up after the first converted batch.]
+[Per-verdict counts over MODULES, not designs, and an S/M/L per module (the Module inventory
+already carries the per-module value; total it here). A modules are mechanical; C modules need a
+design pass; D modules need product decisions; a concession costs decision time, not build time.
+State the total in designer-days as a range, and say plainly that estimates firm up after the
+first converted batch.]
 ## Recommended next step
-[The conversion phases: foundations, then modules in batches with design review between
-batches. Email Love's team does this as part of Enterprise onboarding: hello@emaillove.com.]
+[The batch plan, naming modules by their Module inventory row names: foundations first, then
+batch 1 of about five of the highest-reuse modules, then the later batches, with a design review
+between batches. Then point at Step 7's two routes.]
 
 Numbers in the report come from your actual reads, never estimates presented as counts. Where
 you sampled instead of walking everything, say so.
 
-## Step 6: Hand off
+## Step 7: Hand off to conversion
 
-Deliver the report as a file the user can share internally. Offer to answer questions about
-any specific module's verdict, and to re-run the audit after they clean up anything the flags
-surfaced.
+Deliver the report as a file the user can share internally. Then close the loop, because an
+audit that ends without naming what happens next leaves the customer thinking the migration is
+somebody's private process. There are two routes, and the report is the input to both:
+
+1. **Self-serve, in this file.** "Phases 2 and 3: Convert" below runs Phase 2 from this report:
+   foundations once, then modules in batches with a designer review between batches. It builds
+   in a NEW target file and keeps this source file read-only. What it reads out of this report,
+   by section name: the **Module inventory** (one module per row, one batch per group of rows,
+   with the source refs, verdicts, concessions, build constraints, categories, and effort), the
+   **Scale factor** (every number it builds is at that scale), the **Brand foundations** (type
+   ramp on email-safe fallbacks, proposed theme colors, spacing, buttons, target email width),
+   and the **Flags**.
+2. **Done for you.** Email Love's team runs the same process, design review included, as part
+   of Enterprise onboarding: hello@emaillove.com.
+
+Two things need a human "yes" before either route starts, and both are in Flags: the scale
+factor, and each named concession. They change what gets built, so getting them agreed now is
+cheaper than re-running a batch. If the audit surfaced a missing component library file, that
+blocks conversion outright; say so rather than letting a batch start without it.
+
+Offer to answer questions about any specific module's verdict, and to re-run the audit after
+they clean up anything the flags surfaced.
 
 ---
 
@@ -252,9 +467,9 @@ Two hard rules:
 
 - **The customer's source file is read-only, always.** All building happens in a separate
   target file. Reads from the source are inspections, screenshots, and asset downloads only.
-- **The audit report is required input.** It carries the classification (A/B/C/D), the brand
-  foundations, and the flags. Do not re-derive what it already settled; do re-verify anything
-  that looks wrong when you meet the actual nodes.
+- **The audit report is required input.** It carries the per-module classification (A/B/C/D plus
+  any named concession), the scale factor, the brand foundations, and the flags. Do not re-derive
+  what it already settled; do re-verify anything that looks wrong when you meet the actual nodes.
 
 And one method rule that governs everything below: **you do not rebuild a module by eye.**
 Structure comes from the design-converter worker and you transcribe what it returns, per the
@@ -268,35 +483,81 @@ real conventions in private plugin data you cannot read.
 2. The source Figma file link (read-only).
 3. The target file: an existing one the team designates, or create one named
    "[Customer] Email Love Design System" via the Figma MCP.
-4. Which batch to run: "foundations", or a named batch of modules ("batch 1: the 5 modules
-   listed in the audit's recommended next step", or an explicit list).
+4. Which batch to run: "foundations", or a batch of modules named by their rows in the audit's
+   **Module inventory** ("batch 1: the five modules the audit's Recommended next step lists
+   first", or an explicit list of row names). An explicit list from the user wins over the
+   audit's proposed batch.
 
 Once you have those four, and **before the first write to the canvas**, tell the user what the
 run covers and roughly how long to expect, per "How long this takes, and what to tell the user
 first" above. Do this every batch, not just the first one, and adjust the estimate as the file
 teaches you what it costs.
 
+### What you read out of the audit, by section name
+
+The audit's sections map onto the phases below. Use the audit's own words for these artifacts so
+the two halves of the migration stay one conversation:
+
+- **Module inventory** (required in the report): the deduplicated module list. One row is one
+  module, and a batch is a group of rows. It carries each module's name (which becomes the
+  component name), category, the designs it appears in, the **source ref** (the one appearance you
+  screenshot, so you never re-derive the split), verdict, concession, **build constraints**, and
+  effort. Read the build constraints column before you convert a row: it is where a technique
+  constraint for that module lives, "render nodes, not raw fills" (R4.2.1) above all, and a
+  constraint you skip there resurfaces as a defect the customer reports. This is what Phase 3
+  iterates over. There is no per-design conversion pass: the report's Per-design roll-up is context
+  for the customer, not a work list.
+- **Scale factor** (required in the report): the number every geometry decision is divided by.
+  Read it; never re-derive it (see Phase 2).
+- **Brand foundations:** the type ramp on email-safe fallbacks, the proposed theme colors, the
+  spacing scale, the button styles, and the target email width. Phase 2 builds from these.
+- **Flags:** the gates. Two of them block work rather than describe it: the scale factor when
+  the audit's two derivations disagreed, and each named concession. Both need a human "yes"
+  before the affected modules get built.
+
+If the report has no Module inventory or no Scale factor, it predates this contract (see the
+1.11.0 note under "Version and staying current"). Do not improvise a module list out of a
+per-design table: re-run Phase 1, which is minutes of work and saves rebuilding a batch against
+the wrong boundaries.
+
 ## Phase 2: Foundations (run once per customer)
+
+**Everything you build, here and in Phase 3, is at email scale.** Take the factor from the
+audit's Scale factor section and divide the source numbers by it: type sizes, widths, paddings,
+image dimensions. Do not re-derive the factor from the file, even when the arithmetic looks
+obvious to you: the audit computed both derivations, and where they disagreed a human chose
+between them, so a fresh derivation here quietly overrules that decision. When the audit says the
+factor is still a designer decision and nobody has confirmed it, get the yes before you build,
+because the factor changes every module. State the factor you built at in the foundations report,
+so batch 1 and every batch after it inherits one number. Appendix R0.6 has the same rule at the
+geometry level.
 
 Build the scaffold every later batch depends on:
 
-1. **Pages**, following Email Love library conventions: a Cover, one page per section
-   category the audit found (Heroes, Copy Blocks, Lists, and so on), Buttons, Type,
+1. **Pages**, following Email Love library conventions: a Cover, one page per category the
+   audit's Module inventory uses (Heroes, Single Column, Lists, and so on), Buttons, Type,
    Campaigns.
 2. **Type mapping.** Recreate the customer's type ramp as Figma text styles in the target
    file using their email-safe fallback choices from the audit (never the unlicensed brand
    font unless the user confirms web-font hosting). Name styles as the customer named theirs.
+   Use the email sizes the audit's Brand foundations table already computed at the scale
+   factor, not the authored source sizes.
 3. **Buttons page.** Rebuild each of their button styles as a component: correct email
    construction (a styled frame with a single text node), not their app-style nested
    instances. These become the sub-components nested inside mj-button-Frames, and they are
    the INSTANCE_SWAP targets for module-level "Button Style" properties later. Put the
    label's TEXT property on the button component itself: a label living inside a nested
    instance cannot be bound from the module that uses it (appendix R8).
-4. **Spacing.** Recreate their spacer scale as components if they had one.
+4. **Spacing.** Recreate their spacer scale as components if they had one, at the email-scale
+   values from the audit.
 5. **Assets.** Export the logo and any recurring imagery from the source file
    (`download_assets`) and upload into the target file (`upload_assets`). Logos become
-   images, never vectors.
-6. **Root EMAIL TEMPLATE frame** on Campaigns at the customer's email width: vertical
+   images, never vectors. Export the RENDERED node every time, never the raw image fill behind
+   it: a source fill with `scaleMode: 'CROP'` loses its crop the moment you take the underlying
+   asset, and you get the whole photograph instead of the picture the designer composed
+   (appendix R4.2.1, which also has the aspect-ratio rule).
+6. **Root EMAIL TEMPLATE frame** on Campaigns at the audit's target email width (600 or 640,
+   never the source canvas width when the source was not at email scale): vertical
    auto-layout, width FIXED at that email width, height Hug, the shared marker, and the theme
    colors from the audit's proposal:
    `setSharedPluginData('emaillove', 'nodeType', 'mainFrame')` plus backgroundColor,
@@ -308,9 +569,9 @@ Build the scaffold every later batch depends on:
    themselves are a different shape entirely (Phase 3, and appendix R2): each one is an
    `mj-wrapper` COMPONENT with **no** `mainFrame` marker and no theme keys. Do not copy this
    frame as a starting point for a module.
-7. **Report** what was built, what the audit proposed that you changed, and what needs the
-   designer's eye before batch 1 (theme colors especially: they are a proposal until a human
-   confirms).
+7. **Report** what was built, the scale factor and target email width you built at, what the
+   audit proposed that you changed, and what needs the designer's eye before batch 1 (theme
+   colors especially: they are a proposal until a human confirms).
 
 ## Phase 3: Module conversion (run per batch)
 
@@ -329,6 +590,27 @@ module of a batch. If you are picking up a batch converted with an older copy of
 instructions, read `nodeType` back off each module root: a leftover `mainFrame`, or a wrapper
 nested inside a wrapper, means that module uploads as a broken email and has to be reshaped.
 
+**One module per row of the audit's Module inventory.** The batch is a group of those rows, and
+each row already tells you the module's name (use it verbatim as the component name), its
+category, the designs it appears in, its source ref, its verdict, its concession if any, its build
+constraints, and its effort. Where a module appears in several designs, the source ref names the
+one appearance to convert from, so convert it ONCE from there and note that design; the other
+appearances are the same component placed again, not more work. When a row has no source ref, pick
+the cleanest appearance yourself and record which one in the batch report, so a reviewer can tell
+your boundary from the audit's. Build every number at the audit's scale factor, dividing source
+pixels by it as you go (Phase 2 has the rule; appendix R0.6 has it at the geometry level).
+
+Before building any module whose inventory row carries a concession, check the audit's Flags for
+a human "yes" on it. If there is none, ask, and record the answer in the batch report. Building
+first and asking later means rebuilding.
+
+**A row's build constraints are instructions, not context.** Read them before the first node of
+that module and state in the batch report how each one was satisfied. They exist because a correct
+audit finding was once left in Flags alone and the conversion built straight past it. An older
+audit may have no build-constraints column, so on those read Flags in full before the batch starts,
+and treat anything phrased as "export rendered nodes, not raw fills", "re-crop", or "clipped by
+z-order" as binding (appendix R4.2.1).
+
 For each module in the batch, in order:
 
 ### 1. Convert the source design to MJML JSON via the design-converter worker
@@ -337,8 +619,20 @@ Do not rebuild by eye and do not run the plugin's Convert button for migration b
 pipeline is: screenshot the source module (read-only), POST it to the design-converter
 worker, transcribe the returned MJML JSON into the target file, then verify.
 
-1. **Screenshot the source frame** from the customer's file (read-only; `get_screenshot` or
-   an export at 1x/2x). Keep the PNG; it is also your visual reference for verification.
+1. **Screenshot the module** from the customer's file (read-only; `get_screenshot` or an
+   export). On an email-native source that is a frame; on an unstructured source it is the
+   region of a design that the Module inventory row describes, cropped at the boundaries the
+   audit set. Keep the PNG; it is also your visual reference for verification.
+   **Size the export so the PNG comes back at the target email width**, which means exporting a
+   source at scale factor 2.2 at roughly 0.45x. The worker infers its numbers from the pixels
+   you send it, so a PNG already at email scale returns email-scale widths, paddings, and type
+   sizes, and the appendix rule that worker values are authoritative stays true as written. If
+   you did send a source-scale PNG, its numbers are authoritative only at that scale: divide
+   every one of them by the factor before it becomes geometry, and say in the batch report that
+   you converted that way. You have a shell, so the reliable way to get the width right is to
+   resize locally after the export rather than trusting an export scale:
+   `sips --resampleWidth 600 module-01.png` on macOS, or
+   `convert module-01.png -resize 600x module-01.png` where ImageMagick is available.
 2. **POST to the worker** at `https://design-converter.andy-30d.workers.dev`:
    - Headers: `Content-Type: application/json`, `Authorization: Bearer` with an EMPTY token,
      and `X-Auth-Provider: gumroad`. The worker treats empty Bearer plus gumroad as an
@@ -405,7 +699,8 @@ moduleRoot.setSharedPluginData('emaillove', 'name', 'mj-wrapper')
   a single wrapper component. Never nest one wrapper inside another to keep them together.
 - **The layer name is load bearing here**, unlike everywhere else in the file. It becomes the
   saved component name and its storage path, and there is no rename field in the plugin's
-  save dialog, so name it the way it should appear in the customer's library.
+  save dialog, so use the module's Module inventory row name verbatim: the audit chose it to be
+  the name in the customer's library, so renaming it here silently forks the two documents.
 - **Every node gets two names.** The MJML tag goes in the `name` shared plugin data key; the
   Figma layer name gets the plugin's own friendly display name for that tag ("Row (Contains
   columns that sit side by side)", "Text Block", "Button Text"), so the layers panel reads
@@ -471,15 +766,23 @@ This mapping covers almost everything you will meet:
   mapped primitives (for social icons, an `mj-group` of one-column `mj-image` pairs, each
   with its own `href`). List every row you rebuilt this way in the module's report line.
 - **Every `src` comes back as `"placeholder"`.** Place the real assets you round-tripped in
-  foundations; use flat gray fills at the correct dimensions everywhere else and list them.
+  foundations; use flat gray fills at the correct dimensions everywhere else and list them. Any
+  image you pull from the source now is a render of its node, never the raw fill (R4.2.1), and its
+  height comes from the render's aspect ratio.
 - **Unpinned colors, radii, and fonts drift** between runs, and unpinned fonts flatten to
   Arial. Correct them against the foundations rather than accepting what came back.
 - Map every text node to the type styles from foundations.
 - Buttons: `mj-button-Frame` wrapping an instance of the foundations button component.
-- Verdict B regions (from the audit): place the design content as a frame with NO recognized
-  tag name inside a column; the exporter flattens it to a hosted image at export while it
-  stays editable. Verdict C modules: live-text structure for the copy, one editable-image
-  frame for the rich region.
+- **Honor the inventory row's verdict.** Verdict A: live text throughout. **Verdict
+  `A (concession: ...)`: build it as live text like any other A and apply the named substitute,
+  nothing more.** Do not quietly reproduce the effect the concession gave up, in an image or
+  otherwise: that is the concession being un-made without the designer in the room, and it turns
+  a module the audit priced as mechanical into a flattened picture. Verdict B regions: place the
+  design content as a frame with NO recognized tag name inside a column; the exporter flattens it
+  to a hosted image at export while it stays editable. Verdict C modules: live-text structure for
+  the copy, one editable-image frame for the rich region. Changing a verdict when the nodes
+  contradict the audit is allowed and sometimes right; record it and its reason in the batch
+  report.
 - Text over a single background photo is mj-hero territory, live text, not an image.
 
 ### 3. Merge the mobile twin
@@ -530,7 +833,9 @@ binding is wrong is worse than no property**, so re-read `componentPropertyRefer
 off each node to confirm the binding landed. Record the properties you added, and why, in the
 module's report line.
 
-Then decide its category for the upload. **Use the customer's real category names**, which are
+Then confirm its category for the upload. **The Module inventory row already proposes one**, so
+start there and change it only when the rebuilt structure contradicts it, saying so in the batch
+report. **Use the customer's real category names**, which are
 whatever sections already exist in their plugin, not names you invent. If the Email Love MCP
 is connected, `list_components` returns their categories; otherwise read them off the plugin's
 Assets sidebar, which ships 13 predefined sections: Pre-Header, Header, Heroes, Single Column,
@@ -564,6 +869,10 @@ Run the appendix post-build checklist (R9), plus:
   `mj-spacer`, every FIXED width is one of the load-bearing cases, every pinned width that
   carries text has slack (appendix R3.3.1), and each button's width sizing was chosen for its
   mobile behavior (appendix R0).
+- Scale: the module root is at the audit's target email width, and its type sizes, paddings, and
+  image dimensions are at email scale rather than source scale (appendix R0.6). A module built at
+  source scale looks correct in isolation and wrong the moment it sits next to another module, so
+  check it before the batch grows.
 - Naming: every layer carries the display name for its tag, and no friendly string leaked into
   the plugin data `name` key.
 - Component: the module root is a direct child of its category page, not inside a component
@@ -575,11 +884,13 @@ Run the appendix post-build checklist (R9), plus:
 
 ### 6. Batch report and gate
 
-One report per batch: per module, what was rebuilt, verdict honored or changed (with reason),
-what the worker returned and what you repaired, mobile decisions, divergences flagged,
-component properties added and the evidence for each, the category you chose. End with the
-open questions for the design review. Do not start the next batch until the user says the
-review happened.
+One report per batch: per module, keyed by its Module inventory row name, what was rebuilt, the
+design you converted it from, verdict honored or changed (with reason), any concession and whether
+it was accepted and by whom, what the worker returned and what you repaired, mobile decisions,
+divergences flagged, component properties added and the evidence for each, the category you kept
+or changed. Open with the scale factor and target email width the batch was built at, so a
+reviewer can check one number instead of measuring modules. End with the open questions for the
+design review. Do not start the next batch until the user says the review happened.
 
 ## Hand-off after the final batch
 
@@ -709,12 +1020,61 @@ that padding is also how you get a tap target of at least 44px.
 | Leaf pair wrapper | sparingly | Fine tuning one element, for example 10px above a button but not above the text over it |
 | `mj-button` `inner-padding` | from the MJML, symmetric only | The button's tap target, not layout spacing. Asymmetric values round-trip wrong (R4.3) |
 
-In a conversion the worker JSON paddings are authoritative: transcribe them exactly. The
+In a conversion the worker JSON paddings are authoritative: transcribe them exactly, **at the
+scale of the screenshot they came from (R0.6)**. The
 ranges above are for gaps you have to invent. Four things that keep padding honest: pick a
 base unit (8px) and use multiples of it; padding sits inside the box and eats content width
 (two 50 percent columns with 20px each side lose 80px total); Outlook ignores values under
 5px and handles even numbers more predictably; mobile padding is a separate override
 (`mobileStylesPadding*`), not a reason to compromise the desktop value.
+
+### R0.6 Every number here is at EMAIL scale, never source scale
+
+Widths, type sizes, paddings, radii, and image dimensions in this appendix are email pixels: a
+600 or 640 body, a 16px body copy, a 20px column padding. A source file that was never meant to
+export as email is often drawn at a multiple of that, and the audit settles the factor once (its
+**Scale factor** section, a number a designer confirmed) so every module in the library is built
+against the same one.
+
+The worker's numbers are at the scale of the screenshot it was sent, so the cheapest way to stay
+honest is to send it a PNG already at the target email width; then "transcribe the worker
+paddings exactly" (R0.5) and "build at email scale" are the same instruction. If the screenshot
+went in at source scale, divide every returned number by the factor first.
+
+So divide source measurements by that factor before they become geometry here, and never carry a
+source pixel across untouched. A module built at source scale passes every other check in this
+appendix: it hugs, it is tagged, it exports. It is simply two or three times too big, which shows
+up as a body size no email uses and a root wider than the body, and it only becomes obvious next
+to a module built correctly. If you find yourself deriving the factor from the file rather than
+reading it from the audit, stop: a fresh derivation silently overrules the decision a human
+already made between two disagreeing derivations.
+
+### R0.7 DOUBLE PADDING: a gap belongs to ONE block, never to both
+
+The space between two stacked blocks is one decision, made once, on one node. When the block
+above already carries a `paddingBottom`, the block below must NOT add a `paddingTop` for the same
+gap, and the reverse. Setting both is not "a little more room": the two values add, so a 40 below
+the section above plus a 30 above the block below renders as 70, and the module reads as broken to
+the designer who drew it.
+
+**Failure signature**, in the order you notice it:
+
+- The gap looks roughly twice what the design shows, while each of the two paddings that produced
+  it is individually plausible. That plausibility is why this survives review.
+- A leaf frame's height exceeds its content by exactly the padding you wrote, and the module's
+  total height is over by the same number. An `mj-image-Frame` measuring 362 around a 332
+  rectangle is a 30 that should not exist.
+- Removing either value alone fixes the look. That is the proof there were two.
+
+**Where to put it: on the preceding block's `paddingBottom`.** Prefer trailing space over leading
+space so that each block owns the gap that follows it. Then a block switched off (`visible =
+false`, or a BOOLEAN component property, R8) takes its spacing away with it, instead of leaving a
+hole where lead-in space on the next block used to be paid for by a neighbor that is now gone.
+
+This holds at every level, not just section to section: wrapper to section, section to column,
+column to leaf pair. Before writing any padding, read what the sibling above it already carries.
+The worker JSON paddings are authoritative and already complete (R0.5), so a padding you add on
+top of them is almost always this bug.
 
 ## R1. Non-negotiable ground rules
 
@@ -1166,10 +1526,12 @@ Inner RECTANGLE (direct child):
 - `resize(width, height)` from the MJML `width`/`height` attrs. Keep
   `layoutSizingHorizontal = 'FIXED'`. A RECTANGLE has no hug, and its pixel size is one of
   the four load-bearing FIXED widths.
-- Fill: the worker returns `"placeholder"` for every `src`, so substitute the asset you
-  round-tripped into the target file's foundations pages when one exists (logos especially);
-  otherwise use one SOLID light gray fill (`#E8E8E8`). Where a real URL is available, create
-  the image via `figma.createImageAsync(src)` and set an IMAGE fill, `scaleMode: 'FILL'`. The
+- Fill: an IMAGE fill, `scaleMode: 'FILL'`, from an image that is already in the target file.
+  `figma.createImageAsync(src)` is NOT available to you as an external agent, so a worker `src`
+  URL is not something you can turn into a fill directly, and R4.2.1 has the route for anything
+  coming from the customer's source file. The worker returns `"placeholder"` for every `src`
+  anyway, so substitute the asset you round-tripped into the target file's foundations pages when
+  one exists (logos especially); otherwise use one SOLID light gray fill (`#E8E8E8`). The
   exporter re-exports the node's own pixels, so a gray rect exports as a gray image, which is
   correct placeholder behavior.
 - `cornerRadius` from `border-radius`.
@@ -1178,6 +1540,54 @@ Inner RECTANGLE (direct child):
 - Sizing note: if the rectangle width is LESS than the column content width the exporter
   drops `fluid-on-mobile`; if equal it keeps it. So match the worker `width` exactly: a 560
   image in a 560 column stays fluid, a 134 logo does not.
+
+### R4.2.1 Bringing an image across from the source file: RENDER the node, never the raw fill
+
+An image in a source file is almost never the whole photograph the designer started from. Two
+things routinely sit between the raw bytes and what you see on the canvas, and neither one travels
+with the raw asset:
+
+- **A crop transform.** An image fill with `scaleMode: 'CROP'` carries an `imageTransform` matrix:
+  which part of the photograph is showing, and at what zoom. Export the raw fill and you get the
+  full frame back with that transform discarded, including everything the designer cropped away.
+  The symptom is dead space where the composition used to be tight: a subject that filled 56 to 59
+  percent of a band now occupies 27 percent and floats small inside it, or sits half out of view.
+  Nothing about the rectangle's geometry is wrong, which is exactly why this gets misdiagnosed and
+  reported as a spacing bug.
+- **Clipping by overlapping siblings.** Unstructured sources clip by z-order and not by masks: a
+  shape, a band of background, or another image sits on top and hides part of the picture. What you
+  see is a composite of several nodes, and those pixels exist in none of them on its own. Only a
+  render captures it.
+
+So, for every image you bring across: **render the node as it appears and use the render.** Never
+the raw fill, never the asset behind `fills[0].imageHash`. If the audit's row for a module says its
+images are clipped by z-order rather than by masks, or that they carry a crop, that is this rule in
+its `build constraints` column and it is not optional.
+
+The route, since `figma.createImageAsync` is unavailable to an agent:
+
+1. `download_assets` on the NODE in the source file (`get_screenshot` on the node, or
+   `node.exportAsync`, do the same job), at 2x, to a local PNG. Reading `fills[0].imageHash` and
+   fetching that asset instead is the mistake, not the shortcut.
+2. `upload_assets` to place that PNG onto the `mj-image` rectangle in the target file. The crop is
+   baked into the pixels now, so the fill is a plain `scaleMode: 'FILL'` with an identity transform
+   and there is no crop left to reproduce.
+3. Verify against a screenshot of the SOURCE NODE, never against the source's raw asset.
+
+**Aspect ratio: preserve the render's, never stretch to fit a chosen width.** Measure the ratio on
+the rendered PNG and derive the height from the width you picked: `height = round(targetWidth *
+renderH / renderW)`. A 995 x 550 render placed at 600 wide is 332 tall, and 332 is not a number to
+round to something tidier. If a height was decided earlier and it disagrees with the render, the
+render wins and you re-derive the height. Forcing a render into the wrong box is either a
+`scaleMode: 'FILL'` quietly cropping it a second time or a visibly squashed photo.
+
+**Width is a decision, so make it deliberately and state it.** A source image narrower than its
+canvas (995 in a 1089 wide design, so about 91 percent) is inset by design, not full bleed. Either
+reproduce the inset as horizontal padding on the `mj-image-Frame`, at email scale and snapped to
+the spacing scale the foundations already use, or take it full bleed at the body width. Both are
+defensible. Pick against the design system's own established patterns, and record which you chose
+and why in the batch report so the next module makes the same call. What this must never be is an
+accident of arithmetic.
 
 ### R4.3 mj-button: `mj-button-Frame` wrapping FRAME `mj-button` whose DIRECT child is a TEXT node
 
@@ -1262,6 +1672,7 @@ children.
 **R5.1 Padding.** Worker `padding-*` are explicit px strings; `parseFloat` them onto the
 OWNING frame. Container tags carry their own paddings; leaf tags carry theirs on the PAIR
 WRAPPER frame (the exporter reads `node.parent.padding*` for text, button, image, divider).
+A gap the block above already pays for is not yours to pay for again: R0.7.
 
 **R5.2 Colors.** All colors are hex strings. One SOLID fill per background; TEXT fills for
 text color. `transparent` or absent means `fills = []`.
@@ -1537,7 +1948,9 @@ there.
 11. All vertical spacing is padding: no gaps produced by a taller frame, by `itemSpacing`, or
     by a manually positioned node.
 12. Root width equals the mj-body width; column px widths equal the worker attrs; section
-    paddings equal the worker attrs.
+    paddings equal the worker attrs. All of those numbers are at email scale, from the audit's
+    confirmed scale factor, not source scale (R0.6): the root is 600 or 640, and body copy is a
+    size email actually uses.
 13. The module root is a COMPONENT tagged `mj-wrapper`, a direct child of its category page,
     not inside a COMPONENT_SET or a Figma SECTION, with no stray instances left on the page,
     and no second `mj-wrapper` nested inside it. `mj-column-inner`, if used, is literally
@@ -1549,3 +1962,10 @@ there.
     for spacing, alignment, and color parity. Small color and font-metric differences are
     acceptable; missing content, zero-height sections, clipped text, and alignment flips are
     not.
+17. **No gap is paid for twice.** For every pair of stacked siblings, exactly one of them carries
+    the padding that separates them, and it is the one above (R0.7). Any frame whose height
+    exceeds its content by exactly a padding you wrote is this bug.
+18. **Every image is a render of its source node, not a raw fill** (R4.2.1), so any crop or
+    z-order clipping is baked into the pixels. Each rectangle's height is the render's aspect
+    ratio at the width you chose, and the width itself was a recorded decision (full bleed or the
+    source's inset), not an accident.
