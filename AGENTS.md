@@ -31,11 +31,13 @@ doing anything else.
 
 ## Version and staying current
 
-These instructions are **version 2.3.4** (2026-07-29). They track the
-`emaillove-figma-builder` Claude skill at 2.4.0, plus the render spec that skill loads by
-reference, from the `emaillove-eds-converter` skill at 1.12.0. The appendix here is a copy of
-that render spec, so it can gain a rule without the builder skill's own version moving: when
-that happens, only the patch number changes.
+These instructions are **version 2.7.0** (2026-07-29). They track the
+`emaillove-figma-builder` Claude skill at 2.7.0, plus the render spec that skill loads by
+reference, from the `emaillove-eds-converter` skill at 1.16.0, minus that spec's combined-raster
+asset rule (4.2.2), which is not here yet, and plus the library structure that same skill
+prescribes. The appendix here is a copy of that render spec, so it can gain a rule without
+the builder skill's own version moving: when that happens, only the patch number changes. When the
+builder skill itself moves too, as it did for 2.6.0, the minor number moves with it.
 
 Unlike a Claude plugin, this file does not update itself: you downloaded a copy. If you have
 web access, check once per conversation (quietly, without narrating it) whether a newer
@@ -72,6 +74,51 @@ and any clipping by overlapping siblings live outside the asset. Both bite on Pa
 pass every other check in the appendix, so an email built with an earlier copy is worth
 re-measuring on two points: any leaf frame whose height exceeds its content by exactly one
 padding, and any image that carries dead space where the composition used to be tight.
+
+**Version 2.4.0 added R3.4.1, the Two Column Swap.** Source designs routinely place a photograph
+so it overlaps or bleeds past the block it belongs to, which in Figma is z-order plus absolute
+position and in email is nothing at all. The standard rebuild is now settled: one `mj-section`,
+two `mj-column`s, image in one and text in the other, in source order. It replaces two worse
+answers an earlier copy left open, improvising a container for the overlap and flattening the
+whole block to an image, and the second of those costs live text, accessibility, and dark mode. On
+Path B it matters twice, because the worker cannot see an overlap and never returns the swap
+(B5), and because the tell lives on the source nodes rather than in the screenshot. In an email
+built with an earlier copy, look for a band that came across as an image where the design had a
+photo beside copy.
+
+**Version 2.5.0 made the Path B scale factor ONE number and added the ratio check.** Earlier copies
+told you to derive a factor and then said nothing about applying it, so the factor got used on some
+numbers and each remaining value was rounded on its own toward a size email usually uses. Measured
+on a real conversion: a source headline of 55 and body of 35, a ratio of 1.57, came out as 30 and
+16, a ratio of 1.88, which is 1.83 on the headline against 2.19 on the body and a headline 20
+percent too large for its body. The expensive part is that it presents as a padding problem, so a
+reviewer audits paddings that are all correct and finds nothing. B2 now carries the one-factor rule
+and the ratio check, and R0.6 has it at the geometry level. Worth running on emails already built
+from a non-email-scale source: divide the largest type size by the smallest and compare it to the
+same ratio in the source.
+
+**Version 2.6.0 added the progress contract, and it is the first change here that is purely about
+what you say rather than what you build.** Earlier copies told you to state an estimate before the
+first write to the canvas and then said nothing about the minutes after it, so a build that was
+working looked the same as one that had hung. "Report progress while it runs", under "How long a
+build takes", fixes the checkpoints, the format (a count, a percentage, the section by name, two
+counters for a sequence), the requirement to revise the estimate when the pace disagrees with it,
+and the ceiling on frequency: section boundaries, never per node. Nothing built with an earlier copy
+is wrong because of this, so there is nothing to re-check in emails already built.
+
+**Version 2.7.0 taught this file the shape of an Email Love library, on both paths.** The migration
+instructions now PRESCRIBE that shape rather than leaving it to the converting agent (a fixed page
+frame of Cover, Getting Started, divider pages, Foundations, Type, Buttons, the component category
+pages and Campaigns, with color and spacing as two-tier Figma variables and component fills bound to
+the semantic tokens), which means a library you are handed increasingly has a structure worth
+recognizing and respecting. On Path A, A1 now reads that structure, takes the email width off the
+Cover and the conventions off Getting Started, binds anything you create outside an instance to the
+semantic tokens the file already carries, and forbids renaming, reordering, or adding pages and
+tokens mid-build; "Foundations you do not change" carries the same rule. On Path B, B6 draws the
+line between saving a few reusable components, which is what a build can legitimately produce, and a
+design system, which comes out of the migration route rather than being improvised while you build
+one email. Nothing built with an earlier copy is wrong, though an email built into a customer's
+library with a 2.6.x copy is worth a glance for a page or a style that got added along the way.
 
 ## Setup the user must do once
 
@@ -142,6 +189,63 @@ whole design system is a different job: a batch of five design-system modules ha
 at tens of minutes per pass, which is why library migration is a separate batched process with
 design review between batches, covered by `migration/AGENTS.md` at
 github.com/email-love/codex-agents.
+
+### Report progress while it runs
+
+Codex shows the user every tool call it makes, so they can already see WHAT is happening: the
+`use_figma` writes, the curl to the design converter, the screenshot reads. That makes one part of
+this contract lighter and the rest of it heavier. The visible calls never say **how far through**
+the build is or **how much longer** it has to go, and a wall of node writes reads as motion without
+progress. So the count, the percentage, and the section name carry the load. Telling the user you
+are calling Figma does not: they watched you call it, in more detail than you would have given.
+
+A build is minutes rather than tens of minutes, so the granularity is the **section**, not the
+whole email and not the node. Post one line at each of these points and nowhere else:
+
+1. **Before the first write to the canvas:** the path and why (you owe that line anyway), the
+   section plan by name, and the estimate. **The section count you give here is the denominator for
+   every line after it**, so name them: "Path A, 9 sections: preheader, logo header, hero, three
+   product cards, testimonial, CTA, footer. Roughly 8 minutes."
+2. **After each section lands:** count, percentage, section name.
+3. **On Path B, when the design-converter call goes out** (B3): one line before it. Codex shows the
+   curl leaving, but a 20 to 40 second wait with nothing appearing on the canvas is the one point in
+   a build where a user reasonably concludes the run has hung, and the visible call says nothing
+   about how long it should take. Say the same thing the moment you re-run with `recache=1` or retry
+   an `X-Trivial-Response`, rather than mentioning it at hand-off: a failed call the user just
+   watched does not tell them whether you are recovering or stuck.
+4. **At the end:** what was built, what you assumed or had to ask about, and anything skipped.
+
+How each line is written:
+
+- **A count and a percentage, never prose.** "Section 4 of 9 done, 44 percent" is the format.
+  "Almost there" is not a checkpoint.
+- **Name the section.** "Section 4 of 9: testimonial" lets the user find it in Figma. "Section 4 of
+  9" does not, and a layer name scrolling past inside a tool call is not something a user can
+  follow.
+- **Two counters for a sequence, not one.** "Email 2 of 4, section 3 of 7: hero" locates someone in
+  a campaign. A single percentage of the whole sequence does not.
+- **Revise the estimate when the pace disagrees with it.** Most builds are short enough that the
+  opening number holds. But if sections are landing at double what you opened with, say so at the
+  next section boundary with the new number instead of at the end, and revise upward without
+  apology: Path B transcription in particular runs slower than it looks. This is the one thing the
+  visible tool calls can never supply, so it is the part to get right.
+- **Do not narrate the operation the user is already watching.** Spend the line on the arithmetic
+  instead. The exception is when the visible calls mislead rather than inform: a silent wait, or a
+  burst of calls that looks like thrash and is really one repair, earns one plain-language clause.
+  "Transcribing the footer, 43 nodes" is worth reading; "running use_figma" is not.
+- **Section boundaries only.** Never per node, per instance, per property, or per screenshot. A hero
+  with thirty nodes gets one line when it is finished, not thirty. The transcript is already dense
+  with calls, so prose in between costs more here than it would on a quieter surface.
+
+Two lines, the format to copy. Path A, after a section:
+
+> Section 4 of 9 done, 44 percent: testimonial, instanced and filled. Sections are averaging about
+> 50 seconds, so the remaining 5 are roughly 4 minutes. Next: section 5 of 9, CTA.
+
+Path B, before the worker:
+
+> Sending the hero comp to the design converter now. It takes a few seconds to about half a minute,
+> then transcribing what comes back is the longer part.
 
 ---
 
@@ -256,11 +360,54 @@ produces emails whose sections fit their content.
    COMPONENT and COMPONENT_SET nodes, one call per page. Email Love design systems usually
    keep the library on dedicated pages (Heroes, Cards, Lists, Copy Blocks, Data, Footer)
    separate from the campaigns page.
-2. **Study 2 or 3 of their past emails.** Screenshot and read the frames the user named as
+2. **Read the file's structure, and leave it as you found it.** A library built through Email
+   Love's migration route carries a prescribed page frame, and recognizing it saves you a lot of
+   searching:
+
+   ```
+   Cover
+   Getting Started
+   --- Foundations
+   Foundations
+   Type
+   Buttons
+   --- Components
+   one page per component category, in the customer's own category names
+   --- Templates
+   Campaigns
+   ```
+
+   The `---` pages are dividers standing in for the page folders Figma does not have, so they are
+   empty on purpose. A file shaped like that is telling you where everything lives: the color and
+   spacing tokens on Foundations, the type ramp on Type, the button components on Buttons, the
+   modules on the category pages, and finished emails on Campaigns beside the existing ones, which
+   is where this build belongs. **Read Cover and Getting Started when they exist.** Cover states
+   the email width the system is built at, and that is the width your root frame has to match.
+   Getting Started states the file's own conventions, which outrank any habit of yours.
+
+   **Respect the structure you find rather than imposing one.** Do not rename a page, do not
+   reorder the page list, do not add a Cover or a divider that is not there, and do not open a new
+   page for this build when the file already has the page this work belongs on. Plenty of libraries
+   look nothing like the frame above, because they were built by hand or built before it existed.
+   That is not a defect for you to fix mid-build: reshaping someone's library while they asked for
+   one email is a change they did not ask for. Say in one line what shape you found, put your work
+   where that shape puts it, and if the file genuinely has nowhere for a finished email, ask before
+   creating a page.
+3. **Use the tokens the file already has.** Where the library carries Figma variables, a semantic
+   set (names like `color/bg/page`, `color/text/primary`, `spacing/md`) usually sits on top of a
+   primitive set named by value. For anything you create outside an instance, the root frame fill
+   above all, bind to the SEMANTIC variable rather than typing a hex: that is how the file was
+   built, and it is what keeps a later brand-color change to one edit. Never repoint or rename a
+   token, and never bind to a primitive directly. Instances are already bound, so leave them
+   alone. Two things a variable cannot reach: the root frame's nine theme keys, which are shared
+   plugin data strings and carry literal hex (R2.1), and `fontSize` or `lineHeight`, which are not
+   bindable, so type comes from the file's text styles instead. Where there are no variables, take
+   the values from the palette as usual.
+4. **Study 2 or 3 of their past emails.** Screenshot and read the frames the user named as
    their best, or the most recent. Learn voice, copy length, section rhythm, imagery habits,
    and footer conventions, including whether the footer uses an `mj-raw` token block. These
    are also your donor candidates for the root frame.
-3. **Report the palette** to the user in one compact list.
+5. **Report the palette** to the user in one compact list.
 
 ## A2: Ask who picks the components
 
@@ -402,6 +549,21 @@ to the email width before you send it, so the worker returns email-scale numbers
 place, and pin `emailWidth` in `promptInputs` (B3). Tell the user the factor you derived; it is a
 judgment they may want to correct. R0.6 is the rule this protects.
 
+**A factor you derive here is ONE number, applied to EVERY number.** Whether you scale the
+screenshot before sending it or divide the worker's output afterward, the same factor governs type
+sizes, line heights, widths, paddings, image dimensions, and spacer heights. Rounding is allowed, to
+the nearest whole pixel, after the division. Choosing a converted value because it looks like a
+size email usually uses is not rounding; it is a second factor invented for one element.
+
+**Check it against the source's own ratios.** Divide the largest type size you ended up with by the
+smallest, do the same in the source, and compare. More than a couple of percent apart means
+something got rounded toward a pleasant number instead of divided. The failure looks like this,
+measured on a real conversion: a source headline of 55 and body of 35, a ratio of 1.57, came out as
+30 and 16, a ratio of 1.88, so 1.83 on the headline and 2.19 on the body. The email read as though
+its padding were wrong even though every padding value was correct, which is why this is worth a
+deliberate check rather than a glance. If a converted size looks wrong, the factor is the suspect
+and not the style: re-derive the factor, re-divide everything, re-run the check.
+
 Rendering, whichever HTML you start from. Codex has a shell, so do it locally:
 
 ```bash
@@ -501,7 +663,7 @@ inventing an unmapped node is not. List every row you rebuilt this way in your r
 
 ## B5: Repair what the worker gets wrong (every time, these are known)
 
-The worker returns structure, not a finished email. Four gaps, all observed repeatedly:
+The worker returns structure, not a finished email. Five gaps, all observed repeatedly:
 
 1. **Pills and badges come back as `mj-text`** with an inline-styled `<div>` carrying a
    background color and a border radius. Rebuild every one as an `mj-button` (see the
@@ -523,6 +685,18 @@ The worker returns structure, not a finished email. Four gaps, all observed repe
 4. **Unpinned colors, radii, and fonts drift** by a few units between runs, and unpinned
    fonts flatten to Arial. Correct them against the brand foundations rather than accepting
    what came back.
+5. **The worker cannot see an overlap, so it never returns the Two Column Swap.** It infers
+   structure from a flat screenshot, and email has no z-order to infer into, so a source block
+   where a photo bleeds past its band or sits behind copy comes back either as a full-width
+   `mj-image` stacked above the text or as the whole band flattened into one image. Neither is
+   the answer. Rebuild it as a two column row per **R3.4.1**: one section, two columns, image in
+   one and text in the other in source order, both columns pinned to widths that sum to the
+   section content box, the image a rendered crop of the source region. R3.4.1 also has the two
+   tells for spotting the pattern in the source, which you need because the screenshot you sent
+   the worker hides the overflow by construction, so check the source nodes rather than the PNG.
+   Do not improvise a container for the overlap and do not flatten the block to make it go away.
+   State in your report that you applied the swap, and that the loss is the overlap and nothing
+   else.
 
 ## B6: Apply the design system on top, then make it reusable
 
@@ -580,10 +754,22 @@ Then, either way:
   the full checklist even if the user defers the uploads; it is the hand-off artifact.
 - Do not write `saveCategory` or `saveName` plugin data. The plugin reads neither key today.
 
-For a whole legacy library rather than one email, that is a migration, not a build: point the
-user at Email Love's migration flow (hello@emaillove.com), which ships as a separate Codex
-instruction file at
-https://raw.githubusercontent.com/email-love/codex-agents/main/migration/AGENTS.md.
+**What you have made here is a few reusable components, and that is not a design system. Do not
+improvise one mid-build.** A real Email Love library has a shape: a prescribed page frame (Cover,
+Getting Started, divider pages, Foundations, Type, Buttons, one page per component category,
+Campaigns), color and spacing as Figma variables in two tiers with every component fill bound to a
+semantic token, a Type page built as a specimen sheet, and one module per row of an audited
+inventory. That comes out of the migration route, which audits the source, settles the scale factor
+once, and builds foundations before any module. Inventing a page structure and a token set here, in
+the middle of building one email, produces a file that looks like a design system and matches no
+other customer's, which is exactly the divergence the prescribed structure exists to prevent. So
+save the blocks that earn it, put them on a plainly named library page rather than a scaffolding of
+your own, and say plainly that a full library is a separate piece of work.
+
+Point the user at Email Love's migration flow (hello@emaillove.com), which ships as a separate
+Codex instruction file at
+https://raw.githubusercontent.com/email-love/codex-agents/main/migration/AGENTS.md. It is also the
+route to take for a whole legacy library rather than one email: that is a migration, not a build.
 
 ---
 
@@ -725,6 +911,13 @@ someone made, not defaults to improve on. If a font will not load in your enviro
 substitute one to get the edit through. Report it and leave the layer as you found it; a
 silent swap changes the brand's typography everywhere it lands.
 
+**The file's page structure and its tokens are foundations too.** The page list, the page names,
+the text styles, and the variables were decided when the library was built (A1). Build inside them:
+never rename or reorder a page, never edit a text style or repoint a variable to make one email
+work, and never add a page or a token as a side effect of a build. If an email genuinely needs
+something the foundations do not carry, that is a request for the designer, so name it in your
+report and build the closest correct thing meanwhile.
+
 **Dark mode overrides are read-only.** Per-node `contentColor`, `textColor`, `linkColor`,
 `buttonContentColor`, `buttonTextColor` on a child node are a deliberate treatment someone
 chose. Never clear or overwrite them, and do not strip them when you duplicate a donor. Name
@@ -751,11 +944,16 @@ consistent with the file's real campaigns. Then check structure:
 - **Path A:** every section is a component instance (raw footer excepted), including
   inherited ones. No detached instances. No hand-built frames survived the donor vetting. No
   instance internals were restructured.
+- **The library is as you found it, on Path A:** the page list has the same pages in the same
+  order with the same names, no text style or variable was edited or repointed, and the email sits
+  on the page the file's own structure puts it on (A1). Read the page names back rather than
+  recalling them.
 - **Path B:** the appendix post-build checklist (R9) passes: every node tagged, every leaf a
   complete pair, every `mj-button` with a direct TEXT child, both alignment axes equal on
   every auto-layout frame, all nodes visible, column widths matching the worker JSON. Plus
-  the four B5 repairs done, and any tag the spec does not map rebuilt from mapped primitives
-  per B4.
+  the five B5 repairs done, and any tag the spec does not map rebuilt from mapped primitives
+  per B4. If the source had an overlapping or bleeding photo, that band is a two column row
+  per R3.4.1, not a flattened image and not an attempted overlap.
 - **Sizing, on both paths, for every frame you created:** vertical HUG everywhere, no fixed
   height except an `mj-spacer`, no FIXED width outside the load-bearing cases, every pinned
   width that carries text given slack (R3.3.1), all spacing expressed as padding, and every
@@ -929,6 +1127,16 @@ and a root wider than the body, and on a single email there is nothing beside it
 obvious. So check the two numbers rather than trusting the canvas. In a migration the audit
 settles the factor once, in its **Scale factor** section, and a fresh derivation there would
 overrule a decision a designer already made.
+
+**Whatever the factor is, it is ONE number applied to EVERY number**: type sizes, line heights,
+widths, paddings, image dimensions, spacer heights, radii, border widths. Rounding is allowed, to
+the nearest whole pixel, after the division. Choosing a value because it looks like a size email
+usually uses is a second factor invented for one element, and the way to catch it is to divide the
+largest converted type size by the smallest and compare that to the same ratio in the source. More
+than a couple of percent apart and per-style rounding has crept in. A converted size that looks
+wrong is evidence against the factor, never licence to nudge the one style. B2 has the measured
+case: a 55 headline and a 35 body, a source ratio of 1.57, built as 30 and 16 for a ratio of 1.88,
+and it read as a padding bug rather than a type bug.
 
 ### R0.7 DOUBLE PADDING: a gap belongs to ONE block, never to both
 
@@ -1215,6 +1423,10 @@ COMPONENT with no `mainFrame` above it and none on it.
   as `column.width / (group.width - group horizontal padding) * 100%`. A 560 group containing
   280 + 280 exports 50%/50%.
 - Columns inside a group keep their elements side by side on mobile.
+- **A group is not the vehicle for the Two Column Swap** (R3.4.1, the standard rebuild for an
+  overlapping or bleeding image). That pattern wants the mobile stacking a group suppresses, so
+  it uses a plain `mj-section` holding two `mj-column`s. Reach for a group only when the design
+  genuinely must stay side by side at 390px.
 
 #### R3.3.1 Pinned widths that carry text need slack
 
@@ -1314,6 +1526,72 @@ render time and adapt. Do not pad those; the extra width would be real design dr
 
 - Children: leaf PAIR wrapper frames and `mj-spacer`, top to bottom. After appending, set
   each child's `layoutSizingHorizontal = 'FILL'`.
+
+#### R3.4.1 THE TWO COLUMN SWAP: the standard rebuild for an overlapping or bleeding image
+
+**The failure it replaces.** Source designs routinely place a photograph so it overlaps or
+bleeds past the block it belongs to: a product shot entering from the right behind body copy, an
+animal cropped off by the left edge of a cream band with text beside it. In Figma that is
+z-order plus absolute position. Email has neither, so it cannot be reproduced, and no attribute
+in this appendix gets close. **The standard remedy is to rebuild the block as a two column row:
+one `mj-section`, two `mj-column`s, the image in one and the text in the other, in the same left
+to right order the design implies.** The image stops at its column edge instead of bleeding, and
+nothing overlaps. This is a settled decision rather than a per-block judgment call, so do not
+re-argue it per block and do not go hunting for a cleverer reproduction of the overlap.
+
+**How to recognize it, because nothing in the source labels it.** Two tells, either one of which
+is enough:
+
+- **The photo's bounds extend past the bounds of the block it reads as part of.** It is wider or
+  taller than the band, or its absolute x/y put part of it outside the frame that appears to
+  contain it. Compare the image node's absolute box against the band's box; do not judge it from
+  the screenshot, where the overflow is invisible by construction.
+- **The photo is clipped by a sibling drawn over it rather than by a mask.** A rectangle of
+  background color sits above it in z-order and hides one edge. The layer panel shows no mask
+  and no crop, and the composite you see exists in no single node.
+
+On an unstructured source neither tell is written down anywhere, and the screenshot looks like an
+ordinary photo in a band, which is why recognizing this is its own step rather than something you
+notice in passing.
+
+**The construction.** One `mj-section`, two `mj-column` children, image column and text column in
+source order.
+
+- Both columns FIXED (R0.3 case 2, R3.4). Their widths plus the section's horizontal padding must
+  sum to the section content box: a 600 wide section with 20/20 padding takes columns summing to
+  560. Unequal splits only survive because both numbers are pinned; the exporter derives the
+  percentages from them.
+- **Derive the widths in this order.** Pin the text column first, with the slack from R3.3.1,
+  then give the image column the remainder, then size the image last. Worked: text hugs at 260
+  and pins to 292, so the image column is 268.
+- **The image is a rendered crop of the source region (R4.2.1), never the raw fill**, and it is
+  cropped to its column rather than padded to fit, per R4.2.1's never-pad rule on aspect ratio.
+  The `mj-image` rectangle is the image column's content width, and its height is the render's
+  natural aspect at that width: continuing the example, a 780 x 660 render at 268 wide is 227
+  tall, and 227 is the number.
+- Heights HUG throughout (R0.1). Both alignment axes equal on the section and on each column
+  (R3.4's axis alignment rule, the trap).
+- Spacing on one side of each boundary only (R0.7). The gutter between the two columns is one
+  column's horizontal padding, never both.
+- **Not an `mj-group`.** A group exists to keep columns side by side on mobile (R3.3), which is
+  the opposite of what this pattern wants.
+
+**Mobile.** Two columns stack, so the image lands above the text, which is a normal email pattern
+and arguably better than a bleed that would have had to be abandoned on a 390 wide screen anyway.
+Stacking follows source order, so put the column you want first on mobile first. When the design
+reads text then image on desktop but should read image then text on mobile, set `reverseStack` =
+`'true'` on the section (R3.2) rather than reordering the columns.
+
+**Why this is the default, so nobody relitigates it.** It keeps the text LIVE: the alternative,
+flattening the whole block to one image, gives up selectable text, accessibility, and dark mode
+for the sake of an effect. It degrades well, per the mobile note above. And the loss is small and
+nameable, the overlap and nothing else, which is what you tell the customer at hand-off.
+
+**When it is not this pattern.** Type set over a photographic collage where the lettering is part
+of the artwork, or any treatment where copy and picture are one composited whole with no boundary
+to cut on. The test: if you can name the rectangle the image belongs in and the rectangle the text
+belongs in, it is this pattern, so build it. If you cannot, say so and let the customer decide
+rather than flattening a block to an image on your own judgment.
 
 ### R3.5 mj-column-inner (rarely needed)
 
@@ -1416,7 +1694,9 @@ you see on the canvas. Neither one travels with the raw asset:
 - **Clipping by overlapping siblings.** Unstructured designs clip by z-order and not by masks: a
   shape, a band of background, or another image sits on top and hides part of the picture. What you
   see is a composite of several nodes, and those pixels exist in none of them on its own. Only a
-  render captures it.
+  render captures it. This is also the second tell for the Two Column Swap (R3.4.1): if the sibling
+  drawn over the photo is what stops it bleeding past its block, the block needs rebuilding as a
+  two column row and this rule supplies the image inside it.
 
 So, for every image you bring across: **render the node as it appears and use the render.** Never
 the raw fill, never the asset behind `fills[0].imageHash`.
@@ -1807,3 +2087,9 @@ foundations button component itself and let it surface through the instance.
     so any crop or z-order clipping is baked into the pixels. Each rectangle's height is the
     render's aspect ratio at the width you chose, and the width itself was a stated decision
     (full bleed or the source's inset), not an accident.
+19. **Every overlap or edge bleed in the source became a two column row** (R3.4.1), never an
+    improvised container and never a flattened image. Per swap: both columns FIXED and summing
+    with the section padding to the section content box, the text column pinned with R3.3.1
+    slack, the image column the remainder, the `mj-image` height the render's natural aspect at
+    the image column's content width, no `mj-group`, and the gutter paid by one column only.
+    Your report names the swap and states that the overlap is the whole of what was lost.

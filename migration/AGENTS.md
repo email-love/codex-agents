@@ -22,9 +22,11 @@ doing anything else.
 
 ## Version and staying current
 
-These instructions are **version 1.12.0** (2026-07-29). They track the
-`emaillove-eds-converter` Claude skill at 1.12.0 and the `emaillove-migration-audit` skill at
-1.3.0.
+These instructions are **version 1.16.0** (2026-07-29). They track the
+`emaillove-eds-converter` Claude skill at 1.16.0 and the `emaillove-migration-audit` skill at
+1.8.0, with one rule from those versions not yet in this file: the absent-versus-fused
+distinction in the asset survey (Step 2 of the audit skill) and the combined-raster recovery it
+pairs with (section 4.2.2 of that render spec). Everything else in both skills is here.
 
 This file does not update itself. If you have web access, check once per conversation
 (quietly, without narrating it)
@@ -68,6 +70,65 @@ that carries dead space where the composition used to be tight. Step 4 also now 
 **source ref** and a **build constraints** column on every Module inventory row, which is how a
 finding like "render the node, not the fill" reaches the module it constrains instead of dying
 in Flags.
+
+**Version 1.13.0 added R3.4.1, the Two Column Swap, and it moves modules out of verdict C.**
+Source designs routinely place a photograph so it overlaps or bleeds past the block it belongs
+to, which in Figma is z-order plus absolute position and in email is nothing at all. Earlier
+copies had no standard answer, so every one of these was argued from scratch and usually landed
+as a C with a paragraph of explanation. The remedy is now settled: rebuild the block as a two
+column row, one `mj-section` with two `mj-column`s, image in one and text in the other in source
+order. **A block whose only obstacle is an overlap or an edge bleed is verdict
+`A (concession: image bleed rebuilt as a two column row)`, never a C**, because the whole block
+converts as live text and C reads as a partial conversion. Step 4 has the classification, Phase 3
+step 2 has the build, and appendix R3.4.1 has the construction and the two tells for recognizing
+the pattern on the nodes (the screenshot hides the overflow by construction). Two things are
+worth revisiting in work already done: any C whose notes describe a bleed or an overlap and
+nothing else, which is now an A and cheaper than it was priced, and any converted module where a
+band came across as a flattened image where the design had a photo beside copy.
+
+**Version 1.14.0 made the scale factor ONE number and gave the report a table that proves it.**
+Earlier copies recommended a factor in Step 3 and then, in Phase 2, mapped each text style
+individually toward a round email number, which silently reintroduced a per-style factor: a
+measured module came out at 1.83 on its headline and 2.19 on its body, so the source's own
+headline-to-body ratio of 1.57 was built as 1.88 and the headline was 20 percent too large. It does
+not read as a type problem, it reads as a padding problem, which is why it survived review. Step 3
+now requires a four-column ramp table with the factor restated on every row plus a ratio acceptance
+test, Phase 2 builds the ramp from that table verbatim and re-runs the check, and appendix R0.6 has
+the rule at the geometry level. Two things are worth re-checking in libraries already converted:
+divide the largest type size by the smallest and compare that to the same ratio in the source, and
+do the same across the ends of the spacer scale. If either is more than a couple of percent off,
+the ramp was rounded style by style and the whole library inherits it.
+
+**Version 1.15.0 added the progress contract, and it is the first change here that is purely about
+what you say.** Earlier copies told you to state an estimate before you begin and then said nothing
+about the next forty minutes, so a run that was working looked identical to a run that had hung, and
+a user who had been told twenty minutes had to work out for himself that he was at forty. The
+estimate is now half of it. "Report progress while it runs", under "How long this takes", fixes the
+checkpoints (three while the audit walks, five while a batch converts), the format (a count, a
+percentage, the module by name), the requirement to recompute the remaining time from observed pace
+instead of repeating the opening guess, and the ceiling on frequency: module boundaries, never per
+node. Nothing built with an earlier copy is wrong because of this, so there is nothing to re-check
+in converted work.
+
+**Version 1.16.0 PRESCRIBES the library structure, which was previously left to judgment.** Two
+agents converting the same source from the same audit produced two differently shaped libraries,
+because the old Phase 2 asked for "a Cover, one page per category, Buttons, Type, Campaigns" and
+left the rest open. So the page list came out of whatever categories the walk happened to find, in
+whatever order, with no scaffolding around them, and two customers' libraries could not be navigated
+by the same person. Phase 2 step 1 now fixes the page list as a FIXED frame plus a dynamic middle,
+in one canonical order (Cover, Getting Started, `--- Foundations`, Foundations, Type, Buttons,
+`--- Components`, the audit's category pages, `--- Templates`, Campaigns), and gives each
+scaffolding page a content contract: a Cover that answers "what is this and what width is it", a
+Getting Started that explains instancing and properties, `---` divider pages standing in for the
+page folders Figma does not have, a Foundations token sheet, and a Type page built as a SPECIMEN
+sheet so a broken ramp is visible to the eye as well as to the ratio check. Step 2 is new and
+requires real Figma VARIABLES in two tiers, primitives named by value and semantic aliases named by
+role, with component fills BOUND to the semantics, so changing a brand color is one edit rather than
+forty. Step 4 of Phase 1 now orders the inventory's categories top-of-email-to-bottom, because that
+order becomes the page order. There is also a Phase 2 completion checklist, read back off the file
+rather than recalled. Worth doing in libraries already converted: compare the page list against the
+canonical order, and check whether any component fill carries a hand-typed hex instead of a bound
+semantic token.
 
 ## Setup
 
@@ -138,6 +199,83 @@ groups, absolute positioning, or off-spec widths, widen the estimate before you 
 - **A full library of a hundred modules or more:** multiple sessions. That is exactly why this
   process is batched with a design review between batches rather than run as one long
   unattended pass.
+
+### Report progress while it runs
+
+Codex shows the user every tool call it makes, so they can already see WHAT is happening: the
+`use_figma` writes, the curl to the worker, the screenshot exports. That is more raw activity than
+a user of a quieter surface sees, and it makes one part of this contract lighter and the rest of it
+heavier. The visible calls never say **how far through** the run is or **how much longer** it has
+to go, and a scrolling wall of node writes reads as motion without progress. So the count, the
+percentage, and the revised estimate carry the whole load here. Restating the operation carries
+almost none: do not spend a line telling the user you are calling Figma, because they watched you
+call it.
+
+Post exactly one line at each of these points, and nowhere else.
+
+**While the audit walks (Phase 1).** The audit creates nothing, so it earns three lines, not more:
+
+1. **After the census** (end of Step 2): the counts you found. Pages, candidate frames, designs
+   after desktop and mobile twins are merged, text and paint styles. **The design count is the
+   denominator for every line after it**, so state it even when it looks obvious.
+2. **Per design, as you walk them** (Step 4, pass 1): count, percentage, the design's name, and
+   what it added to the inventory. Say a blocker at the design where you hit it rather than saving
+   it for the report: a component library file you cannot see, a split you are inferring and need
+   the designer to confirm, a type ramp that contradicts the width derivation.
+3. **At the end** (Step 6): the shape of the report. Modules by verdict, the scale factor, and the
+   one or two flags that decide the next step.
+
+**While a conversion batch runs (Phases 2 and 3).** This is the long, quiet one, so it earns five:
+
+1. **After the source census:** your read of the audit's Module inventory plus your first look at
+   the source file. Modules in the inventory, modules in this batch, the designs they come from.
+2. **Before the batch starts:** what IS in it by module name, what is NOT and why (deferred,
+   blocked on an unconfirmed concession, out of scope), and the opening estimate.
+3. **After each module completes:** count, percentage, module name, revised remaining time.
+4. **The moment a step is retried or a decision goes to the user:** a `recache=1` re-run, an
+   `X-Trivial-Response` retry, an unconfirmed concession, a scale factor nobody has confirmed. Say
+   it then, not in the batch report. A failed call the user just watched scroll past does not tell
+   them whether you are recovering or stuck.
+5. **At the end:** what was built, what was skipped, and why.
+
+How each line is written:
+
+- **A count and a percentage, never prose.** "Module 3 of 7 done, 43 percent" is the format.
+  "Making good progress" is not a checkpoint. The denominator is the batch size you listed at the
+  before-the-batch line.
+- **Name the thing you are on.** "Module 4 of 7: Global footer" lets the user find it in Figma, and
+  in Phase 1 "Design 3 of 11: Welcome email" does the same in their own file. "Module 4 of 7" does
+  not, and a layer name scrolling past inside a tool call is not something a user can follow.
+- **Revise the estimate from observed pace, every time.** After module 1 you know the real
+  per-module cost in this file, so recompute the remainder from it instead of repeating the opening
+  guess. Revising upward is fine and expected: an unstructured source runs slower than the opening
+  guess, and the honest larger number beats the tidy stale one. This is the one thing the visible
+  tool calls can never supply, so it is the part to get right.
+- **Do not narrate the operation the user is already watching.** "Calling the worker" and "writing
+  the node" are lines Codex has printed already, in more detail than you would. Spend the line on
+  the arithmetic instead. The exception is when the visible calls mislead rather than inform: a long
+  wait with nothing on the canvas, or a burst of calls that looks like thrash and is really one
+  repair, earns one plain-language clause. "Transcribing the footer, 43 nodes" is worth reading;
+  "running use_figma" is not.
+- **Module boundaries only, and in Phase 1 design boundaries only.** Never per node, per style, per
+  call, or per screenshot. A fifty-node module gets one line when it finishes, not fifty, and an
+  audit that narrates every text node it reads is worse than one that stays quiet. The transcript is
+  already dense with calls, so prose in between costs more here than it would on a quieter surface.
+- **Own an overrun the moment it is apparent.** If the run is tracking well past the estimate you
+  gave, say so at that module boundary, with the new number. A user who was told twenty minutes and
+  is at forty should hear it from you rather than work it out.
+
+Two worked examples, the format to copy. A conversion module:
+
+> Module 3 of 7 done, 43 percent: Global footer, 43 nodes transcribed. Modules are averaging 6
+> minutes in this file against the 4 I estimated, so the remaining 4 are roughly 25 minutes,
+> putting the batch near 45 minutes total against the 30 I opened with. Next: Module 4 of 7,
+> Two column product row.
+
+An audit design, which is shorter because there is no build to price:
+
+> Design 3 of 11 walked, 27 percent: Welcome email, 4 blocks cut, 2 of them new, 9 modules in the
+> inventory so far.
 
 ---
 
@@ -230,6 +368,42 @@ never carries source pixels across.
 Record the result in the report's **Scale factor** section (Step 6). Phase 2 reads that number
 instead of deriving its own, which is the whole point of settling it here.
 
+### The factor is ONE number, and the ramp table has to prove it
+
+Recommending a factor is necessary and not sufficient. Phases 2 and 3 have to APPLY it,
+uniformly, to every number they write: type sizes, line heights, widths, paddings, image
+dimensions, spacer heights. The report is what makes that auditable, so it shows the arithmetic
+per style rather than only the conclusion.
+
+**Write the type ramp mapping as a four-column table, one row per style:**
+
+| Style | Authored size | Factor | Email size |
+| --- | --- | --- | --- |
+| Headline | 65 | 2.2 | 30 |
+| Subhead | 55 | 2.2 | 25 |
+| Body | 35 | 2.2 | 16 |
+
+The Factor column carries the SAME number on every row, and that is the reason for printing it at
+all: a per-style factor cannot hide in a table that restates the factor on each line, because a
+second number in that column is visible at a glance. Never write the table as authored size
+straight to email size with the division left out, and never round a row toward a size that looks
+like a nicer email number. Divide, round to the nearest whole pixel, write down what you get. Same
+table, same discipline, for the spacing scale.
+
+**Acceptance test, run on the table before the report ships: the source's ratios must survive.**
+Divide the largest email size in the table by the smallest, divide the largest authored size by
+the smallest, and compare the two. More than a couple of percent apart means a row has been
+rounded off the factor: find that row and fix it, do not ship the table. Run the same check across
+the spacing scale. Worked, from the migration this rule comes from: authored 65/35 = 1.86 against
+email 30/16 = 1.88 passes, a 1 percent drift that is nothing but whole-pixel rounding. The module
+that actually shipped came out with a 55 source headline at 30 and a 35 source body at 16, so 1.57
+in the source against 1.88 built, a 20 percent failure. That is the defect this test exists to
+catch, and it is worth catching here because downstream it presents as a padding problem rather
+than a type problem, so nobody thinks to look at the ramp.
+
+If a row's email size looks wrong, that is evidence the FACTOR is wrong, not licence to adjust the
+row. Revisit the factor, re-divide the whole ramp, re-run the test.
+
 ## Step 4: Split the designs into modules, then classify every module
 
 Email Love design systems are built from modules, not from whole designs. A module is one
@@ -266,6 +440,25 @@ Three passes:
    Header, Heroes, Single Column, Two Column, Three Column, Four Column, Buttons, Reviews,
    Images, Lists, Order Tables, Footer) rather than one you invent.
 
+   **Then order the categories deliberately, because they become PAGES.** Phase 2 builds one page
+   per category in this inventory, in the order the inventory presents them, and it builds no
+   others. So a category order that came out of whatever the walk happened to find first becomes
+   an incidental page list in the customer's finished library, which is the shape problem the
+   prescription in Phase 2 exists to remove. Do not leave it to the walk.
+
+   **Order the categories the way modules appear in a typical email, top to bottom:** Pre-Header,
+   Header, Heroes, Single Column, Two Column, Three Column, Four Column, Images, Reviews, Lists,
+   Order Tables, Buttons, Footer. That is how someone building an email scans for the next block
+   they need, so it is how the file should be ordered. Skip any category the inventory does not
+   use, and add none it does not. Where a category genuinely has no settled place in that
+   sequence, put it where the customer's own emails put it and say in the report that you did.
+
+   **Group the inventory rows by category, in that order, and order the rows inside a category by
+   reuse, highest first.** The category order is the load-bearing part, since it is what Phase 2
+   reads; the within-category order is what makes the highest-reuse modules easy to find. The
+   batch plan is read off Recommended next step, which names modules explicitly, so it does not
+   depend on row order.
+
 Then assign every module exactly one verdict:
 
 - **(A) Live-text convertible.** Auto-layout stacks of text, images, and buttons that map
@@ -279,15 +472,42 @@ Then assign every module exactly one verdict:
   inside is not live in the inbox (image weight, accessibility, clients with images off), so
   recommend pairing with alt text and keeping critical copy outside the image.
 - **(C) Hybrid.** Split the module: headline and body as live text, the rich visual region as
-  an editable image. Common for heroes.
+  an editable image. Reserve it for blocks where copy and picture are one composited whole with no
+  boundary to cut on: type set over a photographic collage where the lettering is part of the
+  artwork. **An overlap or an edge bleed on its own is NOT a C**, it is an A with a concession:
+  see the Two Column Swap below.
 - **(D) Not emailable.** Interactive patterns (hover states, carousels, video embeds beyond a
   thumbnail link), viewport-relative layouts, or app UI that has no email equivalent. List
   what would replace them.
 
+**A photo that overlaps or bleeds past its block is verdict A, not C.** This is the single most
+common reason a module gets over-classified, and it is now a settled decision rather than a
+per-module argument. Source designs routinely place a photograph so it overlaps or bleeds past
+the block it belongs to: a product shot entering from the right behind body copy, an animal
+cropped off by the left edge of a cream band with text beside it. In Figma that is z-order plus
+absolute position, email has neither, and no MJML attribute gets close. **The standard remedy is
+to rebuild the block as a two column row: one `mj-section`, two `mj-column`s, the image in one
+and the text in the other, in the source's left to right order.** The image stops at its column
+edge instead of bleeding, nothing overlaps, and the text stays live. Appendix R3.4.1 is the full
+rule, including the two tells for recognizing it (the photo's bounds extend past the band's, or
+the photo is clipped by a sibling drawn over it rather than by a mask), which you have to look
+for on the nodes because the screenshot hides the overflow by construction.
+
+So classify such a module **`A (concession: image bleed rebuilt as a two column row)`**, note in
+the row that the overlap is what is lost, and price it as an A. Do not write it as a C: C reads
+as a partial conversion and this is not one, the whole block converts as live text. Do not
+propose flattening the block to an editable image either, which trades selectable text,
+accessibility, and dark mode for one effect. What still earns a C is a block that genuinely needs
+splitting, type set over a photographic collage where the lettering is part of the artwork, or
+any treatment where copy and picture are one composited whole. The test: if you can name the
+rectangle the image belongs in and the rectangle the text belongs in, it is the swap and it is an
+A. If you cannot, it is a C.
+
 **The concession field on A: required on every A row, and deliberately not a fifth verdict
 letter.** A module can convert perfectly as live text except for one effect email cannot
-reproduce at all: a full-bleed treatment that has to stop at the content box, a blur, a blend
-mode, a shape email has no way to draw. That is not B (nothing needs to become an image), not C
+reproduce at all: an overlapping or bleeding photograph, a full-bleed treatment that has to stop
+at the content box, a blur, a blend mode, a shape email has no way to draw. That is not B
+(nothing needs to become an image), not C
 (there is no rich region to split off), and not D (it emails fine). Two modules on an observed
 unstructured source were exactly this, and with nowhere to put it the finding got smuggled into
 a C with a paragraph of explanation, which is how a decision a designer needed to make ends up
@@ -298,7 +518,15 @@ concession>)`** and spell the concession out in the row's notes, both what is lo
 nearest email-safe substitute you propose. Every A row states either `none` or a named
 concession, so a blank is a missing answer rather than an implied no. Every named concession
 also gets its own line in Flags, for the designer to accept or reject before the module is
-built. **Why a field and not a letter:** the ladder answers how a module gets built, and these
+built.
+
+**The one concession with a standard wording, because its substitute is already decided:** an
+overlap or an edge bleed is written **`A (concession: image bleed rebuilt as a two column row)`**
+and the substitute is appendix R3.4.1, not something you invent per module. Use that wording
+verbatim so a reviewer can count these at a glance and Phase 3 knows exactly which rebuild to
+apply. It still gets its Flags line, because a designer still has to accept losing the overlap.
+
+**Why a field and not a letter:** the ladder answers how a module gets built, and these
 get built exactly like any other A, same technique and same effort. What differs is a decision a
 human has to accept. A fifth letter would fork the ladder, and every per-verdict count and
 effort row with it, on something orthogonal to construction. B and C rows may carry a concession
@@ -319,10 +547,12 @@ finding.
 
 Findings that are build constraints rather than observations, and therefore belong on the row:
 images that carry a crop transform or are clipped by overlapping siblings (the row says "render the
-node, not the fill", which is R4.2.1), an image that is inset rather than full bleed and the
-percentage it is inset by, copy that has to stay outside an image for accessibility, a font this
-module in particular leans on, a pinned width this module cannot keep, spacing that has to come
-from one side only. Write each one short and imperative: one clause a builder can act on without
+node, not the fill", which is R4.2.1), an image that overlaps or bleeds past its block (the row says
+"two column row per R3.4.1" and which column the image goes in), an image that is inset rather than
+full bleed and the percentage it is inset by, copy that has to stay outside an image for
+accessibility, a font this module in particular leans on, a pinned width this module cannot keep,
+spacing that has to come from one side only. Write each one short and imperative: one clause a
+builder can act on without
 reading anything else. A constraint that applies to the whole library belongs in Brand foundations
 or Flags instead of being repeated on twenty rows.
 
@@ -336,7 +566,8 @@ designers expect: **mj-hero** renders live text over a full background image, so
 a photo" is verdict A when the text sits on one background image rather than woven through
 layered art; and sections support background images behind live columns. Reserve B for
 compositions where text and imagery genuinely interleave (text wrapping around cutouts,
-badges over product shots, hand-placed collage).
+badges over product shots, hand-placed collage). And the Two Column Swap above keeps a third
+group live: an overlap or a bleed is a fixed rebuild, not a reason to reach for an image.
 
 Finally, **roll the verdicts up per design**: for each design, the ordered list of module names
 it is made of and the worst verdict present in it. The Per-design roll-up is a view of the Module
@@ -350,9 +581,10 @@ From the survey, draft what the Email Love design system will carry:
 
 - **Type ramp mapping:** each of their text styles mapped to an email-safe equivalent, using
   their own fallback choices when a fallbacks page exists. Flag fonts that need web-font
-  hosting or substitution. When the Step 3 scale factor is not 1, show the arithmetic in three
-  columns (authored size, factor, resulting email size) so a reader can audit it instead of
-  trusting it.
+  hosting or substitution. When the Step 3 scale factor is not 1, use the four-column table Step
+  3 specifies (style, authored size, factor, email size), with the factor restated on every row,
+  so a reader can audit the arithmetic instead of trusting it. Run Step 3's ratio acceptance test
+  on the finished table.
 - **Palette:** their named paint styles, and a proposed set of the six Email Love theme
   colors (backgroundColor, contentColor, textColor, linkColor, buttonTextColor,
   buttonContentColor) drawn from it, marked as a proposal for their designer to confirm.
@@ -392,18 +624,26 @@ convert from, precisely enough to screenshot without re-deriving the split (Step
 plus a node name or id, or, where there is no node to name, a position within that design ("top 0
 to 480", "between the divider and the footer rule"). Every A row states either `none` or a named
 concession in the concession column, with what is lost and the proposed substitute in the notes.
+An overlap or an edge bleed uses the standard wording
+`A (concession: image bleed rebuilt as a two column row)` verbatim, and is never a C.
 **Build constraints is REQUIRED on every row and states either `none` or the short imperative
-constraints from Step 4** (for example "render nodes, not raw fills: images clipped by z-order" or
-"image is inset 91 percent, not full bleed"), so that nothing which changes how a module is built
-exists only in Flags. Order the rows so a batch plan can be read straight off them: highest reuse
-first.]
+constraints from Step 4** (for example "render nodes, not raw fills: images clipped by z-order",
+"two column row per R3.4.1, image left", or "image is inset 91 percent, not full bleed"), so that
+nothing which changes how a module is built exists only in Flags. **Group the rows by category, in
+the top-of-email-to-bottom order Step 4 specifies, and order the rows within a category by reuse,
+highest first. The category order is load bearing:** Phase 2 creates one page per category in
+exactly the order they appear here, so an incidental order in this table becomes an incidental page
+list in the customer's library. The batch plan is read off Recommended next step, which names its
+modules, rather than off row order.]
 ## Per-design roll-up
 [One row per design: design name | width(s) | the module names it is made of, in order | worst
 verdict present. A roll-up of the Module inventory, not a second classification: no verdict
 appears here that is not already on a module row above.]
 ## Brand foundations
-[Type ramp mapping table (authored size, factor, email size), proposed theme colors, spacing
-scale at email scale, button styles, target email width.]
+[Type ramp mapping table (style, authored size, factor, email size, one row per style with the
+same factor on every row), proposed theme colors, spacing scale at email scale, button styles,
+target email width. State that the ratio acceptance test passed, with the two ratios you
+compared.]
 ## Flags
 [Everything a human should look at: fonts unavailable for email, naming typos, empty pages,
 inconsistent widths, accessibility risks from image-heavy modules, module boundaries you
@@ -437,7 +677,8 @@ somebody's private process. There are two routes, and the report is the input to
    foundations once, then modules in batches with a designer review between batches. It builds
    in a NEW target file and keeps this source file read-only. What it reads out of this report,
    by section name: the **Module inventory** (one module per row, one batch per group of rows,
-   with the source refs, verdicts, concessions, build constraints, categories, and effort), the
+   with the source refs, verdicts, concessions, build constraints, categories, and effort, and its
+   category ORDER, which becomes the order of the component pages in the converted file), the
    **Scale factor** (every number it builds is at that scale), the **Brand foundations** (type
    ramp on email-safe fallbacks, proposed theme colors, spacing, buttons, target email width),
    and the **Flags**.
@@ -491,7 +732,9 @@ real conventions in private plugin data you cannot read.
 Once you have those four, and **before the first write to the canvas**, tell the user what the
 run covers and roughly how long to expect, per "How long this takes, and what to tell the user
 first" above. Do this every batch, not just the first one, and adjust the estimate as the file
-teaches you what it costs.
+teaches you what it costs. That opening line is one of the five checkpoints in "Report progress
+while it runs" in that same section, and it is the one that matters most to the rest: the batch's
+module count becomes the denominator for every line after it.
 
 ### What you read out of the audit, by section name
 
@@ -505,12 +748,15 @@ the two halves of the migration stay one conversation:
   effort. Read the build constraints column before you convert a row: it is where a technique
   constraint for that module lives, "render nodes, not raw fills" (R4.2.1) above all, and a
   constraint you skip there resurfaces as a defect the customer reports. This is what Phase 3
-  iterates over. There is no per-design conversion pass: the report's Per-design roll-up is context
-  for the customer, not a work list.
+  iterates over. **Its category ORDER is load bearing too:** Phase 2 creates one component page per
+  category in exactly the order the inventory presents them, so read that order off the table
+  rather than sorting the categories yourself. There is no per-design conversion pass: the report's
+  Per-design roll-up is context for the customer, not a work list.
 - **Scale factor** (required in the report): the number every geometry decision is divided by.
   Read it; never re-derive it (see Phase 2).
 - **Brand foundations:** the type ramp on email-safe fallbacks, the proposed theme colors, the
-  spacing scale, the button styles, and the target email width. Phase 2 builds from these.
+  spacing scale, the button styles, and the target email width. Phase 2 builds from these, and it
+  takes the ramp table's Email size column verbatim rather than mapping styles itself.
 - **Flags:** the gates. Two of them block work rather than describe it: the scale factor when
   the audit's two derivations disagreed, and each named concession. Both need a human "yes"
   before the affected modules get built.
@@ -534,44 +780,263 @@ geometry level.
 
 Build the scaffold every later batch depends on:
 
-1. **Pages**, following Email Love library conventions: a Cover, one page per category the
-   audit's Module inventory uses (Heroes, Single Column, Lists, and so on), Buttons, Type,
-   Campaigns.
-2. **Type mapping.** Recreate the customer's type ramp as Figma text styles in the target
-   file using their email-safe fallback choices from the audit (never the unlicensed brand
-   font unless the user confirms web-font hosting). Name styles as the customer named theirs.
-   Use the email sizes the audit's Brand foundations table already computed at the scale
-   factor, not the authored source sizes.
-3. **Buttons page.** Rebuild each of their button styles as a component: correct email
+1. **Pages: a FIXED frame plus a dynamic middle.** The page structure is PRESCRIBED, not derived
+   from what the audit happened to find. Two customers' libraries have to be navigable by the
+   same person without relearning the file, so the scaffolding pages are always present, always
+   spelled exactly as written here, and always in this order. Only the component category pages
+   vary.
+
+   ```
+   Cover
+   Getting Started
+   --- Foundations
+   Foundations
+   Type
+   Buttons
+   --- Components
+   <one page per category from the audit's Module inventory, in the inventory's own order>
+   --- Templates
+   Campaigns
+   ```
+
+   **The scaffolding pages are not optional and not reorderable.** Do not drop the Cover because
+   the file is small, do not merge Foundations into Type, do not sort the category pages
+   alphabetically or by how many modules they hold, and do not move Campaigns up because it is
+   the page you were working on. An agent deciding the shape per run is the defect this
+   prescription removes: the page list stops being a matter of judgment.
+
+   **The three `---` pages are dividers, not content.** Figma has no page folders, so a page
+   named `--- Foundations` acts as a visual separator in the page list. Leave them empty. Name
+   them with three hyphens, one space, then the word, exactly as written. **A divider sits BEFORE
+   the group it introduces**, which is the order that reads correctly in the page list:
+   `--- Foundations` then the foundations pages, `--- Components` then the category pages,
+   `--- Templates` then Campaigns.
+
+   **The middle is the only dynamic part.** One page per category the audit's Module inventory
+   uses (Heroes, Single Column, Lists, and so on), in the order the inventory presents them, and
+   no page for a category the inventory does not use. Do not invent a category here: the audit
+   already chose them from the sections the customer's plugin has, and it ordered them
+   deliberately (Phase 1, Step 4).
+
+   **One category collides with a scaffolding page, and there is exactly one right answer:
+   Buttons.** `Buttons` is both a foundations page in the canonical order above and one of the
+   categories the audit can use, so an inventory that carries button modules would otherwise
+   produce two pages with the same name. It does not: the middle SKIPS the Buttons category, and
+   any Buttons-category module goes on the existing Buttons page, below the button styles. The
+   page list stays exactly the canonical list. No other category collides.
+
+   Create the pages in one pass in this order so the list comes out right without reordering.
+   **A file you just created still has Figma's default page: RENAME it to `Cover` rather than
+   creating a Cover beside it**, or the finished list carries a stray `Page 1` and fails the
+   checklist below. If the target file already had pages before you arrived, move them into
+   position rather than appending, and delete nothing you did not create.
+
+   **Each scaffolding page has a CONTRACT.** Layout and polish are yours; the listed content is
+   not. Two runs of this file on two customers must produce the same page doing the same job.
+
+   - **Cover.** The first thing anyone opening the file sees, and it answers "what is this and
+     what width is it" without anyone having to ask. Required: the customer's brand name set
+     large; "Email Love Design System" beneath it; and a single metadata line carrying three
+     facts, the design system's own version (`v1.0` on a first build, never this file's version
+     number), the email width the system is built at, and the month and year
+     (for example `v1.0 · 600px · July 2026`). **The width is required because it is the single
+     most useful fact about an email design system:** it decides whether a module dropped in from
+     anywhere else fits. Put the content on a full-bleed frame whose fill is bound to
+     `color/bg/brand`, so the cover is on brand color and moves when the brand color moves. No
+     module lives on this page.
+   - **Getting Started.** How to use the library, in prose a designer or marketer new to the file
+     can follow. Required, one short block each: that modules are wrapper components and are used
+     by INSTANCING them, never by copying or detaching; that text and images are edited through
+     the component properties on an instance rather than by editing inside it; that color, type,
+     and spacing come from the tokens on Foundations and Type rather than from hand-typed values;
+     and where to look when something does not export as expected (confirm the block is still an
+     instance and not detached, confirm the copy was changed through its property rather than in
+     place, then hello@emaillove.com). Name the email width and the scale factor here too, so the
+     page stands alone.
+   - **Foundations.** The token sheet. Required: a swatch per color, each labeled with BOTH its
+     hex and its variable name, with primitives and semantic aliases in two clearly separated
+     groups so a reader can see which name to reach for; the spacing scale rendered as visible
+     bars or frames, each labeled with its token name and its pixel value; and the radius token
+     with its value. A hex on this page that no variable carries is a defect: the point of the
+     page is that everything on it is bindable.
+   - **Type.** A SPECIMEN sheet, not a list of style names. Per style in the ramp, three things:
+     the style name, a line of sample text actually set in that style, and a caption stating
+     family, weight, and size (for example `Inter, Bold, 30px`). Order the rows largest to
+     smallest so the ramp reads as a ramp. **This page is how a human catches a broken ramp by
+     eye.** A specimen sheet makes a style that has drifted off the single scale factor visible
+     as a step the wrong size next to its neighbors, which is the same defect the ratio check in
+     step 3 catches arithmetically, and which presents downstream as a padding bug rather than a
+     type bug (the single-factor rule: step 3 here, appendix R0.6). Run both checks every time:
+     the arithmetic catches what the eye misses on a long ramp, and the eye catches what a passing
+     ratio hides in the middle of one.
+   - **Buttons.** One component per button style the audit listed, built as step 4 specifies, each
+     visibly labeled with its name, each with its fill bound to the semantic token that style
+     actually uses. Where the inventory has a Buttons category, its modules land here too, below
+     the styles and visibly separated from them. Nothing else on the page: no loose instances, no
+     scratch work.
+   - **Campaigns.** The one root EMAIL TEMPLATE frame, built as step 7 specifies. It is the only
+     `mainFrame` in the file and it is an email, not a module. Empty until batch 1 drops modules
+     into it.
+2. **Variables: two tiers, and component fills BIND to them.** Build real Figma variables, not a
+   page of hex values a reader has to retype. One collection named `Email Love Tokens`, one mode,
+   two tiers inside it:
+
+   - **Primitives, named by value:** `black/1000`, `navy/900`, `blue/500`, `cream/100`. The
+     family plus a numeric weight, taken from the audit's palette. A primitive's name says what
+     the color IS and never where it is used, so nothing about it goes stale when a usage
+     changes. COLOR variable values take `{ r, g, b, a }` with alpha, on a 0 to 1 scale, while
+     the paint you bind them to takes `{ r, g, b }` without it: the two are easy to cross and the
+     error is silent.
+   - **Semantic aliases, named by role, each pointing at a primitive:** `color/bg/page`,
+     `color/bg/content`, `color/bg/brand`, `color/bg/subtle`, `color/text/primary`,
+     `color/text/inverse`, `color/text/accent`. A semantic carries no color of its own; its
+     value is an alias:
+     `semantic.setValueForMode(modeId, { type: 'VARIABLE_ALIAS', id: primitive.id })`.
+   - **A numeric spacing scale** as FLOAT variables under `spacing/`: `spacing/xs`, `spacing/sm`,
+     `spacing/md`, `spacing/lg`, `spacing/xl`, `spacing/2xl`. The NAMES are prescribed; the
+     default values are 4, 8, 16, 24, 32, 48. Where the audit carried the customer's own spacing
+     scale, its values win and keep these names. **Do not round the audit's values onto the
+     default ladder** to make them look tidier: that is step 5's rule, and rounding a customer's
+     14 up to 16 is a second scale factor wearing a friendly number.
+   - **A radius token for the pill,** `radius/pill`, FLOAT, at the radius the customer's button
+     styles actually use.
+   - **Set `scopes` explicitly on every variable.** The default `ALL_SCOPES` puts every token in
+     every picker, which makes the collection useless at the moment it becomes large. Background
+     colors get `['FRAME_FILL', 'SHAPE_FILL']`, text colors `['TEXT_FILL']`, spacing `['GAP']`
+     plus whichever padding scopes you actually use, radius `['CORNER_RADIUS']`.
+   - **Component fills bind to the SEMANTIC variables, never to a primitive and never to raw
+     hex.** `setBoundVariableForPaint` returns a NEW paint, so capture it:
+     `node.fills = [figma.variables.setBoundVariableForPaint({ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }, 'color', semanticVar)]`.
+     Spacing binds with `node.setBoundVariable('paddingTop', spacingVar)` and its siblings;
+     radius binds per corner (`topLeftRadius` and the other three), never through `cornerRadius`.
+     `fontSize` and `lineHeight` are NOT bindable, so type sizes stay literal on the text node and
+     the ramp is governed by the text styles from step 3 instead.
+   - **What this buys: changing a brand color becomes one edit.** Repoint `color/bg/brand`'s
+     alias at a different primitive and every module using it moves together. Leave forty
+     components carrying hex and it is forty edits, plus a reviewer counting them to be sure.
+   - **Variables are a Figma-side convenience and must not change what exports.** The plugin's
+     exporter reads RESOLVED fills: it takes `node.fills[0].color` and hexes it, and it never
+     reads `boundVariables` at all. A bound paint still carries the resolved RGB in `color`, so
+     binding is invisible to the export, and that is exactly the property that makes this safe to
+     do. Two consequences follow. Set each primitive to the hex the audit gave, so resolved
+     equals intended. And the email template root's theme keys are shared plugin data STRINGS,
+     not fills (step 7), so they cannot be bound at all: they carry literal hex, and repointing a
+     semantic token means updating the matching theme key by hand.
+3. **Type mapping. Build the ramp from the audit's table VERBATIM.** Recreate the customer's
+   type ramp as Figma text styles in the target file using their email-safe fallback choices
+   from the audit (never the unlicensed brand font unless the user confirms web-font hosting).
+   Name styles as the customer named theirs. Take the Email size column of the audit's Brand
+   foundations table exactly as written: every value in it is already the authored size divided
+   by the one confirmed factor. Do not re-derive it, do not re-round it, and above all do not
+   map a style toward a size that looks like a number email usually uses. A 65 the table says
+   is 30 is 30; a 55 the table says is 25 is 25, even though 30 and 24 are the sizes you have
+   seen in a hundred other emails. Mapping style by style toward pleasant numbers is exactly
+   how a per-style factor gets back in after the audit removed it, and it is the defect this
+   instruction exists to prevent. Appendix R0.6 carries the measured case: a module that came
+   out with 1.83 on its headline and 2.19 on its body, from a ramp built one round number at a
+   time, and it read as a padding bug.
+
+   **Then run the ratio check, before anything gets built on top of these styles.** Divide the
+   largest size in the ramp you just built by the smallest, divide the largest authored source
+   size by the smallest, and compare the two. More than a couple of percent apart means a style
+   has drifted off the factor: find it, fix it, check again. If a size still looks wrong once
+   the ramp passes, that is evidence against the FACTOR, so take it back to the audit and the
+   designer and move the whole ramp together. Never adjust the one style and leave the rest of
+   the ramp where it was.
+4. **Buttons page.** Rebuild each of their button styles as a component: correct email
    construction (a styled frame with a single text node), not their app-style nested
    instances. These become the sub-components nested inside mj-button-Frames, and they are
    the INSTANCE_SWAP targets for module-level "Button Style" properties later. Put the
    label's TEXT property on the button component itself: a label living inside a nested
    instance cannot be bound from the module that uses it (appendix R8).
-4. **Spacing.** Recreate their spacer scale as components if they had one, at the email-scale
-   values from the audit.
-5. **Assets.** Export the logo and any recurring imagery from the source file
+5. **Spacing.** Recreate their spacer scale as components if they had one, at the email-scale
+   values from the audit, taken verbatim like the type ramp: the same one factor, whole-pixel
+   rounding only, never rounded onto a friendlier multiple of 8 because it reads better. Run the
+   ratio check across the ends of the scale the same way.
+6. **Assets.** Export the logo and any recurring imagery from the source file
    (`download_assets`) and upload into the target file (`upload_assets`). Logos become
    images, never vectors. Export the RENDERED node every time, never the raw image fill behind
    it: a source fill with `scaleMode: 'CROP'` loses its crop the moment you take the underlying
    asset, and you get the whole photograph instead of the picture the designer composed
    (appendix R4.2.1, which also has the aspect-ratio rule).
-6. **Root EMAIL TEMPLATE frame** on Campaigns at the audit's target email width (600 or 640,
+7. **Root EMAIL TEMPLATE frame** on Campaigns at the audit's target email width (600 or 640,
    never the source canvas width when the source was not at email scale): vertical
    auto-layout, width FIXED at that email width, height Hug, the shared marker, and the theme
    colors from the audit's proposal:
    `setSharedPluginData('emaillove', 'nodeType', 'mainFrame')` plus backgroundColor,
    contentColor, textColor, linkColor, buttonTextColor, buttonContentColor,
    lightThemeBackgroundColor, and fallBackFontName (appendix R2.1 has all nine and what each
-   one is for).
+   one is for). Empty theme keys are not neutral: the exporter substitutes dark defaults.
    **This is the only `mainFrame` foundations produces, and it is an email, not a module.**
    It exists so batch 1 has somewhere to drop modules and see them in context. The modules
    themselves are a different shape entirely (Phase 3, and appendix R2): each one is an
    `mj-wrapper` COMPONENT with **no** `mainFrame` marker and no theme keys. Do not copy this
    frame as a starting point for a module.
-7. **Report** what was built, the scale factor and target email width you built at, what the
+8. **Report** what was built, the scale factor and target email width you built at, the ratio
+   check result with the two ratios you compared, the completion checklist result below, what the
    audit proposed that you changed, and what needs the designer's eye before batch 1 (theme
-   colors especially: they are a proposal until a human confirms).
+   colors especially: they are a proposal until a human confirms). If you changed a type size or
+   a spacer away from the audit's table, that is not a foundations detail, it is a change to the
+   factor: say so explicitly and say who agreed to it.
+
+### Phase 2 completion checklist
+
+**Run every line of this before reporting foundations done**, and put the result in the report.
+Each line is a read-back off the file, not a recollection of having built it: an agent that
+remembers creating the Cover and an agent that read its metadata line back are not in the same
+position. Report the checklist as passed only when it passed in full; a partial pass is an open
+item, named.
+
+Pages, in canonical order:
+
+- [ ] The page list reads exactly Cover, Getting Started, `--- Foundations`, Foundations, Type,
+      Buttons, `--- Components`, the category pages, `--- Templates`, Campaigns. Read the names
+      off `figma.root.children` and compare them in sequence, including the three hyphens and the
+      single space in each divider name. Nothing else is in the list: no second `Buttons`, and no
+      `Page 1` left over from creating the file.
+- [ ] The category pages are exactly the categories the audit's Module inventory uses, in the
+      inventory's order, with none added, none missing, and none renamed, except Buttons, which
+      has its page in the Foundations group instead.
+- [ ] The three divider pages are empty.
+- [ ] **Cover:** brand name set large, "Email Love Design System" beneath it, and one metadata
+      line stating version, email width, and month and year. The width printed there matches the
+      width the root frame was actually built at. Its frame fill is bound to `color/bg/brand`.
+- [ ] **Getting Started:** instancing rather than copying, editing through component properties,
+      styling from the tokens, and the "does not export as expected" path are all four present,
+      plus the email width and the scale factor.
+- [ ] **Foundations:** every swatch labeled with hex AND variable name, primitives and semantics
+      visibly separated, the spacing scale rendered and labeled with token names and values, the
+      radius token present. No hex anywhere on the page that no variable carries.
+- [ ] **Type:** one specimen row per style, each with the style name, a sample line actually set
+      in that style, and a caption naming family, weight, and size, ordered largest to smallest.
+      Then look at it: does the ramp step evenly? A step that reads wrong beside its neighbors is
+      a factor problem, not a style problem (step 3).
+- [ ] **Buttons:** one component per audit button style, each labeled, each a styled frame with a
+      single text node, the label's TEXT property on the component itself, no loose instances left
+      on the page.
+- [ ] **Campaigns:** exactly one root frame, `nodeType = 'mainFrame'`, at the target email width,
+      with all nine theme keys set and not one of them empty.
+
+Variables and bindings:
+
+- [ ] The collection exists with both tiers: primitives named by value, semantics named by role.
+- [ ] Every semantic's value reads back as a `VARIABLE_ALIAS` pointing at a primitive, not as a
+      color of its own. Read the value and check its `type`, do not infer it from the swatch.
+- [ ] The spacing scale exists as FLOAT variables under `spacing/`, and `radius/pill` exists.
+- [ ] `scopes` is set explicitly on every variable, and nothing is left on `ALL_SCOPES`.
+- [ ] Every fill on every foundations component resolves through a semantic variable: walk the
+      button components and the Cover frame and confirm each fill carries a bound variable rather
+      than a hand-typed color.
+- [ ] Binding changed nothing about export: read `fills[0].color` back off a bound node and
+      confirm it hexes to the value the audit gave for that token.
+- [ ] The root frame's theme keys carry literal hex matching the semantics they mirror, because
+      plugin data cannot be bound.
+
+Scale, checked last because it invalidates everything above it:
+
+- [ ] The ratio check passed, with both ratios recorded (step 3).
+- [ ] Every number on every page is at email scale: the root frame is 600 or 640, the type sizes
+      are the audit's Email size column verbatim, the spacing values are the audit's.
 
 ## Phase 3: Module conversion (run per batch)
 
@@ -609,7 +1074,16 @@ that module and state in the batch report how each one was satisfied. They exist
 audit finding was once left in Flags alone and the conversion built straight past it. An older
 audit may have no build-constraints column, so on those read Flags in full before the batch starts,
 and treat anything phrased as "export rendered nodes, not raw fills", "re-crop", or "clipped by
-z-order" as binding (appendix R4.2.1).
+z-order" as binding (appendix R4.2.1). Treat anything phrased as "image bleeds", "photo overlaps
+the copy", "extends past the band", or "full-bleed image" the same way: that is the Two Column
+Swap, appendix R3.4.1, and the module is an A that gets rebuilt as a two column row.
+
+**An overlap or a bleed you find yourself is the same instruction.** An audit written before the
+Two Column Swap existed may have filed one of these as a C, or as an A with a hand-written
+substitute, or missed it because the screenshot hid it. When the nodes show the pattern, R3.4.1 is
+what you build regardless of what the row says, and you record the verdict change and its reason
+in the batch report per step 2. Do not improvise a different substitute and do not flatten the
+block to an image because the row said C.
 
 For each module in the batch, in order:
 
@@ -733,6 +1207,7 @@ This mapping covers almost everything you will meet:
 | A pill, badge, tag, or chip | `mj-button` | It renders a padded, rounded, background-filled box with centred text and an Outlook VML fallback. A column with a border radius does not survive Outlook. A pill needs no link to be a button. |
 | A call-to-action button | `mj-button` | Same primitive; add the `href`. |
 | Two things side by side that must not stack on mobile | `mj-group` of `mj-column`s | Columns stack on small screens unless grouped. |
+| A photo that overlaps or bleeds past the block it belongs to, with text beside it | one `mj-section` holding two `mj-column`s, image in one and text in the other | Email has no z-order and no absolute position, so the overlap cannot be reproduced. The Two Column Swap (R3.4.1) is the settled substitute, and it keeps the text live. Not an `mj-group`: this pattern wants the mobile stacking a group suppresses. |
 | Headline and copy over a full-bleed image | `mj-hero` | Keeps the text live rather than baking it into a picture. |
 | A horizontal rule | `mj-divider` | Never a thin rectangle. |
 | Vertical breathing room | `mj-spacer` | Never an empty frame. |
@@ -769,6 +1244,11 @@ This mapping covers almost everything you will meet:
   foundations; use flat gray fills at the correct dimensions everywhere else and list them. Any
   image you pull from the source now is a render of its node, never the raw fill (R4.2.1), and its
   height comes from the render's aspect ratio.
+- **The worker cannot see an overlap, so it never returns the Two Column Swap.** It infers
+  structure from a flat screenshot and email has no z-order to infer into, so a photo that
+  bleeds past its block comes back either as a full-width `mj-image` above the copy or as the
+  whole band flattened into one image. Neither is the answer. Rebuild it per R3.4.1, and note in
+  the module's report line that you did.
 - **Unpinned colors, radii, and fonts drift** between runs, and unpinned fonts flatten to
   Arial. Correct them against the foundations rather than accepting what came back.
 - Map every text node to the type styles from foundations.
@@ -777,7 +1257,14 @@ This mapping covers almost everything you will meet:
   `A (concession: ...)`: build it as live text like any other A and apply the named substitute,
   nothing more.** Do not quietly reproduce the effect the concession gave up, in an image or
   otherwise: that is the concession being un-made without the designer in the room, and it turns
-  a module the audit priced as mechanical into a flattened picture. Verdict B regions: place the
+  a module the audit priced as mechanical into a flattened picture. **For the one concession with
+  a fixed substitute, `A (concession: image bleed rebuilt as a two column row)`, the substitute is
+  appendix R3.4.1 and nothing else:** one section, two columns, image in one and text in the
+  other in source order, both columns pinned to widths that sum to the section content box, the
+  text column pinned first with R3.3.1 slack and the image column taking the remainder, the image
+  a rendered crop of the source region at the render's natural aspect. Build it exactly that way
+  rather than deriving your own answer, so two agents converting two batches produce the same
+  thing. Verdict B regions: place the
   design content as a frame with NO recognized tag name inside a column; the exporter flattens it
   to a hosted image at export while it stays editable. Verdict C modules: live-text structure for
   the copy, one editable-image frame for the rich region. Changing a verdict when the nodes
@@ -869,6 +1356,12 @@ Run the appendix post-build checklist (R9), plus:
   `mj-spacer`, every FIXED width is one of the load-bearing cases, every pinned width that
   carries text has slack (appendix R3.3.1), and each button's width sizing was chosen for its
   mobile behavior (appendix R0).
+- Concession honored, where the row carried one: on a module built with the Two Column Swap, both
+  columns are FIXED and their widths plus the section's horizontal padding sum to the section
+  content box, the text column's pin has slack, the `mj-image` rectangle is at the image column's
+  content width with the crop's natural aspect for its height, there is no `mj-group` around the
+  pair, and nothing in the block was flattened to an image (appendix R3.4.1). Confirm too that the
+  overlap was not reproduced by some other means.
 - Scale: the module root is at the audit's target email width, and its type sizes, paddings, and
   image dimensions are at email scale rather than source scale (appendix R0.6). A module built at
   source scale looks correct in isolation and wrong the moment it sits next to another module, so
@@ -886,7 +1379,8 @@ Run the appendix post-build checklist (R9), plus:
 
 One report per batch: per module, keyed by its Module inventory row name, what was rebuilt, the
 design you converted it from, verdict honored or changed (with reason), any concession and whether
-it was accepted and by whom, what the worker returned and what you repaired, mobile decisions,
+it was accepted and by whom (and for a bleed concession, the two column widths you landed on, so a
+reviewer can check the sum), what the worker returned and what you repaired, mobile decisions,
 divergences flagged, component properties added and the evidence for each, the category you kept
 or changed. Open with the scale factor and target email width the batch was built at, so a
 reviewer can check one number instead of measuring modules. End with the open questions for the
@@ -1049,6 +1543,42 @@ to a module built correctly. If you find yourself deriving the factor from the f
 reading it from the audit, stop: a fresh derivation silently overrules the decision a human
 already made between two disagreeing derivations.
 
+**One factor, chosen once, applied to EVERY number.** Not type sizes only: line heights, widths,
+paddings, image dimensions, spacer heights, radii, border widths. Uniformity is the entire point of
+settling on a single number, and it is lost the moment any one value is arrived at some other way.
+Rounding is allowed, but only to the nearest whole pixel, and only after the division. What is not
+allowed is picking a converted value because it looks like a size email usually uses. That is a
+second factor, invented for one style, wearing the costume of a sensible number.
+
+**Then check the result against the source's own RATIOS.** Divide the largest converted type size
+by the smallest and compare that to the same ratio in the source. Do it for the ends of the spacing
+scale too. If the two ratios differ by more than a couple of percent, per-style rounding has crept
+in, and the drift is somewhere between the number you divided and the number you wrote down.
+
+**The failure this catches, measured in a real converted module.** The source was drawn above email
+scale: headline 55, body 35. What got built at 600 wide: headline 30, body 16. That is two
+different factors inside one module, 55/30 = 1.83 on the headline and 35/16 = 2.19 on the body, and
+the consequence is that the source's own type relationship did not survive. The source
+headline-to-body ratio is 55/35 = 1.57; the built one is 30/16 = 1.88. The headline is 20 percent
+too large relative to the body.
+
+The audit had done its job. It reported 1.815 from the canvas width and 2.2 from the type ramp,
+named the 21 percent gap, and recommended 2.2. Foundations then built the ramp style by style
+toward round email numbers, a 65 to 30, a 55 to 25, a 35 to 16, and per-style factors came back in
+through that rounding, so the recommended factor was never actually applied to anything.
+
+What makes it expensive is the symptom, because it does not present as a type problem. The module
+reads as though its padding is wrong: a headline 20 percent oversized crowds the space around it,
+so the reviewer goes hunting through padding values that are every one of them correct, and finds
+nothing. The ratio check finds it in one division.
+
+**A converted size that looks wrong is evidence against the FACTOR, not licence to adjust one
+style.** If a 25px headline looks small, the reading is that 2.2 may be the wrong factor for this
+library. Revisit the factor, put the whole ramp through the new one, and re-run the ratio check.
+Never nudge the one style and leave the rest where they were. One style nudged is this bug; the
+whole ramp moved together is a decision, and it is a decision that belongs back with the audit and
+the designer who confirmed the factor.
+
 ### R0.7 DOUBLE PADDING: a gap belongs to ONE block, never to both
 
 The space between two stacked blocks is one decision, made once, on one node. When the block
@@ -1163,18 +1693,18 @@ or an email the plugin refuses to open.
 The one-line test: **is this a whole email someone will send, or one block someone will place
 into many emails?** Heroes, footers, copy blocks, 2-up product rows, banners: those are
 modules. **Phase 3 of a migration builds modules, not emails.** Foundations builds exactly one
-email template, in Phase 2 step 6, so batch 1 has somewhere to drop modules and see them in
+email template, in Phase 2 step 7, so batch 1 has somewhere to drop modules and see them in
 context.
 
 **A module is not a small email.** An email template root *contains* wrapper components; a
 module *is* one of those wrapper components. So a module has no wrapper inside it and no
 `mainFrame` above it. If your module root is a `mainFrame` containing an `mj-wrapper`, you
-have built a one-wrapper email and mislabelled it, and R2.3 explains why the plugin will
+have built a one-wrapper email and mislabeled it, and R2.3 explains why the plugin will
 reject it.
 
 R3 through R6 apply identically to both shapes. Only the root differs.
 
-### R2.1 EMAIL TEMPLATE root (Phase 2 step 6 only)
+### R2.1 EMAIL TEMPLATE root (Phase 2 step 7 only)
 
 Create a top-level FRAME on the target page. It may be a COMPONENT instead (R7) when the whole
 email is meant to be reused; nothing below changes.
@@ -1355,6 +1885,10 @@ COMPONENT with no `mainFrame` above it and none on it.
   280 + 280 exports 50%/50%. MJML requires percentage columns inside a group; you get that for
   free by setting exact pixel widths and letting the exporter divide.
 - Columns inside a group keep their elements side by side on mobile.
+- **A group is not the vehicle for the Two Column Swap** (R3.4.1, the standard rebuild for an
+  overlapping or bleeding image). That pattern wants the mobile stacking a group suppresses, so
+  it uses a plain `mj-section` holding two `mj-column`s. Reach for a group only when the design
+  genuinely must stay side by side at 390px.
 
 #### R3.3.1 Pinned widths that carry text need slack
 
@@ -1454,6 +1988,78 @@ render time and adapt. Do not pad those; the extra width would be real design dr
 
 - Children: leaf PAIR wrapper frames and `mj-spacer`, top to bottom. After appending, set
   each child's `layoutSizingHorizontal = 'FILL'`.
+
+#### R3.4.1 THE TWO COLUMN SWAP: the standard rebuild for an overlapping or bleeding image
+
+**The failure it replaces.** Source designs routinely place a photograph so it overlaps or
+bleeds past the block it belongs to: a product shot entering from the right behind body copy, an
+animal cropped off by the left edge of a cream band with text beside it. In Figma that is
+z-order plus absolute position. Email has neither, so it cannot be reproduced, and no attribute
+in this appendix gets close. **The standard remedy is to rebuild the block as a two column row:
+one `mj-section`, two `mj-column`s, the image in one and the text in the other, in the same left
+to right order the design implies.** The image stops at its column edge instead of bleeding, and
+nothing overlaps. This is a settled decision rather than a per-module judgment call, so do not
+re-argue it per module and do not go hunting for a cleverer reproduction of the overlap.
+
+**How to recognize it, because nothing in the source labels it.** Two tells, either one of which
+is enough:
+
+- **The photo's bounds extend past the bounds of the block it reads as part of.** It is wider or
+  taller than the band, or its absolute x/y put part of it outside the frame that appears to
+  contain it. Compare the image node's absolute box against the band's box; do not judge it from
+  the screenshot, where the overflow is invisible by construction.
+- **The photo is clipped by a sibling drawn over it rather than by a mask.** A rectangle of
+  background color sits above it in z-order and hides one edge. The layer panel shows no mask
+  and no crop, and the composite you see exists in no single node.
+
+On an unstructured source neither tell is written down anywhere, and the screenshot looks like an
+ordinary photo in a band, which is why recognizing this is its own step rather than something you
+notice in passing.
+
+**The construction.** One `mj-section`, two `mj-column` children, image column and text column in
+source order.
+
+- Both columns FIXED (R0.3 case 2, R3.4). Their widths plus the section's horizontal padding must
+  sum to the section content box: a 600 wide section with 20/20 padding takes columns summing to
+  560. Unequal splits only survive because both numbers are pinned; the exporter derives the
+  percentages from them.
+- **Derive the widths in this order.** Pin the text column first, with the slack from R3.3.1,
+  then give the image column the remainder, then size the image last. Worked: text hugs at 260
+  and pins to 292, so the image column is 268.
+- **The image is a rendered crop of the source region (R4.2.1), never the raw fill**, and it is
+  cropped to its column rather than padded to fit, per R4.2.1's never-pad rule on aspect ratio.
+  The `mj-image` rectangle is the image column's content width, and its height is the render's
+  natural aspect at that width: continuing the example, a 780 x 660 render at 268 wide is 227
+  tall, and 227 is the number.
+- Heights HUG throughout (R0.1). Both alignment axes equal on the section and on each column
+  (R3.4's axis alignment rule, the trap).
+- Spacing on one side of each boundary only (R0.7). The gutter between the two columns is one
+  column's horizontal padding, never both.
+- **Not an `mj-group`.** A group exists to keep columns side by side on mobile (R3.3), which is
+  the opposite of what this pattern wants.
+
+**Mobile.** Two columns stack, so the image lands above the text, which is a normal email pattern
+and arguably better than a bleed that would have had to be abandoned on a 390 wide screen anyway.
+Stacking follows source order, so put the column you want first on mobile first. When the design
+reads text then image on desktop but should read image then text on mobile, set `reverseStack` =
+`'true'` on the section (R3.2) rather than reordering the columns.
+
+**Why this is the default, so nobody relitigates it.** It keeps the text LIVE: the alternative,
+flattening the whole block to one editable image, gives up selectable text, accessibility, and
+dark mode for the sake of an effect. It degrades well, per the mobile note above. And the loss is
+small and nameable, the overlap and nothing else, which is exactly what the concession field
+records.
+
+**What this does to the verdict.** A block whose only obstacle is an overlap or an edge bleed is
+**verdict A**, carrying `A (concession: image bleed rebuilt as a two column row)`, and it is not
+a C. Build it as live text like any other A, apply this substitute, and add nothing further. C
+reads as a partial conversion, and this is not one.
+
+**What stays verdict C.** Blocks that genuinely need splitting into live text plus an editable
+image region: type set over a photographic collage where the lettering is part of the artwork, or
+any treatment where copy and picture are one composited whole with no boundary to cut on. The
+test: if you can name the rectangle the image belongs in and the rectangle the text belongs in,
+it is this pattern and it is an A. If you cannot, it is a C.
 
 ### R3.5 mj-column-inner (rarely needed)
 
@@ -1557,7 +2163,9 @@ with the raw asset:
 - **Clipping by overlapping siblings.** Unstructured sources clip by z-order and not by masks: a
   shape, a band of background, or another image sits on top and hides part of the picture. What you
   see is a composite of several nodes, and those pixels exist in none of them on its own. Only a
-  render captures it.
+  render captures it. This is also the second tell for the Two Column Swap (R3.4.1): if the sibling
+  drawn over the photo is what stops it bleeding past its block, the block needs rebuilding as a
+  two column row and this rule supplies the image inside it.
 
 So, for every image you bring across: **render the node as it appears and use the render.** Never
 the raw fill, never the asset behind `fills[0].imageHash`. If the audit's row for a module says its
@@ -1908,7 +2516,7 @@ after you set it.
 
 **The known failure:** a button label that lives on a sublayer inside a nested button instance
 cannot be bound from the module. The fix is to add the TEXT property to the foundations button
-component itself and let it surface through the instance, which is why Phase 2 step 3 puts it
+component itself and let it surface through the instance, which is why Phase 2 step 4 puts it
 there.
 
 ## R9. Post-build checklist (run per module before handing off)
@@ -1969,3 +2577,10 @@ there.
     z-order clipping is baked into the pixels. Each rectangle's height is the render's aspect
     ratio at the width you chose, and the width itself was a recorded decision (full bleed or the
     source's inset), not an accident.
+19. **Every overlap or edge bleed in the source became a two column row** (R3.4.1), never an
+    improvised container and never a flattened image. Per swap: both columns FIXED and summing
+    with the section padding to the section content box, the text column pinned with R3.3.1
+    slack, the image column the remainder, the `mj-image` height the render's natural aspect at
+    the image column's content width, no `mj-group`, and the gutter paid by one column only. The
+    module's report line names the swap and states that the overlap is the whole of what was
+    lost.
