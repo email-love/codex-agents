@@ -18,6 +18,7 @@ MANIFEST = PLUGIN / ".codex-plugin" / "plugin.json"
 MARKETPLACE = ROOT / ".agents" / "plugins" / "marketplace.json"
 SOURCES = ROOT / "sources.json"
 EVALS = ROOT / "tests" / "evals.json"
+MIGRATION_COMPATIBILITY = ROOT / "migration" / "AGENTS.md"
 MAX_SKILL_LINES = 500
 MAX_SKILL_BYTES = 32 * 1024
 REQUIRED_TAGS = {
@@ -239,6 +240,22 @@ def validate_repository_guidance() -> None:
     agents = ROOT / "AGENTS.md"
     if len(agents.read_bytes()) >= 32 * 1024:
         fail("root AGENTS.md must stay below the default 32 KiB instruction budget")
+    compatibility_files = (agents, MIGRATION_COMPATIBILITY)
+    required_compatibility_text = {
+        "codex plugin marketplace add email-love/codex-agents --ref v3.0.0",
+        "codex plugin add email-love@email-love",
+    }
+    for compatibility_file in compatibility_files:
+        if not compatibility_file.exists():
+            fail(f"missing compatibility notice: {compatibility_file.relative_to(ROOT)}")
+            continue
+        compatibility_text = compatibility_file.read_text(encoding="utf-8")
+        for required_text in required_compatibility_text:
+            if required_text not in compatibility_text:
+                fail(
+                    f"{compatibility_file.relative_to(ROOT)}: missing compatibility command "
+                    f"{required_text!r}"
+                )
     active_text = "\n".join(
         path.read_text(encoding="utf-8")
         for path in (PLUGIN / "skills").rglob("*")

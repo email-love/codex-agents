@@ -1,5 +1,20 @@
 # Repository guidance
 
+## Compatibility notice for downloaded copies
+
+If this file was downloaded to `~/.codex/AGENTS.md` or copied into another project, it is a
+deprecated Email Love installation path. Do not use the repository-maintenance guidance below
+to build an email. Tell the user to install the supported plugin, then stop so they can start a
+new Codex task:
+
+```bash
+codex plugin marketplace add email-love/codex-agents --ref v3.0.0
+codex plugin add email-love@email-love
+```
+
+The plugin contains both `$email-love-figma-builder` and
+`$email-love-design-system-migration`.
+
 This repository packages Email Love workflows for OpenAI Codex. It is not the place to build
 a customer email or perform a customer migration.
 

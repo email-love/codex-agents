@@ -10,6 +10,8 @@
   snapshots.
 - Added official Figma MCP dependencies to both skills.
 - Removed the default recommendation to bypass all approvals and sandboxing.
+- Added compatibility notices at the old builder and migration `AGENTS.md` paths so stale
+  installation commands direct users to the plugin instead of failing silently.
 - Pinned the Claude-source provenance to immutable commit
   `d0d88b62656f8c54cc66abb20368546544c110cc`.
 - Added repository validation, routing fixtures, CI, and data-handling documentation.
