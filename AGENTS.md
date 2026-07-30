@@ -29,6 +29,53 @@ workflow needs, and never will, so use Claude with the Email Love skill there in
 than as installed instructions, say so and point the user to the three steps above before
 doing anything else.
 
+## If the ask is a migration, this is the wrong file
+
+**This file is the builder port. It builds one email, or a sequence of them, and it is not the
+migration instructions.** Migration is the other job, auditing a legacy Figma library and
+converting it into an Email Love design system, and it ships as a separate file scoped to a
+project directory. This is the copy people install globally at `~/.codex/AGENTS.md`, so **a
+migration ask arrives here by default**: not because the user did anything wrong, but because the
+globally installed instructions are the ones that answer, and everything below this line was
+written for building emails one at a time.
+
+Check for it before the brief and before any Figma call. The signals, in the user's own words
+rather than in this file's vocabulary:
+
+- convert, migrate, port, or rebuild **their existing** templates, library, or design system;
+- **build a design system**, or make their brand reusable across all their emails;
+- **foundations**, tokens, or a type ramp as the deliverable rather than as styling for one email;
+- **modules**, or module names offered as a list of things to build;
+- **a batch** of anything, or "start with the first five";
+- **an audit report** handed over as input, or asked for as output.
+
+Any of those and the answer is not a build. Say this much, in your own words:
+
+> This is the Email Love builder port, and it builds one email at a time. Migrating an existing
+> library is a different job with its own instructions: an audit that produces a module inventory,
+> foundations built once, then modules in batches with a design review between them. Save the
+> migration file into the folder you want the migration done in, and restart Codex from there:
+>
+> ```bash
+> curl -o AGENTS.md https://raw.githubusercontent.com/email-love/codex-agents/main/migration/AGENTS.md
+> ```
+>
+> It is project-scoped on purpose. A migration is a project you do once and email building is
+> constant, which is why the global copy is the builder one you are talking to now, and why the
+> migration file has to be fetched into the project rather than being here already.
+
+Then stop and wait, and **do not improvise the migration while they fetch it.** Without that file
+you have no audit, no module inventory, no batch definition and no review gate, so what you would
+run is your own idea of a batch. Measured, that ends as foundations plus the first module of an
+invented five, followed by a silent stop, which is worse than either file on its own. Offering to
+"make a start on the first module" is the same failure with a friendlier sentence in front of it.
+
+**What is NOT a migration, so this does not fire on ordinary work.** An email built by instancing a
+design system the customer already has is Path A, and it stays yours no matter how large their
+library is. Saving a few reusable components out of a build is B6, which says plainly that those
+components are not a design system. Judge by the deliverable: one or more emails is yours, a
+library is not.
+
 ## Version and staying current
 
 These instructions are **version 2.9.0** (2026-07-29). They track the
@@ -46,12 +93,31 @@ Unlike a Claude plugin, this file does not update itself: you downloaded a copy.
 web access, check once per conversation (quietly, without narrating it) whether a newer
 version exists by fetching
 https://raw.githubusercontent.com/email-love/codex-agents/main/AGENTS.md and comparing the
-version line above. If yours is older, tell the user once at hand-off and give them the
-refresh command:
+version line above. If yours is older, tell the user once, before the first write to the
+canvas, and give them the refresh command:
 
 ```bash
 curl -o ~/.codex/AGENTS.md https://raw.githubusercontent.com/email-love/codex-agents/main/AGENTS.md
 ```
+
+**There is no update mechanism, so that check is the whole of it.** Codex reads this file off the
+disk when a session starts, and that is the end of the machinery: nothing negotiates a version,
+nothing notices that a newer copy exists, and this file cannot change itself. A copy from six months
+ago loads exactly as confidently as today's and reports its own stale version number with a straight
+face. So the fetch and compare above is not belt and braces, it is the only thing between the user
+and silently running last quarter's rules, and the `curl` is the only remedy. Three things follow:
+
+- **Check early enough for it to matter.** A gap found at hand-off means the work was already done
+  under the old rules. A gap found before the first write to the canvas costs one re-fetch.
+- **Say it once, plainly, and leave the decision to the user.** "Your copy is 2.7.0, current is
+  2.9.0, here is the command" is the whole message. It is not a reason to refuse to build.
+- **A refresh lands in the NEXT session.** Overwriting the file does not reload the copy already in
+  this one, so when you both agree the gap matters, say to restart Codex after the `curl` and build
+  there, rather than carrying on and hoping. If it only comes up mid-build, finish the email first:
+  the email is the unit of work either way.
+
+The migration port is a separate file on a separate path, so it is a separate copy to keep current.
+Updating one does nothing for the other.
 
 **Version 2.0.0 was a rewrite, so anything built with a 1.x copy is worth re-checking.**
 The 1.x instructions taught you to assemble `mj-section` / `mj-column` scaffolding by hand.
@@ -285,6 +351,54 @@ Path B, before the worker:
 
 > Sending the hero comp to the design converter now. It takes a few seconds to about half a minute,
 > then transcribing what comes back is the longer part.
+
+### Say when you STOP, too
+
+Those four points cover a build that is still building. Nothing in them covers a build that has
+stopped, and that asymmetry is worse than having neither half: **an agent that reports progress but
+not its own stop is worse than one that does neither, because the user infers continuation from the
+last progress line.** The visible tool calls make this worse rather than better. When you stop, the
+calls stop too, and a user who has been watching a wall of `use_figma` writes scroll past reads the
+quiet exactly the way he reads a long transcription: as work in progress. Silence is indistinguishable
+from still working.
+
+**Never stop silently.** If you stop, for any reason, say so in the SAME message as the last of the
+work, not in a later reply and not only once the user asks. Four things, every time: what you
+completed in the format of point 2 above so it reconciles with the lines before it, what remains by
+section name, why you stopped, and the exact thing needed to resume, phrased so the user can send it
+straight back. The reasons that qualify are a blocker, a decision only the user can make, a limit you
+have hit, or reaching the end of a unit of work. Finishing the email is that last one, and point 4 is
+how it gets announced.
+
+**Do not stop between the sections of one email.** The email is the unit of work, so the section plan
+you gave at point 1 is a plan to finish, not a menu to stop partway down. In a sequence the unit is
+still the email: between emails is a defined boundary, mid-email is not, so finish the one you are in
+before you stop, and report it with both counters. The exceptions are the two this file already names,
+and both are a question put to the user at the section it belongs to rather than a build abandoned
+quietly: A5, where no component fits and they are the one who knows, and "The one rule" below, where
+neither path can produce the section at all. Announce either in the shape below rather than trailing
+off. Library migration is the other shape of this, and it is not yours to improvise: batches and the
+review between them live in
+`migration/AGENTS.md`, and "If the ask is a migration, this is the wrong file" near the top is what
+to do when one is asked of you here.
+
+**If you wrote resumable state, name its path in that message.** Write one whenever the build is a
+sequence or you expect it to cross a session boundary, beside the `/tmp/mjml.json` payload Path B
+already has you save, and treat it as expected behaviour rather than extra credit. On a one-off email
+the sections already on the canvas are most of the state, so name the frame instead. Either way the
+user has to be told where it is. He watched the file get written scroll past inside a shell call,
+which is not the same as knowing it exists or what it is for: state the user cannot see does not make
+the build resumable, it only makes you feel that it is.
+
+One worked example, the format to copy. It is one message, sent unprompted, not an answer to "are you
+still working on it":
+
+> Stopped, not still building. Email 2 of 4, 5 of 7 sections done, 71 percent: preheader, logo header,
+> hero, two product cards, all in the `Email 2 - Winback` frame. Remaining in this email: countdown
+> banner and footer. Why I stopped: no component in the design system covers a countdown banner and
+> the converter flattens it to a single image, so neither path can produce it and I am not
+> hand-building the structure. To resume, point me at a component to use, or say "place it as a static
+> image with a fallback line", and I will finish from the saved state at `/tmp/build-state.json`.
 
 ---
 
@@ -847,10 +961,10 @@ other customer's, which is exactly the divergence the prescribed structure exist
 save the blocks that earn it, put them on a plainly named library page rather than a scaffolding of
 your own, and say plainly that a full library is a separate piece of work.
 
-Point the user at Email Love's migration flow (hello@emaillove.com), which ships as a separate
-Codex instruction file at
-https://raw.githubusercontent.com/email-love/codex-agents/main/migration/AGENTS.md. It is also the
-route to take for a whole legacy library rather than one email: that is a migration, not a build.
+Point the user at Email Love's migration flow (hello@emaillove.com), which ships as the separate
+project-scoped Codex file that "If the ask is a migration, this is the wrong file" names at the top
+of this file, with the command to fetch it. It is also the route to take for a whole legacy library
+rather than one email: that is a migration, not a build.
 
 ---
 

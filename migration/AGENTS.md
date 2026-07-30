@@ -20,6 +20,30 @@ project you do once; building emails is something you do constantly. Keep them a
 than as installed instructions, say so and point the user to the four steps above before
 doing anything else.
 
+## If the ask is one email, this is the wrong file
+
+The converse of that split, and the milder half of it, since installing this file is a deliberate
+act and the ask that arrives here is usually the one it was installed for. But the folder outlives
+the migration. If what the user wants is **one email, or a campaign of them, built in Figma** rather
+than a library audited and converted, the builder port is the right file:
+
+```bash
+curl -o ~/.codex/AGENTS.md https://raw.githubusercontent.com/email-love/codex-agents/main/AGENTS.md
+```
+
+Say that in a line, give the command, and let them decide. Add that the builder session should run
+from somewhere other than this migration folder, since a project `AGENTS.md` layers on top of the
+global one and this file would still be talking. Do not build the campaign out of this file: the
+phases below start from an audit and end at a component library, and the email they are asking for
+is the builder's own job, on its Path A, once a migration has produced the system to instance from.
+
+One caveat so this does not fire on ordinary migration work. A single design converted as a
+**module** is this file's unit rather than a one-off email, and R2 draws that line by shape: a
+module is the `mj-wrapper` built for reuse, an email is a `mainFrame`. Converting one module because
+a batch has one row left is migration. Building next week's promo is not. And the trigger is what the
+user asked for, never a node you are about to create: the one `mainFrame` foundations builds (Phase 2
+step 7) and the sample email at hand-off are this file's own work, not the builder's.
+
 ## Version and staying current
 
 These instructions are **version 1.19.0** (2026-07-29). They track the
@@ -33,11 +57,35 @@ ported.
 This file does not update itself. If you have web access, check once per conversation
 (quietly, without narrating it)
 https://raw.githubusercontent.com/email-love/codex-agents/main/migration/AGENTS.md against
-the version above, and mention it at hand-off if yours is older:
+the version above. If yours is older, say so once, before foundations or before the batch you
+are about to open, rather than saving it for the hand-off:
 
 ```bash
 curl -o AGENTS.md https://raw.githubusercontent.com/email-love/codex-agents/main/migration/AGENTS.md
 ```
+
+**There is no update mechanism, so that check is the whole of it.** Codex reads this file off the
+disk when a session starts, and that is the end of the machinery: nothing negotiates a version,
+nothing notices that a newer copy exists, and this file cannot change itself. A copy from six months
+ago loads exactly as confidently as today's and reports its own stale version number with a straight
+face. So the fetch and compare above is not belt and braces, it is the only thing between the user
+and silently converting a library under last quarter's rules, and the `curl` is the only remedy.
+That bites harder here than on a one-off email, because a batch built under stale rules is a batch
+to rebuild. Three things follow:
+
+- **Check early enough for it to matter.** That means the once-per-conversation check above happens
+  at the start of a session that is about to run foundations or open a batch, not at the end of it,
+  since a migration spans sessions and the copy in the folder can be months old by batch 3. A gap
+  found at hand-off means the modules were already built the old way.
+- **Say it once, plainly, and leave the decision to the user.** "Your copy is 1.16.0, current is
+  1.19.0, here is the command" is the whole message. It is not a reason to refuse a batch.
+- **A refresh lands in the NEXT session.** Overwriting the file does not reload the copy already in
+  this one, so when you both agree the gap matters, restart Codex after the `curl` and open the next
+  batch there, rather than carrying on and hoping. A version gap is not a licence to stop mid-batch:
+  the batch is still the unit of work, so finish the one you are in first.
+
+The builder port is a separate file on a separate path, so it is a separate copy to keep current.
+Updating one does nothing for the other.
 
 **Version 1.9.0 replaced the conversion method entirely.** Earlier copies told you to rebuild
 each module by eye from the source design. That is now forbidden: structure comes from the
@@ -341,6 +389,62 @@ An audit design, which is shorter because there is no build to price:
 
 > Design 3 of 11 walked, 27 percent: Welcome email, 4 blocks cut, 2 of them new, 9 modules in the
 > inventory so far.
+
+### Say when you STOP, too
+
+Everything above covers a run that is still running. Nothing in it covers a run that has stopped, and
+that asymmetry is worse than having neither half: **an agent that reports progress but not its own
+stop is worse than one that does neither, because the user infers continuation from the last progress
+line.** The visible tool calls make this worse rather than better here. When you stop, the calls stop
+too, and a user who has been watching a wall of `use_figma` writes scroll past reads the quiet exactly
+the way he reads a long transcription: as work in progress. Silence is indistinguishable from still
+working.
+
+**Never stop silently.** If you stop, for any reason, say so in the SAME message as the last of the
+work, not in a later reply and not only once the user asks. Four things, every time:
+
+- what you completed, in the format of conversion checkpoint 3 (or audit line 2), so it reconciles
+  with the lines before it;
+- what remains, by module name from the audit's Module inventory, or by design name in Phase 1;
+- why you stopped;
+- the exact thing needed to resume, phrased so the user can send it straight back.
+
+The reasons that qualify are a blocker, a decision only the user can make, a limit you have hit, or
+reaching the end of a unit of work. That last one is the common case rather than an exception:
+finishing a batch IS a stop, and conversion checkpoint 5 plus the gate in Phase 3 step 6 are how that
+one gets announced, as audit line 3 plus the Step 8 hand-off are for a finished audit.
+
+**Do not pause mid-batch.** In Phases 2 and 3 the batch is the unit of work and the design review
+happens BETWEEN batches (Phase 3 step 6), so five modules of a five-module batch is a defined stopping
+point and one module of five is not. Either complete the batch, or stop AT the blocker and name it. An
+overrun is not a blocker: a batch tracking at double the estimate earns a revised number at the next
+module boundary, not a stop. Phase 1 has no batch, so there the only mid-walk stop is a real blocker,
+and Step 1 names the usual one, a component library file you cannot see.
+
+A blocker specific enough to stop mid-batch is one this file already names: a concession with no human
+yes in the audit's Flags, a scale factor nobody has confirmed, an asset or component library file that
+is genuinely absent so the module cannot be built at all, or another decision only a designer can
+make. Having built some of the batch is not on that list, and neither is the batch feeling long.
+
+**Writing resumable state is correct, so say WHERE it is.** A batch that can span sessions needs state
+that survives one, so keep a small JSON state file beside the `module-NN.json` payloads Phase 3 step 1
+already has you write, and update it at the same module boundaries as checkpoint 3: the batch number,
+the modules completed and remaining by inventory name, the fidelity tier, and the scale factor and
+content width the batch is being built at. That much is expected behaviour rather than extra credit.
+**Then name its path in the stop message.** The user saw the file being written scroll past inside a
+shell call, which is not the same as knowing it exists or what it is for: state the user cannot see
+does not make a run resumable, it only makes you feel that it is.
+
+One worked example, the format to copy. It is one message, sent unprompted, not an answer to "are you
+still working on it":
+
+> Stopped, not still running. Batch 1 of 3, 4 of 5 modules done, 80 percent: Global header, Hero with
+> CTA, Two column product row, Testimonial, all built at the REFERENCE ONLY standards (600 body, 560
+> content width). Remaining in this batch: Global footer. Why I stopped: the footer's inventory row
+> carries the image bleed rebuilt as a two column row concession and there is no human yes on it in
+> the audit's Flags, so building it now means rebuilding it. To resume, confirm the two column rebuild
+> or say "defer the footer to batch 2", and I will finish the batch from the saved state at
+> `./migration-state.json`.
 
 ---
 
