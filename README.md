@@ -162,4 +162,5 @@ packages and tests only the Codex version.
 ## Documentation and support
 
 - [Agents in Figma](https://help.emaillove.com/plugin/ai/agents-in-figma)
+- [Migrate an existing design system](https://help.emaillove.com/plugin/ai/migrate-design-system)
 - [Email Love support](mailto:hello@emaillove.com)
