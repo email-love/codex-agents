@@ -1,0 +1,39 @@
+{
+  "name": "email-love",
+  "version": "3.0.0",
+  "description": "Build export-ready emails and migrate legacy email design systems in Figma with Email Love",
+  "author": {
+    "name": "Email Love",
+    "email": "hello@emaillove.com",
+    "url": "https://emaillove.com"
+  },
+  "homepage": "https://help.emaillove.com/plugin/ai/agents-in-figma",
+  "repository": "https://github.com/email-love/codex-agents",
+  "license": "MIT",
+  "keywords": [
+    "email",
+    "figma",
+    "email-design-system",
+    "mjml",
+    "email-love"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Email Love",
+    "shortDescription": "Build export-ready emails and migrate email design systems.",
+    "longDescription": "Build production-ready emails in Figma from Email Love components or convert legacy email design systems into reusable Email Love libraries.",
+    "developerName": "Email Love",
+    "category": "Design",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://emaillove.com",
+    "defaultPrompt": [
+      "Build an export-ready email in my Figma file.",
+      "Audit this legacy email design system.",
+      "Convert the next migration batch in Figma."
+    ],
+    "brandColor": "#EE2461"
+  }
+}

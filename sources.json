@@ -1,0 +1,19 @@
+{
+  "upstream": {
+    "repository": "https://github.com/email-love/claude-skills",
+    "commit": "d0d88b62656f8c54cc66abb20368546544c110cc",
+    "builder_tag": "emaillove-figma-builder-v2.9.0",
+    "render_tag": "emaillove-eds-converter-v1.19.0",
+    "migration_tag": "emaillove-migration-audit-v1.10.0"
+  },
+  "legacy_snapshots": [
+    {
+      "path": "legacy/AGENTS-2.9.0.md",
+      "sha256": "6a46f462dc2f084df672619b054539840bf2dc0bf773025b49badf36e39629e3"
+    },
+    {
+      "path": "legacy/migration-AGENTS-1.19.0.md",
+      "sha256": "c0aa5110a5b2c559f1b2e23f560e08d4962db6190702b4167960d0800c7f9147"
+    }
+  ]
+}
