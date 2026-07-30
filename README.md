@@ -1,72 +1,166 @@
-# Email Love agent instructions for OpenAI Codex
+# Email Love for OpenAI Codex
 
-Teach [OpenAI Codex](https://developers.openai.com/codex) to build real, export-ready emails
-inside your Figma file from your [Email Love](https://emaillove.com) design system.
+Build real, export-ready emails in Figma and migrate legacy email design systems into Email
+Love with progressively loaded Codex skills.
 
-Codex has no skills system, so the instructions ship as [`AGENTS.md`](AGENTS.md), the file
-Codex loads automatically as persistent context.
+This repository is a Git-backed Codex plugin marketplace. It packages two focused skills:
 
-## Two instruction files
+- **Email Love Figma Builder:** build one email or campaign using an existing Email Love
+  design system, or create a first email through the design-converter workflow.
+- **Email Love Design System Migration:** audit a legacy library and convert it into an
+  Email Love design system in staged, reviewable batches.
 
-- [`AGENTS.md`](AGENTS.md): **building emails** from an existing Email Love design system. Install globally at `~/.codex/AGENTS.md`.
-- [`migration/AGENTS.md`](migration/AGENTS.md): **migrating a legacy design system** to Email Love, read-only audit then conversion. Install at the root of a migration project folder and run `codex` from there, so it does not load during everyday email work.
+The underlying Figma frames export to production HTML through the Email Love plugin. These
+workflows therefore protect Email Love's structural conventions, not just canvas appearance.
 
 ## Install
 
-
-
-**1. Save the instructions**
+### 1. Add the Email Love marketplace
 
 ```bash
-curl -o ~/.codex/AGENTS.md https://raw.githubusercontent.com/email-love/codex-agents/main/AGENTS.md
+codex plugin marketplace add email-love/codex-agents --ref main
 ```
 
-That applies everywhere. To scope it to one project, save it at that project's root instead.
-If you already have an `AGENTS.md`, paste ours in as a section rather than replacing the file.
+For production use, replace `main` with a release tag so upgrades are deliberate.
 
-**2. Connect Figma**
+### 2. Install the plugin
+
+```bash
+codex plugin add email-love@email-love
+```
+
+You can also open `/plugins` in Codex CLI, select the **Email Love** marketplace, and install
+the plugin there.
+
+Start a new Codex task or CLI session after installation so the bundled skills are loaded.
+
+### 3. Connect Figma
+
+The plugin declares the official remote Figma MCP as a dependency. If Codex does not prompt
+you to connect it automatically, run:
 
 ```bash
 codex mcp add figma --url https://mcp.figma.com/mcp
 codex mcp login figma
 ```
 
-Use the **remote** server. The local one does not expose the write tools this workflow needs.
+Use the remote server. The workflow requires `use_figma`, `get_metadata`, and
+`get_screenshot`; a connection without `use_figma` is read-only.
 
-**3. Ask for an email**
+The Figma MCP login uses OAuth. Separately, the Email Love conversion workflow can require a
+Figma personal access token for file, library, and asset operations outside the MCP OAuth
+session:
 
-Talk to Codex normally and share your Figma file link:
+```bash
+export FIGMA_TOKEN=figd_...
+```
 
-> Build a promo email in https://figma.com/design/... Spring sale, 20% off with code SPRING20, ends Sunday, one CTA to the pricing page.
+Create it in Figma Account Settings with Current user, File content, File metadata, and
+Library content scopes, then launch Codex from the same environment.
 
-You never mention the instruction file again.
+### 4. Install Email Love in Figma
 
-**4. Approve the `use_figma` tool calls**
+Install the latest Email Love Figma plugin.
 
-Every canvas write goes through that one tool, and a build fires dozens of them. If you
-decline, or the session cannot prompt you, Codex reports that the Figma write tools "aren't
-connected" and builds nothing, even though your connection is fine. This is the most common
-thing that goes wrong. For unattended runs (`codex exec`), pass
-`--dangerously-bypass-approvals-and-sandbox`.
+- Building from an existing library requires a
+  [synced design system](https://help.emaillove.com/plugin/components/design-systems).
+- Building a first email without one uses the design-converter path.
 
-## Requirements
+Approve the Figma write calls when Codex asks. Do not disable the entire sandbox merely to
+avoid repeated Figma approvals. For unattended work, use a trusted isolated environment and
+grant only the permissions the workflow needs.
 
-- Codex CLI, app, or IDE extension (verified on CLI 0.133.0)
-- The remote Figma MCP server connected, with access to your file
-- The Email Love Figma plugin (latest version) and a [synced design system](https://help.emaillove.com/plugin/components/design-systems) in that file
+## Use
 
-## Using Claude instead?
+Talk to Codex normally. The skills can activate implicitly, or invoke one explicitly.
 
-The same workflow ships as a Claude skill and Claude Code plugin at
-[email-love/claude-skills](https://github.com/email-love/claude-skills).
+### Build an email
 
-ChatGPT chat cannot build emails in Figma: its Figma app only creates FigJam diagrams,
-Figma Slides, and Figma Buzz assets, and cannot edit Figma Design files.
+```text
+Use $email-love-figma-builder to build a promo email in
+https://figma.com/design/...
 
-## Documentation
+Spring sale, 20% off with code SPRING20, ends Sunday, one CTA to the pricing page.
+```
 
-[help.emaillove.com/plugin/ai/agents-in-figma](https://help.emaillove.com/plugin/ai/agents-in-figma)
+You can also say:
 
-## Support
+```text
+Build a three-email welcome sequence in this Figma file.
+```
 
-Email [hello@emaillove.com](mailto:hello@emaillove.com) and we'll respond within a business day.
+### Migrate a design system
+
+```text
+Use $email-love-design-system-migration to audit this legacy email design system.
+Keep the source file read-only.
+```
+
+The migration skill always audits first, builds in a separate target file, and converts no
+more than five modules before a review gate.
+
+## Why this is a plugin instead of a global `AGENTS.md`
+
+The original builder and migration files were approximately 158 KB and 241 KB. Codex's
+default combined project-instruction limit is 32 KiB, so installing those files as
+`AGENTS.md` could truncate them before the critical render and verification rules.
+
+Skills use progressive disclosure:
+
+1. Codex initially sees only each skill's name and trigger description.
+2. It loads the compact `SKILL.md` when a matching task begins.
+3. It reads the Path A, Path B, audit, migration, or render references only when that phase
+   requires them.
+
+The complete pre-plugin instructions remain frozen under [`legacy/`](legacy/) for provenance,
+not as the recommended installation path.
+
+## Upgrade
+
+Refresh the Git marketplace, then reinstall or upgrade the plugin from `/plugins`:
+
+```bash
+codex plugin marketplace upgrade email-love
+```
+
+Start a new task after an upgrade.
+
+## Security and data handling
+
+Path B and migration conversion send customer-provided design renders to the Email Love
+design-converter service. Review [SECURITY.md](SECURITY.md) before using the converter with
+sensitive or regulated material.
+
+## Development
+
+Repository structure:
+
+```text
+.agents/plugins/marketplace.json
+plugins/email-love/
+├── .codex-plugin/plugin.json
+└── skills/
+    ├── email-love-figma-builder/
+    └── email-love-design-system-migration/
+```
+
+Run the repository checks before opening a pull request:
+
+```bash
+python3 scripts/validate_repo.py
+```
+
+The checks validate plugin metadata, skill frontmatter, context budgets, reference links,
+provenance snapshots, and representative routing fixtures.
+
+## Claude
+
+The source Email Love workflows for Claude live at
+[email-love/claude-skills](https://github.com/email-love/claude-skills). This repository
+packages and tests only the Codex version.
+
+## Documentation and support
+
+- [Agents in Figma](https://help.emaillove.com/plugin/ai/agents-in-figma)
+- [Migrate an existing design system](https://help.emaillove.com/plugin/ai/migrate-design-system)
+- [Email Love support](mailto:hello@emaillove.com)

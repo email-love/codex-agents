@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "builder_path_a",
+      "prompt": "Build a launch email in my Figma file using our synced Email Love components.",
+      "expected_skill": "email-love-figma-builder",
+      "expected_route": "path-a",
+      "must_do": [
+        "confirm use_figma is available",
+        "inventory the component library",
+        "read path-a.md and shared-rules.md",
+        "use intact component instances"
+      ],
+      "must_not_do": [
+        "detach an instance",
+        "hand-author mj-section structure"
+      ]
+    },
+    {
+      "id": "builder_path_b",
+      "prompt": "We have no Email Love design system yet. Turn this existing Figma email comp into our first exportable email.",
+      "expected_skill": "email-love-figma-builder",
+      "expected_route": "path-b",
+      "must_do": [
+        "assess source geometry fidelity",
+        "read all render references",
+        "send only the customer source render to the converter",
+        "save converter JSON before transcription"
+      ],
+      "must_not_do": [
+        "convert a competitor preview",
+        "invent exporter structure"
+      ]
+    },
+    {
+      "id": "builder_partial_library",
+      "prompt": "Build this campaign with our Email Love library, but create the missing comparison block if no component fits.",
+      "expected_skill": "email-love-figma-builder",
+      "expected_route": "mixed",
+      "must_do": [
+        "use Path A where components fit",
+        "confirm the component gap with the user",
+        "use Path B render rules for the missing module"
+      ],
+      "must_not_do": [
+        "fill the gap freehand",
+        "flatten the comparison block without user approval"
+      ]
+    },
+    {
+      "id": "migration_audit_only",
+      "prompt": "Audit this legacy email design system for migration. Do not change the source file.",
+      "expected_skill": "email-love-design-system-migration",
+      "expected_route": "audit",
+      "must_do": [
+        "keep the source read-only",
+        "classify source fidelity",
+        "inventory reusable modules",
+        "produce the migration report"
+      ],
+      "must_not_do": [
+        "create foundations",
+        "write to the source file"
+      ]
+    },
+    {
+      "id": "migration_requires_gate",
+      "prompt": "Migrate this whole legacy library into Email Love.",
+      "expected_skill": "email-love-design-system-migration",
+      "expected_route": "staged-migration",
+      "must_do": [
+        "audit before conversion",
+        "obtain human confirmation of blocking judgments",
+        "build in a separate target file",
+        "convert no more than five modules per batch"
+      ],
+      "must_not_do": [
+        "convert the whole library in one pass",
+        "write to the source file"
+      ]
+    },
+    {
+      "id": "missing_write_tool",
+      "prompt": "Build this Email Love email, but the connected Figma tools only expose screenshots and metadata.",
+      "expected_skill": "email-love-figma-builder",
+      "expected_route": "read-only-handoff",
+      "must_do": [
+        "state that the Figma connection is read-only",
+        "offer an email plan or AI Import handoff"
+      ],
+      "must_not_do": [
+        "promise a canvas build",
+        "generate a fake email image as completion"
+      ]
+    },
+    {
+      "id": "single_email_not_migration",
+      "prompt": "Create one Black Friday promo email in this Figma file.",
+      "expected_skill": "email-love-figma-builder",
+      "expected_route": "builder",
+      "must_do": [
+        "collect the brief",
+        "choose Path A or Path B by inspecting the file"
+      ],
+      "must_not_do": [
+        "invoke the full design-system migration workflow",
+        "restructure the customer's page hierarchy"
+      ]
+    }
+  ]
+}
