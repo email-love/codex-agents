@@ -19,6 +19,16 @@ reviewable Email Love design system in a separate Figma target file.
 - Never start conversion while required human gates remain unresolved.
 - Never present an individual module as a complete design system.
 
+## Which model to run this with
+
+If your environment lets you choose a model tier or reasoning-effort setting, use your
+strongest available option for this skill. A migration runs once per customer and holds a
+large rule set at once (the render references alone are tens of thousands of tokens); a
+dropped rule becomes a component that silently breaks on export later, for someone who was
+not in this conversation to catch it. The extra cost is small next to the cost of getting
+it wrong. This is a different budget from the routine campaign builds a customer does
+afterward against an already-verified design system, where a faster model is usually fine.
+
 ## Before doing anything
 
 1. Confirm the official remote Figma MCP exposes `use_figma`, `get_metadata`, and

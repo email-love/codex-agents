@@ -320,6 +320,16 @@ Build the scaffold every later batch depends on:
    themselves are a different shape entirely (Phase 3, and render rule R2): each one is an
    `mj-wrapper` COMPONENT with **no** `mainFrame` marker and no theme keys. Do not copy this
    frame as a starting point for a module.
+
+   **A wrapper is FIXED at the target email width, as a component and as every instance of it.**
+   When Phase 3 drops wrapper instances into this root frame, size each instance
+   `layoutSizingHorizontal = 'FIXED'` at the same width the component was built at, not FILL.
+   R0.3's FILL rule (prefer FILL, pin only when you must) is for frames INSIDE a wrapper, not
+   for the wrapper itself. A wrapper sized FILL inherits from whatever container it is in,
+   which reads correctly the moment its container is this root and breaks the moment the same
+   instance is placed elsewhere or the root width changes. The plugin's export also reads column
+   widths from the pinned wrapper width, so a FILL wrapper leaves the export math ambiguous.
+   Module step 5 has the matching verification.
 8. **Report** what was built, **the source fidelity tier you built under and one clause of why**,
    the target email width, and the content width you built at,
    the completion checklist result below, what the

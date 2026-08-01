@@ -23,6 +23,22 @@ The only structure created without either source is an empty email root and, whe
 required, the narrowly defined `mj-raw` ESP token block. If neither path can produce a
 section, stop and ask the user.
 
+## Which model to run this with
+
+The two paths carry very different risk, so if your environment lets you choose a model tier
+or reasoning-effort setting, they deserve different budgets.
+
+**Path B, and the design-system-migration skill, deserve your strongest available model.** That
+work holds a large rule set at once (the render references alone run tens of thousands of
+tokens) and a dropped rule becomes a component that silently breaks on export later, for
+someone who was not in this conversation to catch it. This is also work a customer does once,
+not daily, so the extra cost is small next to the cost of getting it wrong.
+
+**Path A, once a design system is already synced and verified, is a smaller job.** Instance a
+component, load its font, set text, done. A faster or lower-effort model handles routine
+campaign builds reliably here, because mistakes are cheap and obvious: wrong copy in a button
+is visible the moment you look at it.
+
 ## Before doing anything
 
 1. Confirm the official remote Figma MCP exposes `use_figma`, `get_metadata`, and
