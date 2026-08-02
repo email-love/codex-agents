@@ -107,6 +107,70 @@
         "invoke the full design-system migration workflow",
         "restructure the customer's page hierarchy"
       ]
+    },
+    {
+      "id": "migration_local_folder_source",
+      "prompt": "Audit the HTML and EML templates in this dedicated local folder for an Email Love migration.",
+      "expected_skill": "email-love-design-system-migration",
+      "expected_route": "source-local-folder",
+      "must_do": [
+        "load the local-folder adapter",
+        "confirm the exact folder and recursion scope",
+        "classify the source as REFERENCE ONLY",
+        "defer cross-template deduplication to design review"
+      ],
+      "must_not_do": [
+        "scan a broad Downloads folder without confirmation",
+        "derive a scale factor from rendered HTML"
+      ]
+    },
+    {
+      "id": "migration_klaviyo_source",
+      "prompt": "Audit our current Klaviyo templates and migrate the approved set into Email Love.",
+      "expected_skill": "email-love-design-system-migration",
+      "expected_route": "source-klaviyo",
+      "must_do": [
+        "load the Klaviyo adapter",
+        "confirm the account with get_account_details",
+        "paginate list_email_templates",
+        "state that v1 excludes campaigns and flow messages"
+      ],
+      "must_not_do": [
+        "fetch more than about 50 templates without a scope confirmation",
+        "present standalone templates as the whole Klaviyo library"
+      ]
+    },
+    {
+      "id": "migration_marketo_source",
+      "prompt": "Use our Marketo REST credentials to audit the approved email templates for migration.",
+      "expected_skill": "email-love-design-system-migration",
+      "expected_route": "source-marketo",
+      "must_do": [
+        "load the Marketo adapter",
+        "offer environment variables for secrets",
+        "fetch approved templates serially",
+        "state that v1 excludes individual Emails and Content Blocks"
+      ],
+      "must_not_do": [
+        "parallelize template fetches",
+        "write to Marketo"
+      ]
+    },
+    {
+      "id": "migration_send_readiness",
+      "prompt": "The final migration batch passed design review. Finish the handoff.",
+      "expected_skill": "email-love-design-system-migration",
+      "expected_route": "send-readiness-handoff",
+      "must_do": [
+        "run the campaign send-readiness pass",
+        "list violations by node id",
+        "verify theme keys, subject, preheader, links, alt text, legal address, and unsubscribe",
+        "require an empty violation list before handoff"
+      ],
+      "must_not_do": [
+        "handoff campaigns with placeholder legal copy",
+        "treat absent image links or alt text as automatically intentional"
+      ]
     }
   ]
 }

@@ -46,6 +46,20 @@ STALE_MONOLITH_REFERENCES = {
     '"The one rule" below',
     "migration/AGENTS.md",
 }
+MIGRATION_SOURCE_ADAPTERS = {
+    "activecampaign.md",
+    "brevo.md",
+    "customer-io.md",
+    "google-drive.md",
+    "hubspot.md",
+    "iterable.md",
+    "kit.md",
+    "klaviyo.md",
+    "local-folder.md",
+    "marketo.md",
+    "omnisend.md",
+    "sharepoint.md",
+}
 
 errors: list[str] = []
 
@@ -66,6 +80,8 @@ def validate_manifest() -> None:
     manifest = load_json(MANIFEST)
     if manifest.get("name") != "email-love":
         fail("plugin manifest name must be 'email-love'")
+    if manifest.get("version") != "4.0.0":
+        fail("plugin manifest version must be 4.0.0 for this migration contract")
     if not re.fullmatch(r"\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?", manifest.get("version", "")):
         fail("plugin manifest version must be strict semver")
     if manifest.get("skills") != "./skills/":
@@ -193,6 +209,49 @@ def validate_skills() -> None:
             if f"R{rule}." not in combined_render:
                 fail(f"{skill_dir.relative_to(ROOT)}: render references missing R{rule}")
 
+    migration = SKILLS / "email-love-design-system-migration"
+    source_dir = migration / "references" / "sources"
+    actual_adapters = {path.name for path in source_dir.glob("*.md")}
+    if actual_adapters != MIGRATION_SOURCE_ADAPTERS:
+        fail(
+            "migration source adapters must be exactly: "
+            f"{sorted(MIGRATION_SOURCE_ADAPTERS)}; got {sorted(actual_adapters)}"
+        )
+    for adapter in sorted(source_dir.glob("*.md")):
+        adapter_text = adapter.read_text(encoding="utf-8")
+        if not adapter_text.startswith("## Source adapter:"):
+            fail(f"{adapter.relative_to(ROOT)}: missing Source adapter heading")
+        validate_links(adapter, adapter_text)
+
+    required_migration_contract = {
+        migration / "SKILL.md": ["## Phase 0: Pick the source", "references/sources/hubspot.md"],
+        migration / "references" / "audit.md": [
+            "Type ramp, censused rather than sampled",
+            "Palette, censused rather than sampled",
+            "Spacing system, censused rather than sampled",
+            "## Spacing system",
+            "## Palette",
+        ],
+        migration / "references" / "foundations.md": [
+            "### Precondition: packaged render references",
+            "### Shared plugin-data contract",
+            "WCAG contrast table",
+            "vertical HUG with `clipsContent` off",
+        ],
+        migration / "references" / "module-conversion.md": [
+            "render each whole design once at 1:1",
+            "Semantic-token bind count",
+            "### 6. Export sniff test",
+            "### Send-readiness pass",
+            "Button label",
+        ],
+    }
+    for path, required_strings in required_migration_contract.items():
+        text = path.read_text(encoding="utf-8")
+        for required_string in required_strings:
+            if required_string not in text:
+                fail(f"{path.relative_to(ROOT)}: missing v4 contract text {required_string!r}")
+
 
 def validate_provenance() -> None:
     sources = load_json(SOURCES)
@@ -214,8 +273,8 @@ def validate_provenance() -> None:
 def validate_evals() -> None:
     payload = load_json(EVALS)
     cases = payload.get("cases", [])
-    if len(cases) < 7:
-        fail("tests/evals.json must contain at least seven representative cases")
+    if len(cases) < 11:
+        fail("tests/evals.json must contain at least eleven representative cases")
     seen: set[str] = set()
     required = {"id", "prompt", "expected_skill", "expected_route", "must_do", "must_not_do"}
     for index, case in enumerate(cases):
@@ -242,7 +301,7 @@ def validate_repository_guidance() -> None:
         fail("root AGENTS.md must stay below the default 32 KiB instruction budget")
     compatibility_files = (agents, MIGRATION_COMPATIBILITY)
     required_compatibility_text = {
-        "codex plugin marketplace add email-love/codex-agents --ref v3.0.0",
+        "codex plugin marketplace add email-love/codex-agents --ref v4.0.0",
         "codex plugin add email-love@email-love",
     }
     for compatibility_file in compatibility_files:

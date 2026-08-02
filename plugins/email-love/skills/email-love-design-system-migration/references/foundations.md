@@ -10,6 +10,48 @@
 - Create proof email structure
 - Run the foundations completion checklist
 
+### Precondition: packaged render references
+
+Before building, confirm all three packaged references are readable:
+
+- [render-geometry.md](render-geometry.md)
+- [render-nodes.md](render-nodes.md)
+- [render-components-validation.md](render-components-validation.md)
+
+They carry the complete mapping and exporter ground truth. If any is missing, tell the user
+before the first write, name which verification is unavailable, and refresh the plugin or agree
+on a reduced scope. Do not discover the gap in the middle of a batch.
+
+### Shared plugin-data contract
+
+The exporter reads namespace `emaillove`. This load-bearing subset stays inline even though the
+references contain the full rules.
+
+| Key | Node | Value and purpose |
+| --- | --- | --- |
+| `name` | every tagged node | Exact MJML tag, including `-Frame` where required; never rely on the layer-name fallback |
+| `nodeType` | whole-email root only | `'mainFrame'`; forbidden everywhere in a reusable module |
+| `backgroundColor` | mainFrame | Dark-mode page background hex; empty falls back to black |
+| `contentColor` | mainFrame | Dark-mode content background hex |
+| `textColor` | mainFrame | Dark-mode text hex |
+| `linkColor` | mainFrame | Link hex |
+| `buttonTextColor` | mainFrame | Button-label hex |
+| `buttonContentColor` | mainFrame | Button-background hex |
+| `lightThemeBackgroundColor` | mainFrame | Light `mj-body` background hex |
+| `fallBackFontName` | mainFrame | One family such as `Arial`, never a CSS stack |
+| `emailSubject` | mainFrame | Plain subject string |
+| `emailPreHeader` | mainFrame | Plain preheader string |
+| `fullWidth` | `mj-wrapper` | `'true'` only when the wrapper is full width |
+| `stackColumns` | wrapper or section | `'true'` or `'false'` for mobile stacking behavior |
+| `reverseStack` | wrapper or section | `'true'` to reverse mobile stack order |
+| `href` | `mj-image` rectangle or `mj-button` frame | Real link; omit when absent and never write `#` |
+| `altText` | `mj-image` rectangle | Meaningful alternative text, or intentionally empty for decorative imagery |
+
+Several mobile behaviors are not shared keys. A FILL `mj-button` produces full-width mobile;
+an image whose rectangle equals its content width stays fluid; mobile padding is a node property;
+and columns stack by default unless `stackColumns='false'` or `mj-group` supplies the lockup.
+Check Figma sizing and width relationships before hunting for a key that does not exist.
+
 **Start by reading the audit's Source fidelity tier, and say which tier you are building under
 before you create a node.** It decides where every number below comes from, so it is not something
 to discover in the middle of a type ramp.
@@ -46,6 +88,12 @@ answer, not a single procedure:
 Everything below that reads a source number, the ramp and the spacing scale above all, is an
 AUTHORITATIVE and PARTIAL instruction. On a REFERENCE ONLY source it is the defaults above that get
 built, and the source's numbers stay in the audit as evidence.
+
+**Read the audit's Spacing system and Palette sections before creating foundations.** The spacing
+section is the one system every later module must use, not a collection of per-module source
+measurements. The palette is the complete color census and the approved mapping from source hexes
+to primitives and semantic roles. A missing section is a stale audit and blocks foundations until
+the audit is refreshed.
 
 **Foundations also SETS the content width, once, for the whole library, and records it.** This is
 the same shape as the scale factor rule above, so treat it the same way: one number, decided here,
@@ -157,9 +205,12 @@ Build the scaffold every later batch depends on:
      `color/bg/brand`, so the cover is on brand color and moves when the brand color moves. No
      module lives on this page.
    - **Getting Started.** How to use the library, in prose a designer or marketer new to the file
-     can follow. Required, one short block each: that modules are wrapper components and are used
-     by INSTANCING them, never by copying or detaching; that text and images are edited through
-     the component properties on an instance rather than by editing inside it; that color, type,
+     can follow. **Its frame is vertical HUG with `clipsContent` off, never fixed height.** Take a
+     whole-page screenshot after writing it and confirm every line is visible. Required, one short
+     block each: that modules are wrapper components and are used by INSTANCING them, never by
+     copying or detaching; that text is edited through component properties on an instance;
+     images are edited by selecting the image rectangle inside the instance and replacing its
+     image fill, because Figma has no image property type; that color, type,
      and spacing come from the tokens on Foundations and Type rather than from hand-typed values;
      and where to look when something does not export as expected (confirm the block is still an
      instance and not detached, confirm the copy was changed through its property rather than in
@@ -291,21 +342,21 @@ Build the scaffold every later batch depends on:
    the INSTANCE_SWAP targets for module-level "Button Style" properties later. Put the
    label's TEXT property on the button component itself: a label living inside a nested
    instance cannot be bound from the module that uses it (render rule R8).
-5. **Spacing.** On an AUTHORITATIVE or PARTIAL source, recreate their spacer scale as components if
-   they had one, at the email-scale
-   values from the audit, taken verbatim like the type ramp: the same one factor, whole-pixel
-   rounding only, never rounded onto a friendlier multiple of 8 because it reads better. Run the
-   ratio check across the ends of the scale the same way. **On a REFERENCE ONLY source the scale is
-   multiples of 8**, 8, 16, 24, 32, 40, 48, and here rounding onto a multiple of 8 is not a second
-   factor sneaking in, it IS the specification: pick one section padding off that scale and use it
-   library-wide rather than a different value per module. There is no ratio check, because there is no
-   scale in the source to preserve the shape of.
+5. **Spacing.** Build the audit's accepted Spacing system by role. For AUTHORITATIVE or PARTIAL,
+   preserve its decided values at email scale and its named exceptions; never recover a discarded
+   per-module outlier during conversion. Recreate spacer components only when the source had them,
+   and run the ratio check across the accepted scale. **On REFERENCE ONLY use 8, 16, 24, 32, 40,
+   48**, and choose one section padding for the whole library. There is no source ratio to check.
 6. **Assets.** Export the logo and any recurring imagery from the source file
    (`download_assets`) and upload into the target file (`upload_assets`). Logos become
-   images, never vectors. Export the RENDERED node every time, never the raw image fill behind
+   images, never vectors. **A logo keeps its intrinsic dimensions and aspect ratio; never resize
+   it to fill a column or include it in a bulk image-growing pass.** Export the RENDERED node
+   every time, never the raw image fill behind
    it: a source fill with `scaleMode: 'CROP'` loses its crop the moment you take the underlying
    asset, and you get the whole photograph instead of the picture the designer composed
-   (render rule R4.2.1, which also has the aspect-ratio rule).
+   (render rule R4.2.1, which also has the aspect-ratio rule). This rule fires here for recurring
+   assets and again in Phase 3 for each module's own image assets. Never crop an asset out of a
+   full-canvas render, which bakes overlapping siblings into the image.
 7. **Root EMAIL TEMPLATE frame** on Campaigns at the audit's target email width (600 or 640,
    never the source canvas width when the source was not at email scale; 600 on a REFERENCE ONLY
    source unless the customer's ESP or brand asks for 640): vertical
@@ -334,7 +385,16 @@ Build the scaffold every later batch depends on:
    the target email width, and the content width you built at,
    the completion checklist result below, what the
    audit proposed that you changed, and what needs the designer's eye before batch 1 (theme
-   colors especially: they are a proposal until a human confirms). Then the tier's own numbers:
+   colors especially: they are a proposal until a human confirms).
+
+   **Include a WCAG contrast table for every text-on-fill pairing.** At minimum calculate
+   `textColor` on `backgroundColor`, `linkColor` on `backgroundColor`, `buttonTextColor` on
+   `buttonContentColor`, plus explicit text-on-brand combinations. Report the ratio and pass/fail:
+   4.5:1 for normal text and 3:1 for large text at 18pt or 14pt bold. Flag normal-text failures
+   and button pairs sitting exactly at 3:1, and name a darker semantic token that passes or ask the
+   designer for one.
+
+   Then the tier's own numbers:
 
    - **AUTHORITATIVE or PARTIAL:** the scale factor, the width-versus-type factor check with both
      ratios and which factor governs which quantities, and the ratio check result with the two ratios
@@ -370,8 +430,10 @@ Pages, in canonical order:
 - [ ] **Cover:** brand name set large, "Email Love Design System" beneath it, and one metadata
       line stating version, email width, and month and year. The width printed there matches the
       width the root frame was actually built at. Its frame fill is bound to `color/bg/brand`.
-- [ ] **Getting Started:** instancing rather than copying, editing through component properties,
-      styling from the tokens, and the "does not export as expected" path are all four present,
+- [ ] **Getting Started:** the frame is vertical HUG with `clipsContent` off and a full-page
+      screenshot shows every line. Instancing rather than copying, text editing through component
+      properties, image editing by replacing the nested image rectangle's fill, styling from the
+      tokens, and the "does not export as expected" path are all present,
       plus the email width, the content width with its side margin, and the scale factor, or, on a
       REFERENCE ONLY source, the sentence that the geometry is built to email standards and the brand
       came from the source.
@@ -404,6 +466,8 @@ Variables and bindings:
       confirm it hexes to the value the audit gave for that token.
 - [ ] The root frame's theme keys carry literal hex matching the semantics they mirror, because
       plugin data cannot be bound.
+- [ ] The WCAG contrast table covers every theme and explicit text-on-fill pairing; each failure
+      names a passing alternative token or an unresolved designer decision.
 
 Scale, checked last because it invalidates everything above it. **The first line decides which of the
 next two you run:**

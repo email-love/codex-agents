@@ -1,5 +1,34 @@
 # Changelog
 
+## 4.0.0 - 2026-08-02
+
+Ports the migration feature range from Claude commits `cb25519` through `b437b5a`. The
+comparison contains 19 feature commits plus upstream status and provenance updates.
+
+- Adds Phase 0 source selection and 12 read-only adapters: Local Folder, Klaviyo, Marketo,
+  Customer.io, Google Drive, SharePoint, Brevo, Kit, ActiveCampaign, Iterable, Omnisend, and
+  HubSpot. Figma remains the richest source and the default when available.
+- Replaces sampled foundations with complete type-ramp, palette, and role-based spacing
+  censuses. Audit reports now require dedicated Spacing system and Palette sections that gate
+  foundations and every later module batch.
+- Requires native whole-design rendering plus deterministic local content-band crops for
+  unstructured sources, while every real image asset is still rendered from its own source node.
+  Logos retain their intrinsic dimensions.
+- Adds the inline shared plugin-data contract and an up-front packaged-reference precondition.
+- Fixes Getting Started so its instructions are vertically HUG, unclipped, and accurate about
+  editing image fills rather than nonexistent image component properties.
+- Adds WCAG contrast reporting for foundations, module-root button label properties, explicit
+  node-id violation lists, semantic-token bind counts, spacing-system enforcement, and
+  deterministic content-band padding correction.
+- Documents the five-link navigation exception to the mobile group rule.
+- Adds one exported-HTML sniff test per batch for body width, media queries, mobile classes, and
+  column-width sums.
+- Adds a final campaign send-readiness pass covering theme keys, subject and preheader, fallback
+  fonts, links, alt text, legal address, and unsubscribe behavior.
+- Pins upstream provenance to `b437b5a91102b352dadb1df2fffda7d3c6035cf1`, migration tag
+  `emaillove-migration-audit-v1.17.0`, and converter tag
+  `emaillove-eds-converter-v1.29.0`.
+
 ## 3.0.1 - 2026-08-01
 
 Ports two Claude-side commits: model-choice guidance (Claude commit `c0719be`) and Portsmouth

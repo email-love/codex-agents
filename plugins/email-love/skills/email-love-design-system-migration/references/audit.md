@@ -11,8 +11,9 @@
 - Write the migration report
 - Hand off to conversion
 
-Audit an existing Figma design system for migration to Email Love, and produce a migration
-report the customer and the Email Love team can act on. This is Phase 1 of a migration: it
+Audit an existing email library for migration to Email Love, and produce a migration report
+the customer and the Email Love team can act on. Phase 0 in the skill selects Figma or one of
+the packaged [source adapters](sources/). This is Phase 1 of a migration: it
 tells everyone what they have, what converts, what needs design judgment, and how big the job
 is. Phase 2 is the conversion, and this report is its input:
 [conversion-overview.md](conversion-overview.md), [foundations.md](foundations.md), and
@@ -21,15 +22,16 @@ it for the customer as part of Enterprise onboarding. Step 8 is the hand-off, an
 of the job, not an afterthought.
 
 **This phase is strictly read-only.** Never create, modify, rename, or delete anything in the
-customer's file. Every Figma call you make must be an inspection. If the user asks you to
+customer's source. Every Figma, filesystem, cloud, or ESP call must be an inspection or fetch.
+If the user asks you to
 start converting, that is Phase 2: it happens in a separate target file, driven by "Phases 2
 and 3: Convert" in [conversion-overview.md](conversion-overview.md) (Step 8 has the hand-off),
 and the source file stays read-only in that phase too.
 
 ## Step 1: Scope the input
 
-You need the Figma file link. If several files hold the design system, audit each. Ask only
-three questions if not obvious: which frames or pages are the email templates (as opposed to
+For a Figma source, you need the file link. If several files hold the design system, audit each.
+Ask only three questions if not obvious: which frames or pages are the email templates (as opposed to
 web or app design); whether there is an existing production email you can use as a reference
 for how their emails actually render today; and whether the component masters live in this
 file or in a separate Figma library, and if separate, ask for that file too. A missing
@@ -331,7 +333,12 @@ Three passes:
    you where the cuts are. On an unstructured source (loose groups, absolute positioning, no
    components, no styles) you are inferring them, so say so in the report and ask the designer
    to confirm the split: the Module inventory is what gets built, so a wrong boundary is a wrong
-   component. **Then write the boundary down on the row.** Whoever converts the module has to
+   component.
+   **For an unstructured source, render the whole design at 1:1 and detect content bands from
+   the pixels.** Rows of pure canvas background between mixed-content bands are candidate module
+   gaps. Record exact y-coordinates such as `top 128 to 540` on the source ref. This gives Phase 3
+   a deterministic local crop and prevents a second agent from re-inferring different boundaries.
+   **Then write the boundary down on the row.** Whoever converts the module has to
    screenshot exactly the region you cut, and a boundary you found but did not record is a
    boundary they have to infer again, differently. So record a source ref per module: the design to
    convert from, plus the node name or node id you cut at, and on a source with no node to name (a
@@ -491,23 +498,32 @@ and Phase 3 does not work from it.
 
 ## Step 6: Extract the brand foundations
 
-From the survey, draft what the Email Love design system will carry:
+From the survey, draft what the Email Love design system will carry. State whether every value
+was measured from the source or selected from email standards.
 
-- **Type ramp mapping:** each of their text styles mapped to an email-safe equivalent, using
-  their own fallback choices when a fallbacks page exists. Flag fonts that need web-font
-  hosting or substitution. When the Step 4 scale factor is not 1, use the four-column table Step
-  4 specifies (style, authored size, factor, email size), with the factor restated on every row,
-  so a reader can audit the arithmetic instead of trusting it. Run Step 4's ratio acceptance test
-  on the finished table. **On a REFERENCE ONLY source there is no factor and no table:** map their
-  typefaces to email-safe equivalents as usual, then state the conventional ramp from Step 3 (12,
-  14, 16, 20, 24 to 30, body at 16) as the sizes the build uses, and record their authored sizes
-  separately as evidence rather than as inputs.
-- **Palette:** their named paint styles, and a proposed set of the six Email Love theme
-  colors (backgroundColor, contentColor, textColor, linkColor, buttonTextColor,
-  buttonContentColor) drawn from it, marked as a proposal for their designer to confirm.
-- **Spacing scale** from any padding/spacer components, stated at email scale (divided by the
-  Step 4 factor) rather than at source scale. On a REFERENCE ONLY source, state the multiples of 8
-  from Step 3 instead: there is no source scale to divide and no source scale worth preserving.
+- **Type ramp, censused rather than sampled.** Enumerate every distinct `(family, size, weight,
+  line-height)` tuple across the surveyed source, including local overrides. Cluster values only
+  when they differ by a point or two and report every cluster. Map the complete census to
+  email-safe fallbacks. For AUTHORITATIVE and PARTIAL sources, use Step 4's four-column table with
+  the same factor printed on every row and run the ratio acceptance test. For REFERENCE ONLY,
+  retain the source typefaces and weights but map them to the standard 12, 14, 16, 20, and 24 to
+  30 ramp with body at 16; authored sizes remain evidence, not build inputs.
+- **Palette, censused rather than sampled.** Enumerate every distinct fill hex, including local
+  overrides, then cluster only near-duplicates within about 2 to 3 values per RGB channel. For
+  every cluster list the exact source hex, fill count, and modules where it appears. Propose the
+  six Email Love theme roles (`backgroundColor`, `contentColor`, `textColor`, `linkColor`,
+  `buttonTextColor`, `buttonContentColor`) from those clusters. List every proposed deviation
+  from an exact source hex with its RGB delta, and list low-frequency source colors not carried
+  into the six roles. The designer confirms this mapping.
+- **Spacing system, censused rather than sampled.** Across every module, enumerate distinct
+  values by role: section side padding, vertical rhythm, column gutter, card or inset padding,
+  and mobile equivalents. Convert them to email scale where a factor applies and include the
+  number of modules using each value. Propose one system or short ladder per role, name the
+  largest outliers, and gate the proposal on a designer decision. Prefer a legible multiples-of-8
+  system unless the source clearly uses another grid. Record named exceptions such as a
+  full-bleed band or wide-quote outset. Any mobile padding above 160px on a 320px viewport is a
+  defect. On REFERENCE ONLY, do not census source geometry; use 8, 16, 24, 32, 40, and 48 and
+  state the selected section side padding.
 - **Buttons:** their button styles as candidates for the Email Love button component page.
 - **Target email width:** the width the converted system gets built at, which is 600 or 640 and
   nothing else. It is a hard constraint from the email clients rather than something the factor
@@ -548,9 +564,9 @@ From the survey, draft what the Email Love design system will carry:
 
 ## Step 7: Write the migration report
 
-Produce one markdown report, in this exact structure. **Source fidelity, Scale factor, and Module
-inventory are required sections**: they are what Phases 2 and 3 consume, and a report missing any of
-them cannot be converted from.
+Produce one markdown report, in this exact structure. **Source fidelity, Scale factor, Spacing
+system, Palette, and Module inventory are required sections**: they are what Phases 2 and 3
+consume, and a report missing any of them cannot be converted from.
 
 # Migration audit: [Design system name]
 ## Summary
@@ -558,9 +574,6 @@ them cannot be converted from.
 needing design judgment. State the source fidelity tier here, because it reframes everything
 below it. If the source is not at email scale, say so here; it is the finding
 that changes the most work.]
-## Inventory
-[Pages, style counts, component counts, design count (with desktop/mobile pairs merged),
-distinct module count, fonts in play.]
 ## Source fidelity
 [REQUIRED. The tier: AUTHORITATIVE, PARTIAL, or REFERENCE ONLY. Then the signals you saw, the ones
 for and the ones against: standard email width or not, equivalent margins identical or varying (with
@@ -571,6 +584,9 @@ take only the brand. Say that this is a judgement and a recommendation their des
 On REFERENCE ONLY, state the standards the build will use (600 body, 560 content width, ramp with
 body at 16, spacing in multiples of 8) and say plainly that a converted module whose margins do not
 match the source is correct.]
+## Inventory
+[Source account, path, or file; item count; Figma pages and structured-object counts when
+available; design count with desktop/mobile pairs merged; distinct module count; fonts in play.]
 ## Scale factor
 [REQUIRED, and on a REFERENCE ONLY source it reads `Not applicable, source is reference only`
 followed by the email standards from Source fidelity. Do not put a number here on that tier, not even
@@ -585,6 +601,17 @@ which factor governs which quantities in words (type factor for type sizes, line
 spacing; target width for the body width, content width, content margin, column splits, and image
 widths). Say plainly that this is a tension the conversion declares rather than resolves, so nobody
 reads two factors as an error to be corrected later.]
+## Spacing system
+[REQUIRED. On AUTHORITATIVE or PARTIAL, one row per spacing role with every source value at
+email scale, module counts, proposed system value or ladder, and outliers. Close with `designer
+decision`. Name every exception and every mobile value above 160px. On REFERENCE ONLY, state
+`Not applicable, source is reference only`, then the 8, 16, 24, 32, 40, 48 scale and the one
+section side padding selected from it.]
+## Palette
+[REQUIRED. One row per color cluster: source hex, usage count, and modules. Then map the six
+theme roles to those clusters and list every deviation as `proposed #... vs source #..., delta
+R/G/B`. List additional source colors not used by the six roles. Close with `designer decision`.
+On REFERENCE ONLY the source palette still applies, and no role may be invented outside it.]
 ## Module inventory
 [REQUIRED, deduplicated, and this is the section Phase 3 works from. One row per DISTINCT
 module: module name | category | appears in (design names) | source ref | verdict A/B/C/D |
@@ -610,9 +637,10 @@ modules, rather than off row order.]
 verdict present. A roll-up of the Module inventory, not a second classification: no verdict
 appears here that is not already on a module row above.]
 ## Brand foundations
-[Type ramp mapping table (style, authored size, factor, email size, one row per style with the
-same factor on every row), proposed theme colors, spacing scale at email scale, button styles,
-target email width. State that the ratio acceptance test passed, with the two ratios you
+[Type ramp mapping table from the complete type census (style, authored size, factor, email size,
+one row per style with the same factor on every row), button styles, and target email width.
+Point to Spacing system and Palette rather than restating them. State that the ratio acceptance
+test passed, with the two ratios you
 compared. Also REQUIRED here, because foundations otherwise invents it: the source's **content
 margin as a percentage of source width**, the email-scale margin it converts to through the target
 width, the **content width** that implies, the designs you measured, and whether the source margin
@@ -671,9 +699,9 @@ somebody's private process. There are two routes, and the report is the input to
    the order of the component pages in the converted file), the **Source fidelity** (the tier,
    which decides whether the converter preserves your geometry or builds it to email standards
    and takes only your brand), the
-   **Scale factor** where one applies (every number it builds is at that scale), the **Brand
-   foundations** (type
-   ramp on email-safe fallbacks, proposed theme colors, spacing, buttons, target email width, and
+   **Scale factor** where one applies (every number it builds is at that scale), the **Spacing
+   system**, the **Palette**, the **Brand foundations** (type
+   ramp on email-safe fallbacks, buttons, target email width, and
    the content margin percentage with the content width it converts to, which is where foundations
    gets its one library-wide content width), and the **Flags**.
 2. **Done for you.** Email Love's team runs the same process, design review included, as part

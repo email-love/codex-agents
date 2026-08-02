@@ -1,16 +1,18 @@
 ---
 name: email-love-design-system-migration
-description: Audit and migrate an entire legacy email design system or library into an Email Love Figma design system. Use when the user asks to assess migration readiness, inventory legacy email modules, determine source fidelity or scale, create Email Love foundations, convert a legacy library in batches, or move a whole existing design system into Email Love. The source Figma file remains read-only and all conversion happens in a separate target file. Do not use for building one campaign email; use email-love-figma-builder for that.
+description: Audit and migrate an entire legacy email design system or library into an Email Love Figma design system. Use when the user asks to assess migration readiness, inventory legacy email modules, determine source fidelity or scale, create Email Love foundations, convert a legacy library in batches, or migrate templates from Figma, a local folder, cloud storage, or a supported ESP. The source remains read-only and all conversion happens in a separate target Figma file. Do not use for building one campaign email; use email-love-figma-builder for that.
 ---
 
 # Email Love Design System Migration
 
-Audit a legacy email library, establish its trustworthy foundations, and convert it into a
-reviewable Email Love design system in a separate Figma target file.
+Audit a legacy email library from Figma, files, cloud storage, or a supported ESP, establish
+its trustworthy foundations, and convert it into a reviewable Email Love design system in a
+separate Figma target file.
 
 ## Non-negotiable boundaries
 
-- Keep the source Figma file read-only at all times.
+- Keep every source read-only at all times. Never edit a source Figma file, local folder,
+  cloud folder, ESP template, campaign, automation, or message.
 - Build only in a separate target file.
 - Never convert an unaudited library.
 - Never convert the entire library in one unreviewed pass.
@@ -31,19 +33,20 @@ afterward against an already-verified design system, where a faster model is usu
 
 ## Before doing anything
 
-1. Confirm the official remote Figma MCP exposes `use_figma`, `get_metadata`, and
-   `get_screenshot`.
-2. Before calling `use_figma`, read the Figma MCP's current `figma-use` skill or equivalent
+1. Ask where the source emails live and select the source adapter in Phase 0.
+2. For a Figma source, confirm the official remote Figma MCP exposes `get_metadata` and
+   `get_screenshot`. For conversion, also confirm it exposes `use_figma`.
+3. Before calling `use_figma`, read the Figma MCP's current `figma-use` skill or equivalent
    instructions in full.
-3. If `use_figma` is missing, limit work to the read-only audit and a precise migration
+4. If `use_figma` is missing, limit work to the read-only audit and a precise migration
    report. Do not promise conversion.
-4. Confirm whether the user wants:
+5. Confirm whether the user wants:
    - audit only;
    - foundations only after an accepted audit;
    - a specific conversion batch; or
    - the complete staged migration.
-5. Obtain the source file link, and for conversion obtain or create a separate target file
-   link.
+6. Obtain the source link, path, folder, or account scope required by the selected adapter.
+   For conversion, obtain or create a separate target Figma file link.
 
 Do not ask the user to disable the sandbox or bypass all approvals. Use normal tool
 approvals. For unattended work, recommend a trusted isolated environment with narrowly
@@ -54,6 +57,8 @@ scoped permissions.
 Read references completely before acting in the corresponding phase:
 
 - **Audit:** [audit.md](references/audit.md)
+- **The selected non-Figma source only:** load its adapter from
+  [`references/sources/`](references/sources/)
 - **Any run longer than a couple of minutes:** [progress.md](references/progress.md)
 - **Conversion entry and gates:** [conversion-overview.md](references/conversion-overview.md)
 - **Foundations:** [foundations.md](references/foundations.md)
@@ -67,13 +72,45 @@ The render references are deliberately split by topic. Search them by rule numbe
 `R9`) or exact tag when re-checking a rule, but read all three completely before the first
 module transcription in a run.
 
+## Phase 0: Pick the source
+
+Ask this once before scoping the audit:
+
+> Where are the emails you want to migrate?
+> (a) Figma, (b) local folder, (c) Klaviyo, (d) Marketo, (e) Customer.io,
+> (f) Google Drive, (g) SharePoint, (h) Brevo, (i) Kit, (j) ActiveCampaign,
+> (k) Iterable, (l) Omnisend, or (m) HubSpot?
+
+The answer selects exactly one route:
+
+| Choice | Source | Adapter |
+| --- | --- | --- |
+| a | Figma | Use the audit reference directly |
+| b | Local folder | [local-folder.md](references/sources/local-folder.md) |
+| c | Klaviyo | [klaviyo.md](references/sources/klaviyo.md) |
+| d | Marketo | [marketo.md](references/sources/marketo.md) |
+| e | Customer.io | [customer-io.md](references/sources/customer-io.md) |
+| f | Google Drive | [google-drive.md](references/sources/google-drive.md) |
+| g | SharePoint | [sharepoint.md](references/sources/sharepoint.md) |
+| h | Brevo | [brevo.md](references/sources/brevo.md) |
+| i | Kit | [kit.md](references/sources/kit.md) |
+| j | ActiveCampaign | [activecampaign.md](references/sources/activecampaign.md) |
+| k | Iterable | [iterable.md](references/sources/iterable.md) |
+| l | Omnisend | [omnisend.md](references/sources/omnisend.md) |
+| m | HubSpot | [hubspot.md](references/sources/hubspot.md) |
+
+Do not infer the source silently. Recommend Figma when it is available because components,
+styles, variables, and cross-design reuse produce the richest audit. Then follow the source
+the customer actually has. Load only the selected adapter, completely, before discovery.
+
 ## Phase 1: Audit
 
 Read the audit reference, then:
 
-1. Scope every source page and design included.
-2. Inventory pages, frames, components, component sets, styles, variables, email widths,
-   mobile twins, and repeated modules with read-only calls.
+1. Scope every source item included using the selected adapter's Discover procedure.
+2. For Figma, inventory pages, frames, components, component sets, styles, variables, email
+   widths, mobile twins, and repeated modules with read-only calls. For other sources, use the
+   adapter's audit-step adaptations.
 3. Classify source fidelity:
    - **AUTHORITATIVE:** geometry is a deliberate specification.
    - **PARTIAL:** preserve repeated deliberate values and standardize inconsistent ones.
@@ -129,7 +166,7 @@ Read the module-conversion reference and all render references.
 2. Before the first write, name the batch and its module count and give a rough estimate.
 3. For each module:
    - read its audit row and build constraints;
-   - screenshot the source node at the target email width;
+   - fetch or screenshot the source item at the target email width using its adapter;
    - send only that customer's source render to the converter;
    - save the returned JSON;
    - transcribe according to the render references;
@@ -166,6 +203,7 @@ Revise estimates at the next module boundary when pace changes materially.
 Use the phase checklist and R9 from the references. At minimum verify:
 
 - source file unchanged;
+- source account, folder, and templates unchanged for non-Figma adapters;
 - prescribed target pages present in the correct order;
 - foundations and semantic bindings intact;
 - one canonical body width and content width;

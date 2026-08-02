@@ -1,5 +1,13 @@
 # Phases 2 and 3: Convert
 
+## Contents
+
+- Conversion boundaries
+- Required inputs
+- Audit report contract
+- Human gates
+- Foundations and module batches
+
 Convert an audited legacy design system into a working Email Love design system. This follows
 the audit and works in two phases: foundations once, then modules in batches. A designer
 reviews between batches; never convert the whole library in one unreviewed pass.
@@ -9,8 +17,8 @@ review included, as part of Enterprise onboarding: hello@emaillove.com.
 
 Two hard rules:
 
-- **The customer's source file is read-only, always.** All building happens in a separate
-  target file. Reads from the source are inspections, screenshots, and asset downloads only.
+- **The customer's source is read-only, always.** All building happens in a separate target
+  Figma file. Source calls are inspections, screenshots, fetches, and asset downloads only.
 - **The audit report is required input.** It carries the source fidelity tier, the per-module
   classification (A/B/C/D plus any named concession), the scale factor where one applies, the brand
   foundations, and the flags. Do not re-derive
@@ -32,7 +40,8 @@ conventions in private plugin data you cannot read.
 ## Inputs
 
 1. The migration audit report (file or pasted).
-2. The source Figma file link (read-only).
+2. The source link, path, folder, account scope, or saved renders named by the selected source
+   adapter, all read-only.
 3. The target file: an existing one the team designates, or create one named
    "[Customer] Email Love Design System" via the Figma MCP.
 4. Which batch to run: "foundations", or a batch of modules named by their rows in the audit's
@@ -73,8 +82,14 @@ the two halves of the migration stay one conversation:
   carries no number and states email standards instead, and that is the finished answer rather than a
   gap: do not derive a factor of your own, not from the width, not from the ramp, not "for
   information", because whoever builds applies the number that is there.
-- **Brand foundations:** the type ramp on email-safe fallbacks, the proposed theme colors, the
-  spacing scale, the button styles, and the target email width. Phase 2 builds from these, and it
+- **Spacing system** (required): the accepted value or ladder for section side padding, vertical
+  rhythm, gutters, inset padding, and mobile equivalents, plus named exceptions. Phase 2 builds
+  the tokens; Phase 3 rejects any per-module value outside this system.
+- **Palette** (required): the complete color census and the accepted mapping from source clusters
+  to primitives and semantic roles. Phase 2 creates the variables; Phase 3 requires every
+  non-placeholder fill to bind to one.
+- **Brand foundations:** the type ramp on email-safe fallbacks, the button styles, and the target
+  email width, with pointers to Palette and Spacing system. Phase 2 builds from these, and it
   takes the ramp table's Email size column verbatim rather than mapping styles itself. On a
   REFERENCE ONLY source, only the brand half is source material (palette, typefaces, logo, copy);
   the ramp, the spacing scale, the content width, and the target width are the email standards the

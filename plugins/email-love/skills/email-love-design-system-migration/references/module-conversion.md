@@ -5,11 +5,12 @@
 - Confirm the reusable module shape
 - Send the source render to the converter
 - Transcribe the returned JSON
-- Merge mobile twins
+- Decide mobile behavior and merge a twin when present
 - Add component properties and categories
 - Verify each module
+- Sniff one exported HTML artifact per batch
 - Report and gate each batch
-- Hand off the completed migration
+- Run send readiness and hand off the migration
 
 ### 0. What you are building: a module, not a small email
 
@@ -92,6 +93,14 @@ worker, transcribe the returned MJML JSON into the target file, then verify.
    export). On an email-native source that is a frame; on an unstructured source it is the
    region of a design that the Module inventory row describes, cropped at the boundaries the
    audit set. Keep the PNG; it is also your visual reference for verification.
+   **For an unstructured source, render each whole design once at 1:1 and crop its audited
+   content bands locally.** A per-node render loses visually overlapping siblings when the source
+   has no grouping, while one native canvas render preserves the composition and makes every
+   source ref repeatable. This render is for structural classification only.
+   **Export every image asset from its own rendered source node.** Never crop a hero, logo, card
+   image, or product image from the module or canvas screenshot. That bakes overlapping text and
+   cards into the pixels and creates ghost content. Logos retain intrinsic dimensions and aspect
+   ratio; never resize them to fill a column.
    **Size the export so the PNG comes back at the target email width.** Where a factor exists that
    means exporting a source at scale factor 2.2 at roughly 0.45x; where none does, divide the source
    region's own width by the target width and export at that, which is a framing decision about one
@@ -255,6 +264,10 @@ This mapping covers almost everything you will meet:
   footers, and err toward stacking content rows. Every case gets a recorded decision either
   way in step 3 Part A of this phase, and step 5's mobile verification confirms the decision
   is present.
+  **A row of five or more navigation links is the exception.** Do not force it into a group or
+  one inline text line: each phone-width cell becomes narrower than a word. Use loose columns so
+  the links stack, and record `loose columns, stack expected, no keys set, nav bar exceeds
+  group-safe width` in the mobile decision.
 - **A badge, pill, or icon sitting beside text is an `mj-group`, not a loose frame inside
   `mj-text-Frame`.** A loose frame there flattens to an image and detaches from the text.
   Rebuild it as a group inside the section: `mj-group` containing one `mj-column` that holds
@@ -379,6 +392,12 @@ binding is wrong is worse than no property**, so re-read `componentPropertyRefer
 off each node to confirm the binding landed. Record the properties you added, and why, in the
 module's report line.
 
+**Every module containing a button must expose its label as a TEXT property on the module
+root.** Use `Button label` for one CTA or `Card N button label` for a grid. A label property on
+the nested foundation button is not surfaced to the marketer who selects the module instance.
+This requirement is independent of an optional Show Button BOOLEAN, which still needs evidence
+from a sibling design where the button is absent.
+
 Then confirm its category for the upload. **The Module inventory row already proposes one**, so
 start there and change it only when the rebuilt structure contradicts it, saying so in the batch
 report. **Use the customer's real category names**, which are
@@ -406,11 +425,12 @@ Run the R9 post-build checklist in `render-components-validation.md`, plus:
   back; do not assume. A module carrying `mainFrame` uploads as a whole email, and a module
   with a wrapper nested inside another wrapper is an email in disguise. No theme color keys
   unless a designer asked for a dark-mode treatment on that block.
-- Structural checklist: the `name` plugin data key resolves to a real tag on every node
-  (nothing relying on the layer-name fallback); every leaf is a complete tagged pair; both
-  alignment axes match on every auto-layout frame; no detached instances; no unrecognized
-  frames except intentional editable-image regions; `mj-column-inner`, if used, is literally
-  `children[0]` of its column.
+- Structural checklist: walk the tree and list every violation by node id in the batch report;
+  an empty list is the only pass. The `name` plugin data key resolves to a real tag on every node,
+  including each button's `mj-button-text`; every leaf is a complete tagged pair; both alignment
+  axes match on every auto-layout frame; no detached instances; no unrecognized frames except
+  intentional editable-image regions; `mj-column-inner`, if used, is literally `children[0]` of
+  its column. Report an alignment mismatch as `<node id>: primary=X, counter=Y`.
 - Sizing: walk the tree and confirm every frame is vertical HUG, the only fixed height is an
   `mj-spacer`, every FIXED width is one of the load-bearing cases, every pinned width that
   carries text has slack (render rule R3.3.1), and each button's width sizing was chosen for its
@@ -433,6 +453,14 @@ Run the R9 post-build checklist in `render-components-validation.md`, plus:
   the spacing scale, and the text column resolves to the library content width. Do not check the
   module against the source's proportions, because matching them is not the goal and a mismatch is not
   a finding.
+- **Spacing system:** every side padding, vertical padding, gutter, and mobile padding resolves to
+  a value or named exception in the audit's Spacing system. List the role and system value for
+  every padding. An unrecognized value is a fail and a designer question, not a local override.
+  Any mobile padding above 160px on a 320px viewport is a defect.
+- **Semantic-token bind count:** every non-placeholder solid fill resolves to a semantic variable
+  from the audit's Palette. List each unbound node id, raw hex, and intended role. Placeholder gray
+  image fills are the only exception, and each must be identified as intentional. An empty
+  violation list is the only pass.
 - **Content width: read the resolved x and width of the text-bearing column off the built module and
   confirm it equals the library content width from foundations**, not the worker's number. On a
   multi-column row confirm the columns plus gutters sum to it. This is a cross-module check by nature,
@@ -444,12 +472,16 @@ Run the R9 post-build checklist in `render-components-validation.md`, plus:
   the plugin data `name` key.
 - Component: the module root is a direct child of its category page, not inside a component
   set or a Figma section, with no stray instances of it left loose on the page. Every property
-  binding re-read and confirmed.
+  binding re-read and confirmed. If the module contains a button, the module root exposes its
+  label as a TEXT property. List by node id every button whose label is not surfaced.
 - Visual: screenshot the rebuild next to the source screenshot from step 1; flag divergences
   rather than silently accepting them. **On a REFERENCE ONLY source, read that comparison for content
   and structure only:** the same blocks, in the same order, with the same copy and the same imagery.
   Margins, type sizes, and spacing are expected to differ, and listing them as divergences buries the
   ones that matter under noise a reviewer will then try to fix.
+  If the rebuild is 20 to 40px taller than the source, detect runs of non-canvas pixels in both
+  renders and derive the padding correction from their content-band differences. Do not eyeball a
+  nudge; band detection makes the second pass deterministic.
   **Then take a second screenshot pair at mobile width (390px)**, both source and rebuild, and
   diff those too. The desktop pair is silent on stacking by construction, so any group-vs-loose-
   columns mistake is invisible in it; the mobile pair surfaces it in one glance. On the rebuild's
@@ -462,14 +494,30 @@ Run the R9 post-build checklist in `render-components-validation.md`, plus:
   with any multi-column section: even "loose columns, stack expected, no keys set" is a real
   answer with a visible line.
 
-### 6. Batch report and gate
+### 6. Export sniff test, once per batch
+
+After every module passes step 5, inspect one representative exported HTML artifact. Prefer a
+multi-column module; otherwise choose one with a button. Place an instance in the temporary
+Campaigns email root and ask the user to run the plugin Export if the agent cannot drive that UI.
+Save and read the HTML. Confirm and record:
+
+- body width matches foundations;
+- an `@media only screen and (max-width` block exists;
+- mobile classes exist for each recorded stack, fluid image, or full-width button behavior;
+- column widths and gutters sum to the intended content box, with no column wider than the body.
+
+On a failure, repair the Figma source of the export, re-export, and re-read before review. This is
+not a replacement for step 5; it checks the artifact step 5 cannot see.
+
+### 7. Batch report and gate
 
 One report per batch: per module, keyed by its Module inventory row name, what was rebuilt, the
 design you converted it from, verdict honored or changed (with reason), any concession and whether
 it was accepted and by whom (and for a bleed concession, the two column widths you landed on, so a
 reviewer can check the sum), what the worker returned and what you repaired, mobile decisions,
 divergences flagged, component properties added and the evidence for each, the category you kept
-or changed. **Open with the source fidelity tier, the target email width, and the content width the
+or changed, the per-node violation lists, semantic bind count, spacing-system check, and the four
+export-sniff confirmations. **Open with the source fidelity tier, the target email width, and the content width the
 batch was built at, plus the scale factor where one applies**, so a reviewer can check three or four
 numbers instead of measuring modules. On a REFERENCE ONLY source, open instead with the tier and the
 standards, and repeat the one sentence that the geometry is ours: a batch report is the document a
@@ -480,6 +528,26 @@ module was multi-column). End with the open questions for the
 design review. Do not start the next batch until the user says the review happened.
 
 ## Hand-off after the final batch
+
+### Send-readiness pass
+
+Before hand-off, walk every `mainFrame` campaign on Campaigns and list violations by node id.
+An empty list is the only pass.
+
+- All nine required root values are real and non-empty: `nodeType='mainFrame'`,
+  `backgroundColor`, `contentColor`, `textColor`, `linkColor`, `buttonTextColor`,
+  `buttonContentColor`, `lightThemeBackgroundColor`, and `fallBackFontName`.
+- `emailSubject` and `emailPreHeader` are non-blank real copy, not a module name or TODO.
+- `fallBackFontName` is one family such as `Arial`, not a CSS stack.
+- Every campaign root has a specific name. Prefix scratch roots with `QA only, do not send`.
+- Every `mj-image` has an explicit real `href` or is recorded as deliberately unlinked, plus
+  meaningful `altText` or an explicit decorative-empty decision. Never use `#`.
+- Every CTA `mj-button` has a real `href`; a linkless badge or pill is recorded as intentional.
+- Footer copy includes a real company name, postal address, and unsubscribe mechanism. No lorem
+  ipsum, literal `Address`, placeholder legal copy, or `#` unsubscribe link.
+
+Fix every violation, or explicitly classify and rename a campaign as non-sending QA. Do not open
+the customer handoff while this list is non-empty.
 
 The design system is on the canvas but not yet in the plugin. Walk the user through the
 upload: pick the design system in the plugin, open the Assets section you recorded for the

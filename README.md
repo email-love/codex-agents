@@ -7,8 +7,9 @@ This repository is a Git-backed Codex plugin marketplace. It packages two focuse
 
 - **Email Love Figma Builder:** build one email or campaign using an existing Email Love
   design system, or create a first email through the design-converter workflow.
-- **Email Love Design System Migration:** audit a legacy library and convert it into an
-  Email Love design system in staged, reviewable batches.
+- **Email Love Design System Migration:** audit a legacy library from Figma, files, cloud
+  storage, or a supported ESP and convert it into an Email Love design system in staged,
+  reviewable batches.
 
 The underlying Figma frames export to production HTML through the Email Love plugin. These
 workflows therefore protect Email Love's structural conventions, not just canvas appearance.
@@ -98,6 +99,24 @@ Keep the source file read-only.
 
 The migration skill always audits first, builds in a separate target file, and converts no
 more than five modules before a review gate.
+
+At the start of an audit it asks where the current emails live. Supported sources are:
+
+- Figma;
+- a local folder of HTML, EML, PNG, or JPEG files;
+- Google Drive or SharePoint folders;
+- Klaviyo, Marketo, Customer.io, Brevo, Kit, ActiveCampaign, Iterable, Omnisend, or HubSpot.
+
+Figma produces the richest audit because components, styles, variables, and reuse are
+structured data. File, cloud, and ESP sources are treated as visual references and rebuilt to
+email standards. Each connected source stays read-only. Non-Figma sources require their named
+MCP connection, except Local Folder, which requires local file access, and Marketo, which uses
+read-only REST calls from an environment that permits outbound HTTP.
+
+The first adapter release intentionally reads a bounded content pool per ESP. For example,
+Klaviyo and Marketo start with standalone templates, while Customer.io starts with Templates
+and Newsletters. The migration report names excluded campaign, automation, transactional, or
+dynamic-content surfaces so a partial source is never presented as the customer's whole library.
 
 ## Why this is a plugin instead of a global `AGENTS.md`
 
