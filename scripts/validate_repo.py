@@ -80,8 +80,8 @@ def validate_manifest() -> None:
     manifest = load_json(MANIFEST)
     if manifest.get("name") != "email-love":
         fail("plugin manifest name must be 'email-love'")
-    if manifest.get("version") != "4.1.0":
-        fail("plugin manifest version must be 4.1.0 for this migration contract")
+    if manifest.get("version") != "4.1.1":
+        fail("plugin manifest version must be 4.1.1 for this migration contract")
     if not re.fullmatch(r"\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?", manifest.get("version", "")):
         fail("plugin manifest version must be strict semver")
     if manifest.get("skills") != "./skills/":
@@ -245,6 +245,9 @@ def validate_skills() -> None:
         migration / "references" / "module-conversion.md": [
             "render each whole design once at 1:1",
             "Group columns resolve wide enough on mobile",
+            "Multi-column gutter present. A section with more than one column",
+            "batch report says so verbatim",
+            "a card image touches the next card's edge",
             "emaillove_preview_email",
             "Take STRUCTURE from the worker and NUMBERS from measurement",
             "error code: 1010",
@@ -256,6 +259,10 @@ def validate_skills() -> None:
         ],
         migration / "references" / "render-nodes.md": [
             "R3.3.2 Group columns shrink on mobile",
+            "R3.4.0 Multi-column gutters: a section with more than one column needs one",
+            "zero horizontal column padding is a",
+            "186.67px, with 8px horizontal padding on each side",
+            "Do not infer card width by dividing content width by column count",
             "R5.2.1 Measuring a type size off a screenshot",
             "Open the PNG and look at it before uploading",
             "The neighbour's content",
@@ -270,7 +277,20 @@ def validate_skills() -> None:
         text = path.read_text(encoding="utf-8")
         for required_string in required_strings:
             if required_string not in text:
-                fail(f"{path.relative_to(ROOT)}: missing v4.1 contract text {required_string!r}")
+                fail(f"{path.relative_to(ROOT)}: missing v4.1.1 contract text {required_string!r}")
+
+    render_nodes_text = (migration / "references" / "render-nodes.md").read_text(encoding="utf-8")
+    gutter_rule = render_nodes_text.find("#### R3.4.0 Multi-column gutters")
+    two_column_swap = render_nodes_text.find("#### R3.4.1 THE TWO COLUMN SWAP")
+    if gutter_rule < 0 or two_column_swap < 0 or gutter_rule >= two_column_swap:
+        fail("render rule R3.4.0 must remain before R3.4.1 Two Column Swap")
+
+    module_text = (migration / "references" / "module-conversion.md").read_text(encoding="utf-8")
+    content_width = module_text.find("- **Content width:")
+    gutter_check = module_text.find("- **Multi-column gutter present.")
+    naming = module_text.find("- Naming:")
+    if min(content_width, gutter_check, naming) < 0 or not content_width < gutter_check < naming:
+        fail("module gutter check must remain between Content width and Naming")
 
 
 def validate_provenance() -> None:
@@ -280,14 +300,14 @@ def validate_provenance() -> None:
     if not re.fullmatch(r"[0-9a-f]{40}", commit):
         fail("sources.json upstream commit must be a full Git SHA")
     expected_upstream = {
-        "commit": "73e30383fd32659975a78667af97410d014aaba0",
+        "commit": "e6b532b2c4b3681fc4a1ac2d2090ec7e87afd2ae",
         "builder_tag": "emaillove-figma-builder-v2.9.2",
-        "render_tag": "emaillove-eds-converter-v1.33.2",
+        "render_tag": "emaillove-eds-converter-v1.34.0",
         "migration_tag": "emaillove-migration-audit-v1.18.0",
     }
     for key, expected in expected_upstream.items():
         if upstream.get(key) != expected:
-            fail(f"sources.json upstream.{key} must be {expected!r} for v4.1.0")
+            fail(f"sources.json upstream.{key} must be {expected!r} for v4.1.1")
     for snapshot in sources.get("legacy_snapshots", []):
         relative = snapshot.get("path", "")
         expected = snapshot.get("sha256", "")
@@ -331,7 +351,7 @@ def validate_repository_guidance() -> None:
         fail("root AGENTS.md must stay below the default 32 KiB instruction budget")
     compatibility_files = (agents, MIGRATION_COMPATIBILITY)
     required_compatibility_text = {
-        "codex plugin marketplace add email-love/codex-agents --ref v4.1.0",
+        "codex plugin marketplace add email-love/codex-agents --ref v4.1.1",
         "codex plugin add email-love@email-love",
     }
     for compatibility_file in compatibility_files:

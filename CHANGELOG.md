@@ -1,5 +1,29 @@
 # Changelog
 
+## 4.1.1 - 2026-08-02
+
+Port from claude-skills `e6b532b` (task #52): multi-column gutter guardrail.
+
+Codex built a three-column component with zero column padding during a v4.1.0 shakedown;
+geometry validated because zero-gutter columns sum to the content width trivially, but adjacent
+card headlines visually concatenated into one sentence. The arithmetic gate could not see it.
+
+Adds a Phase 3 step 5 blocking checklist rule: a section with more than one column and zero
+horizontal column padding is a FAIL unless the source design has a measured zero gutter and the
+batch report says so. Every multi-column section must list horizontal padding per column and
+confirm that at least one side of each internal boundary carries the source gutter.
+
+Adds render rule R3.4.0, generalising R3.4.1's spacing-on-one-side-only rule to every
+multi-column row. The named failure signature is concatenated headlines, touching card images,
+or a button a pixel from its neighbour. The worked example uses three equal cards in a 560px
+content box with a 16px source gutter, expressed as 186.67px column boxes with 8px horizontal
+padding on each side. Card width must not be inferred by dividing content width by column count
+unless the measured source gutter is zero. R3.4.0 numbering keeps the Two Column Swap at R3.4.1.
+
+Patch bump: the audit report structure is unchanged and partly audited migrations remain
+compatible. Pins upstream provenance to `e6b532b2c4b3681fc4a1ac2d2090ec7e87afd2ae`
+and converter tag `emaillove-eds-converter-v1.34.0`.
+
 ## 4.1.0 - 2026-08-02
 
 Batch port from claude-skills commits `252bc05` through `73e3038`: ten defect fixes

@@ -486,6 +486,21 @@ Run the R9 post-build checklist in `render-components-validation.md`, plus:
   never against how the module looks. A module with the wrong content width passes every other line
   in this list, which is why it reaches a reviewer as a text edge that moves while scrolling
   (render rule R0.3.1).
+- **Multi-column gutter present. A section with more than one column and zero horizontal
+  column padding is a FAIL** unless the source design has a measured zero gutter AND the
+  batch report says so verbatim. The content-width equation above passes trivially at zero
+  gutter (`card + 0 + card + 0 + card = content`), so the arithmetic gate cannot catch this
+  by itself. Walk every multi-column section, list the horizontal padding on each column,
+  and confirm at least one side of each column boundary carries the source's measured
+  gutter (render rule R3.4.0: spacing on one side of each boundary only, never both). On a
+  three-column row with a 560 content box and a 16px source gutter, columns take
+  `(560 - 32) / 3 = 176`px content each, expressed as 186.67px column boxes with 8px on
+  each side, so the boundary carries 16px between adjacent content. **Failure signature:**
+  columns correctly sum to the content width but headlines from adjacent columns visually
+  concatenate into one sentence; a card image touches the next card's edge; a button sits
+  a pixel from a neighbour. Treat any of those as a gutter failure, not a typography
+  problem. From Codex's build of a three-column module with zero column padding: geometry
+  validated, content collapsed.
 - Naming: every layer carries the display name for its tag, and no friendly string leaked into
   the plugin data `name` key.
 - Component: the module root is a direct child of its category page, not inside a component
