@@ -1,5 +1,35 @@
 # Changelog
 
+## 4.1.0 - 2026-08-02
+
+Batch port from claude-skills commits `252bc05` through `73e3038`: ten defect fixes
+surfaced by a Red Paddle Co end-to-end migration.
+
+- Adds render rule R3.3.2 for `mj-group` columns that shrink proportionally on mobile,
+  including the resolved-width formula and per-column text or image requirement. Module
+  verification now computes it at 375px, preventing navigation from rendering as
+  `CHA / NGI / NG` and `G / E / A / R`.
+- Moves mobile visual QA to `emaillove_preview_email` after provisional upload. Figma has
+  no mobile breakpoint, so `get_screenshot` at 390px only rescales desktop-shaped pixels.
+- Documents the portable `unsubscribe.com` magic link and forbids invented unsubscribe URLs.
+- Makes the worker-versus-source split explicit: STRUCTURE from the worker, NUMBERS from
+  measurement, with a foundations decision for missing type-ramp steps.
+- Adds the cap-height measurement method for settling type sizes against the approved ramp.
+- Requires opening every exported PNG before placement and checking baked-in white,
+  neighboring content, and accidentally fused rows.
+- Checks installed Figma fonts before building the type ramp and uses Arimo when Arial or
+  Helvetica is unavailable, with the export consequence reported.
+- Maps `mj-navbar` to one reflowing `mj-text` with a hyperlink range per label.
+- Extends the audit palette census to cluster by role, including text-node fills, and adds a
+  recommended 12px minimum type floor.
+- Documents the Cloudflare 403 `error code: 1010` browser User-Agent workaround.
+
+Minor version bump: the audit report structure is unchanged and partly audited migrations
+remain compatible. Pins upstream provenance to
+`73e30383fd32659975a78667af97410d014aaba0`, migration tag
+`emaillove-migration-audit-v1.18.0`, and converter tag
+`emaillove-eds-converter-v1.33.2`.
+
 ## 4.0.0 - 2026-08-02
 
 Ports the migration feature range from Claude commits `cb25519` through `b437b5a`. The

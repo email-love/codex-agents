@@ -508,13 +508,19 @@ was measured from the source or selected from email standards.
   the same factor printed on every row and run the ratio acceptance test. For REFERENCE ONLY,
   retain the source typefaces and weights but map them to the standard 12, 14, 16, 20, and 24 to
   30 ramp with body at 16; authored sizes remain evidence, not build inputs.
-- **Palette, censused rather than sampled.** Enumerate every distinct fill hex, including local
-  overrides, then cluster only near-duplicates within about 2 to 3 values per RGB channel. For
-  every cluster list the exact source hex, fill count, and modules where it appears. Propose the
-  six Email Love theme roles (`backgroundColor`, `contentColor`, `textColor`, `linkColor`,
-  `buttonTextColor`, `buttonContentColor`) from those clusters. List every proposed deviation
-  from an exact source hex with its RGB delta, and list low-frequency source colors not carried
-  into the six roles. The designer confirms this mapping.
+  Where the smallest cluster is below 12px, say so and recommend a floor at 12px, or at the
+  customer's confirmed floor. Conversion will otherwise standardize 10px and 11px values upward
+  module by module for readability and client compatibility. Record this as a foundations
+  decision before a batch begins.
+- **Palette, censused rather than sampled, and clustered by role.** Enumerate every distinct fill
+  hex, including local overrides, then cluster only near-duplicates within about 2 to 3 values per
+  RGB channel. Sample text-node fills as well as background fills, and treat the same hex in two
+  roles as two rows. A band and body copy may share `#222222`, but the semantic layer must be able
+  to change them independently. For every cluster list the exact source hex, role, fill count,
+  and modules where it appears. Propose the six Email Love theme roles (`backgroundColor`,
+  `contentColor`, `textColor`, `linkColor`, `buttonTextColor`, `buttonContentColor`) from those
+  clusters. List every proposed deviation from an exact source hex with its RGB delta, and list
+  low-frequency source colors not carried into the six roles. The designer confirms this mapping.
 - **Spacing system, censused rather than sampled.** Across every module, enumerate distinct
   values by role: section side padding, vertical rhythm, column gutter, card or inset padding,
   and mobile equivalents. Convert them to email scale where a factor applies and include the

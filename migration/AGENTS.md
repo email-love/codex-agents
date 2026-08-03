@@ -6,7 +6,7 @@ If Codex loaded this file from a migration project, stop before making any Figma
 the user that Email Love migration now ships inside the supported Codex plugin:
 
 ```bash
-codex plugin marketplace add email-love/codex-agents --ref v4.0.0
+codex plugin marketplace add email-love/codex-agents --ref v4.1.0
 codex plugin add email-love@email-love
 ```
 

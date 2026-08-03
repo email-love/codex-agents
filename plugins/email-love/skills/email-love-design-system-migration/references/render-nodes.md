@@ -139,6 +139,47 @@ measure the string against the **exported** font stack rather than trusting the 
 It does NOT apply to FILL columns or FILL buttons, which resolve against the content box at
 render time and adapt. Do not pad those; the extra width would be real design drift for no gain.
 
+#### R3.3.2 Group columns shrink on mobile, and R3.3.1 does not protect them
+
+R3.3.1 protects a pinned column against font drift at the desktop width you pinned. It does not
+protect the same column when an `mj-group` shrinks on a phone. A group never stacks, so every
+fixed desktop column becomes a percentage at smaller viewports.
+
+Before pinning any group column, compute its resolved phone width:
+
+```
+resolved = columnWidth / groupWidth * (mobileViewport - section horizontal padding at mobile)
+```
+
+At a 375px viewport with 20px padding on each side, the available width is 335px. A 137px column
+inside a 560px group therefore resolves to `137 / 560 * 335 = 82px`.
+
+Require, per column:
+
+- **Text carrier:** `resolved >= widthOf(longest unbreakable word) * 1.05`. Measure the longest
+  word, not the whole string, in the exported font.
+- **Fixed-aspect image carrier:** `resolved >= image natural width`. Below that threshold the
+  image is compressed and its aspect ratio breaks.
+
+When a column fails, the group is the wrong container. Use one of these remedies:
+
+1. Collapse the contents into one reflowing `mj-text` with `setRangeHyperlink` per linked range.
+2. Drop the group so the columns stack.
+3. Hide decorative content with `mobileStylesHideInMobileDevice`.
+
+Widening is usually unavailable because group columns must still sum to the content box; taking
+pixels from one neighbor can simply move the failure.
+
+**Failure signature:** words break character by character only on mobile while the Figma canvas
+and desktop preview look correct. The measured four-item navigation rendered as
+`CHA / NGI / NG`, `G / E / A / R`, `CLO / THIN / G`, `GI / F / T / S` at 375px. Its 86px GEAR
+column resolved to `86 / 560 * 335 = 51px`, too narrow for the word in the exported 17px font.
+Rebuilding the row as one reflowing text node with four hyperlink ranges produced clean lines.
+
+Run the same arithmetic on announcement bars and hero copy. A second measured case had a text
+column resolving to 190px for copy whose natural hug width was 191px. One pixel of hidden deficit
+would have wrapped poorly on every phone.
+
 ### R3.4 mj-column
 
 - Node: FRAME, child of `mj-section` or `mj-group`.
@@ -366,10 +407,24 @@ The route, since `figma.createImageAsync` is unavailable to an agent:
 1. `download_assets` on the NODE in the source file (`get_screenshot` on the node, or
    `node.exportAsync`, do the same job), at 2x, to a local PNG. Reading `fills[0].imageHash` and
    fetching that asset instead is the mistake, not the shortcut.
-2. `upload_assets` to place that PNG onto the `mj-image` rectangle in the target file. The crop is
+2. **Open the PNG and look at it before uploading.** Three defects present as layout bugs rather
+   than asset bugs:
+   1. **Baked-in white.** A node with its own white background exports opaque and becomes a white
+      box on a colored band. For line art, key white to transparency and set the color explicitly.
+      For a photographic cutout, flood-fill the surround from the border to the real band color so
+      white highlights inside the product survive.
+   2. **The neighbour's content.** When cropping from a rendered parent, compare the far edge with
+      the adjacent column's actual start, not the source node's declared width. A source node can
+      be wider than its visible content. One measured crop carried 28px of the neighboring text and
+      button edge while every Figma column measurement remained correct.
+   3. **A fused row that is not missing.** Use the same visual inspection discipline required for
+      any row captured as one composite: confirm the row is intentionally fused before treating
+      the asset as complete.
+   For a sliced icon set, composite each PNG onto its actual band color and inspect the result.
+3. `upload_assets` to place that PNG onto the `mj-image` rectangle in the target file. The crop is
    baked into the pixels now, so the fill is a plain `scaleMode: 'FILL'` with an identity transform
    and there is no crop left to reproduce.
-3. Verify against a screenshot of the SOURCE NODE, never against the source's raw asset.
+4. Verify against a screenshot of the SOURCE NODE, never against the source's raw asset.
 
 **Aspect ratio: preserve the render's, never stretch to fit a chosen width.** Measure the ratio on
 the rendered PNG and derive the height from the width you picked: `height = round(targetWidth *
@@ -488,6 +543,31 @@ A gap the block above already pays for is not yours to pay for again: R0.7.
 
 **R5.2 Colors.** All colors are hex strings. One SOLID fill per background; TEXT fills for
 text color. `transparent` or absent means `fills = []`.
+
+### R5.2.1 Measuring a type size off a screenshot
+
+When the worker returns a size that conflicts with the audit's ramp, or two plausible sizes differ
+by several pixels, measure ink height instead of guessing:
+
+1. Crop tightly to one line in the source screenshot.
+2. Threshold the crop to isolate the glyphs from the background.
+3. Measure the pixel height of the ink as `measuredCapHeight`.
+4. Find a known reference line from the audit's ramp in the same casing and measure its ink height
+   as `knownCapHeight`; keep its text size as `knownSize`.
+5. Solve:
+
+   ```
+   size = knownSize * (measuredCapHeight / knownCapHeight)
+   ```
+
+Compare all-caps with all-caps and mixed-case with mixed-case. Ascenders and descenders change the
+cap-to-em ratio, so mixing casing shifts the result. Measured references from the Red Paddle
+migration: an all-caps line at 28px measured 20px of ink, while a mixed-case line at 36px measured
+33px.
+
+Round the result onto the audit's ramp, never to the nearest round number. The purpose of the
+measurement is to choose between approved ramp steps. If no step fits, return to the foundations
+ramp-gap decision rather than inventing a per-module size.
 
 **R5.3 Alignment master table.**
 

@@ -47,6 +47,15 @@ references contain the full rules.
 | `href` | `mj-image` rectangle or `mj-button` frame | Real link; omit when absent and never write `#` |
 | `altText` | `mj-image` rectangle | Meaningful alternative text, or intentionally empty for decorative imagery |
 
+**Magic link values the exporter rewrites at export time.** These values are portable
+instructions, not placeholder URLs. Put them on the link for text, buttons, or images. Never
+invent a placeholder unsubscribe URL, and never hard-code an ESP merge tag unless the customer
+explicitly requests that ESP-specific value.
+
+| Put this on the link | What the exporter does |
+| --- | --- |
+| `unsubscribe.com` | Replaces it with the selected ESP's unsubscribe merge tag. Source: [Email Love unsubscribe links](https://help.emaillove.com/plugin/links/unsubscribe). |
+
 Several mobile behaviors are not shared keys. A FILL `mj-button` produces full-width mobile;
 an image whose rectangle equals its content width stays fluid; mobile padding is a node property;
 and columns stack by default unless `stackColumns='false'` or `mj-group` supplies the lockup.
@@ -242,6 +251,11 @@ Build the scaffold every later batch depends on:
      ratio hides in the middle of one. On a REFERENCE ONLY source there is no ratio check to pair it
      with, so the page carries the whole load: look at the specimen sheet and confirm the standard
      ramp reads as a ramp.
+     **A gap in the ramp is a decision for foundations, not for batch 3.** If the sheet jumps from
+     26 to 17, or from 30 to 20, inspect the source for eyebrows, captions, small subheads, or fine
+     print that belongs between those steps. If any exists, add the missing step now and record it
+     as a standardization. A step added this way sits outside the ratio check because it was not
+     derived from the audit's factor; state which original rows the ratio check covers.
    - **Buttons.** One component per button style the audit listed, built as step 4 specifies, each
      visibly labeled with its name, each with its fill bound to the semantic token that style
      actually uses. Where the inventory has a Buttons category, its modules land here too, below
@@ -302,6 +316,16 @@ Build the scaffold every later batch depends on:
    customer's email-safe fallback choices from the audit (never the unlicensed brand font unless the
    user confirms web-font hosting). Name styles as the customer named theirs. **The typefaces come
    from the source on every tier. Where the SIZES come from is the tier's answer.**
+
+   **Check that the target font is installed before building the ramp.** Call
+   `figma.listAvailableFontsAsync()` and look for the family by name. Agent-run Figma environments
+   commonly expose Google Fonts but not Helvetica, Helvetica Neue, or Arial. When Arial or
+   Helvetica is the target and is unavailable, build in **Arimo**, the metrically compatible Arial
+   clone, so advance widths and pinned-column slack remain representative. Record the consequence
+   in the foundations report: the exporter writes the Figma family into `font-family`, so output
+   will say Arimo until the family is swapped or Arial is accepted at send time. Also record any
+   collapse from brand weights such as Light, Extra Bold, or Black to the Regular and Bold weights
+   available in the chosen email-safe stack.
 
    **REFERENCE ONLY: build the conventional ramp, and do not divide anything.** 12 fine print, 14
    secondary, 16 body, 20 subhead, 24 to 30 headline, line height 1.4 to 1.5 on body copy and tighter
@@ -444,7 +468,9 @@ Pages, in canonical order:
       in that style, and a caption naming family, weight, and size, ordered largest to smallest.
       Then look at it: does the ramp step evenly? A step that reads wrong beside its neighbors is
       a factor problem, not a style problem, on a source built through a factor, and a mis-built
-      standard ramp on one that was not (step 3).
+      standard ramp on one that was not (step 3). The target family was checked with
+      `figma.listAvailableFontsAsync()` before the ramp was built, and any Arimo substitution,
+      weight collapse, or intentionally added ramp-gap step is recorded in the foundations report.
 - [ ] **Buttons:** one component per audit button style, each labeled, each a styled frame with a
       single text node, the label's TEXT property on the component itself, no loose instances left
       on the page.

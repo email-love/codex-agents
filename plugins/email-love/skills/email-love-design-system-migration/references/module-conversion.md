@@ -136,6 +136,10 @@ worker, transcribe the returned MJML JSON into the target file, then verify.
      `X-Trivial-Response: true` means the result degenerated to a single image and you should
      re-run with `recache=1` (and usually `decomposeRasterized=1`). A full module takes 20 to
      40 seconds.
+   - **If the worker returns 403 with body `error code: 1010`, treat it as a Cloudflare browser
+     check, not an authentication failure.** Retry with a normal recent Chrome or Firefox
+     `User-Agent` header. The empty Bearer and gumroad provider headers remain correct. A 403
+     without code 1010 is still an authentication problem, so re-check those headers instead.
 
    From the Codex shell:
 
@@ -295,8 +299,15 @@ This mapping covers almost everything you will meet:
   bleeds past its block comes back either as a full-width `mj-image` above the copy or as the
   whole band flattened into one image. Neither is the answer. Rebuild it per R3.4.1, and note in
   the module's report line that you did.
-- **Unpinned colors, radii, and fonts drift** between runs, and unpinned fonts flatten to
-  Arial. Correct them against the foundations rather than accepting what came back.
+- **Take STRUCTURE from the worker and NUMBERS from measurement.** The worker is a strong
+  structure detector: trust its rows, columns, stacking order, button classification, and useful
+  structural splits. It is not a measuring instrument. Colors drift, sizes land on plausible round
+  numbers instead of the customer's ramp, and unpinned fonts flatten to Arial. Transcribe the tree,
+  then replace every color with one sampled from source pixels, every type size with one measured
+  by the cap-height method in R5.2.1, and every font with the foundations mapping. A size absent
+  from the audit's ramp is the loudest signal that the worker guessed. The measured Red Paddle run
+  produced nine mismatches, from `#CCCCCC` for `#FFFFFF` through four wrong reds to a 40px headline
+  where the approved ramp said 36px and had no 40px step.
 - Map every text node to the type styles from foundations.
 - Buttons: `mj-button-Frame` wrapping an instance of the foundations button component.
 - **Honor the inventory row's verdict.** Verdict A: live text throughout. **Verdict
@@ -457,6 +468,13 @@ Run the R9 post-build checklist in `render-components-validation.md`, plus:
   a value or named exception in the audit's Spacing system. List the role and system value for
   every padding. An unrecognized value is a fail and a designer question, not a local override.
   Any mobile padding above 160px on a 320px viewport is a defect.
+- **Group columns resolve wide enough on mobile** (R3.3.2): for every `mj-group` column, compute
+  `columnWidth / groupWidth * (375 - mobile side padding)`. A text carrier must resolve to at
+  least the exported-font width of its longest unbreakable word times 1.05. A fixed-aspect image
+  carrier must resolve to at least its natural image width. List every violation by node id; an
+  empty list is the only pass. Repair a failure by collapsing to one reflowing `mj-text` with
+  hyperlink ranges, dropping the group so columns stack, or hiding decorative content on mobile.
+  Desktop Figma and desktop preview cannot expose this defect.
 - **Semantic-token bind count:** every non-placeholder solid fill resolves to a semantic variable
   from the audit's Palette. List each unbound node id, raw hex, and intended role. Placeholder gray
   image fills are the only exception, and each must be identified as intentional. An empty
@@ -482,11 +500,16 @@ Run the R9 post-build checklist in `render-components-validation.md`, plus:
   If the rebuild is 20 to 40px taller than the source, detect runs of non-canvas pixels in both
   renders and derive the padding correction from their content-band differences. Do not eyeball a
   nudge; band detection makes the second pass deterministic.
-  **Then take a second screenshot pair at mobile width (390px)**, both source and rebuild, and
-  diff those too. The desktop pair is silent on stacking by construction, so any group-vs-loose-
-  columns mistake is invisible in it; the mobile pair surfaces it in one glance. On the rebuild's
-  mobile screenshot, walk every section that had more than one column and confirm its actual
-  stacking behavior matches the decision recorded in step 3 Part A.
+  **Mobile visual: render it, do not reason about it.** Figma has no mobile breakpoint, so a
+  `get_screenshot` call at 390px only rescales desktop-shaped canvas pixels. After the batch is
+  provisionally uploaded to the plugin library, compose a QA email from its wrappers and call
+  `emaillove_preview_email` with the compose token. Its exporter-generated response contains the
+  desktop and mobile renders. Diff the mobile render against the source's mobile design, or against
+  the source screenshot when no mobile design exists. Fail the batch on any word broken mid-string,
+  image aspect ratio that differs from desktop, stacked column retaining a desktop gutter as an
+  indent, or section whose actual grouped or stacked behavior contradicts step 3 Part A. Build the
+  batch, upload provisionally, render and diff, then open the next batch. Finding a construction
+  error in batch 1 costs one correction; finding it in batch 5 costs five.
 - Mobile: every multi-column section has an explicit stacking decision from step 3 Part A
   (either `mj-group` with the lockup reason, or `loose columns` with why stacking is expected),
   and the shared plugin data keys that produce it are listed. A section with more than one
@@ -543,8 +566,11 @@ An empty list is the only pass.
 - Every `mj-image` has an explicit real `href` or is recorded as deliberately unlinked, plus
   meaningful `altText` or an explicit decorative-empty decision. Never use `#`.
 - Every CTA `mj-button` has a real `href`; a linkless badge or pill is recorded as intentional.
-- Footer copy includes a real company name, postal address, and unsubscribe mechanism. No lorem
-  ipsum, literal `Address`, placeholder legal copy, or `#` unsubscribe link.
+- Footer copy includes a real company name, postal address, and unsubscribe mechanism. Use
+  `unsubscribe.com` as the portable default; the exporter replaces it with the selected ESP's
+  unsubscribe merge tag. Use a specific merge tag only when the customer explicitly asks for that
+  ESP-specific value. No lorem ipsum, literal `Address`, placeholder legal copy, invented
+  unsubscribe URL, or `#` unsubscribe link.
 
 Fix every violation, or explicitly classify and rename a campaign as non-sending QA. Do not open
 the customer handoff while this list is non-empty.

@@ -100,6 +100,13 @@ present in the export. For anything else the appendix does not map in detail, co
 from mapped primitives, and reserve `mj-hero` for a design that genuinely needs live text over
 a full-bleed background image.
 
+**For `mj-navbar`, do not invent a mapping.** Rebuild the row as one `mj-text` whose characters
+contain every label, with one `setRangeHyperlink` per label. Separate labels with a normal space
+plus one or more non-breaking spaces so the visible gap survives HTML whitespace collapsing while
+the line can break between labels but never inside one. Apply the audit's Nav Link ramp style and
+the source alignment. This reflows on mobile, unlike pinned group columns, and supports separately
+linked labels without one column per item.
+
 ## R7. Components: when a node is a COMPONENT instead of a FRAME
 
 **Make it a COMPONENT when it is meant to be reused**: a converted design-system module
@@ -250,6 +257,10 @@ there.
    Tahoma, or Georgia (R3.3.1), and the inner group percentages still sum to 100. A label that fits
    exactly on the Figma canvas is a wrap in the plugin Preview, because the canvas font and the
    font the email loads are different binaries. FILL columns are exempt.
+   For each column inside `mj-group`, also compute its resolved width at 375px per R3.3.2. A text
+   carrier must fit its longest unbreakable word times 1.05 in the exported font, and a fixed-aspect
+   image carrier must fit its natural image width. R3.3.1 desktop slack does not satisfy this
+   separate mobile-shrink check.
 10. **Every button's width sizing was a decision** (R0.4), and buttons are at least 44px tall,
     from `inner-padding` rather than a set height.
 11. All vertical spacing is padding: no gaps produced by a taller frame, by `itemSpacing`, or
