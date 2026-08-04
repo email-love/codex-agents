@@ -1,5 +1,35 @@
 # Changelog
 
+## 4.2.0 - 2026-08-03
+
+Batch 6 port from claude-skills `23f0d9b`: verified mobile schemas, a complete mobile type
+ramp, corrected dark-mode roots, asset transparency, and multi-column top alignment.
+
+- Replaces guessed mobile plugin-data fields with the two observed schemas. Container padding
+  uses `mobileStylesPadding*` plus `isPaddingActive = 'true'`; mobile type uses `fontSize` plus
+  `fontSize_mode = 'override'` on the inner TEXT node. Read-back proves storage and plugin Preview
+  proves effect.
+- Makes the audit derive a two-anchor mobile type compression with a 14px floor, records it in a
+  required Mobile styles report section, and applies it to every migrated text node.
+- Makes Phase 3 mobile work unconditional. Every stacking column except the last receives 28px
+  mobile bottom padding, and measured source mobile differences override the default.
+- Requires percentage line heights, reapplies line height after range font changes, and checks
+  each text node returns one styled line-height segment.
+- Corrects the six root theme keys to dark-mode-only values. The light body background now lives
+  only in `lightThemeBackgroundColor`; absent brand guidance uses the documented house defaults.
+- Treats UI icons and brand logos differently when removing baked backgrounds, and requires a
+  contrast check before a logo is made transparent.
+- Top-aligns unequal multi-column rows by default while preserving independent horizontal
+  alignment through `counterAxisAlignItems`.
+- Applies the universal mobile-schema, dark-mode, and multi-column rules to the builder's shared
+  render references as well as the migration workflow.
+
+Minor version bump: the audit report gains a required Mobile styles section. Pins upstream
+provenance to `23f0d9b508478fa7a0a286209e2c196f25fa60ac`, migration tag
+`emaillove-migration-audit-v1.19.0`, and converter tag
+`emaillove-eds-converter-v1.35.0`. The builder tag remains
+`emaillove-figma-builder-v2.9.2`.
+
 ## 4.1.1 - 2026-08-02
 
 Port from claude-skills `e6b532b` (task #52): multi-column gutter guardrail.

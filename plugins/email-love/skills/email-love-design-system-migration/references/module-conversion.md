@@ -244,6 +244,15 @@ This mapping covers almost everything you will meet:
 | ESP tokens, Handlebars, dynamic cards | `mj-raw` | Passed through verbatim. |
 | A composition that genuinely cannot be rebuilt | an untagged frame in a column | Deliberately flattened to a hosted image, still editable in Figma. |
 
+- **Multi-column rows top-align by default.** Columns holding different amounts of content
+  otherwise centre against each other and the row reads as a jumble. The exporter reads a
+  column's `primaryAxisAlignItems` as `vertical-align` (MIN = top) and its
+  `counterAxisAlignItems` as column `text-align`, two independent reads, so a column can be
+  top-pinned with centred text: primary MIN, counter CENTER. Set the parent section's
+  `counterAxisAlignItems = 'MIN'` too, so the canvas shows what the export does. This
+  deliberately relaxes the matched-axes rule for multi-column rows; single-column sections keep
+  it. Override to middle only where the design demonstrably centres, such as a badge beside a
+  headline in a lockup.
 - **Build the pair, do not style the wrapper.** The wrapper carries layout; the inner node
   carries content. An image is an `mj-image-Frame` containing a rectangle whose fill is the
   image, never a frame with an image fill on itself. A divider is an `mj-divider-Frame`
@@ -305,7 +314,7 @@ This mapping covers almost everything you will meet:
   numbers instead of the customer's ramp, and unpinned fonts flatten to Arial. Transcribe the tree,
   then replace every color with one sampled from source pixels, every type size with one measured
   by the cap-height method in R5.2.1, and every font with the foundations mapping. A size absent
-  from the audit's ramp is the loudest signal that the worker guessed. The measured Red Paddle run
+  from the audit's ramp is the loudest signal that the worker guessed. The measured batch 4 run
   produced nine mismatches, from `#CCCCCC` for `#FFFFFF` through four wrong reds to a 40px headline
   where the approved ramp said 36px and had no 40px step.
 - Map every text node to the type styles from foundations.
@@ -353,24 +362,38 @@ line, per section, in this format:
 A section with more than one column and no recorded decision is not done. Step 5's mobile
 verification fails a module where any multi-column section lacks a decision.
 
-**Part B: merge the mobile twin, if one exists.**
+**Part B: write the mobile styles. This always runs.**
 
-Diff the source's mobile frame against its desktop sibling and express every intentional
-difference as Mobile Styles data on the rebuilt nodes, via shared plugin data:
+An earlier version fired only when the source had a mobile twin, which on a typical migration
+means never, and the result was a library correct at 640 and unreadable at 375. The audit's
+Mobile styles section is the input. Use only the observed schemas from foundations: Schema A
+for containers and Schema B for text nodes. An invented key fails silently, and an invented
+activation flag can actively break the output.
 
-- Padding: `mobileStylesPaddingTop/Right/Bottom/Left` (inner variants exist as
-  `mobileStylesInnerPadding*`).
-- Visibility: `mobileStylesHideInMobileDevice` / `mobileStylesHideInDesktopDevice` ("true").
-  Desktop-only and mobile-only twins of a region become two nodes, one hidden each way.
-- Alignment: `mobileStylesTextAlign` / `mobileStylesAlign`.
-- Column stacking on the wrapper when the mobile layout stacks: `stackColumns`.
+Per module:
 
-Ignore differences that are just the 390px frame being narrower; capture only deliberate
-changes (padding scale, hidden elements, alignment shifts, reordered stacks). When a
-difference cannot be expressed in these keys (different copy, different image crop), note it
-in the module's report line for the designer.
+- **Mobile font size on every `mj-text` and `mj-button-text` TEXT node** from the audit's mobile
+  ramp: `fontSize` = the mobile pixels and `fontSize_mode = 'override'`. Put both on the TEXT node,
+  not the frame.
+- **No mobile line heights.** The percentage line heights from foundations step 3 ride the mobile
+  size automatically. Only write `lineHeight` plus `lineHeight_mode` for a genuine per-module
+  exception, and record it.
+- **Mobile padding on every wrapper or section whose horizontal inset exceeds the mobile value:**
+  write `mobileStylesPaddingTop/Right/Bottom/Left` plus `isPaddingActive = 'true'` on the same node.
+- **Stacked-column spacing:** every loose-column section whose columns stack on mobile gets
+  `mobileStylesPaddingBottom = '28'` plus `isPaddingActive = 'true'` on every column except the
+  last. Its desktop gutter is horizontal and disappears on stack; without this, stacked cards and
+  badges land flush. Exclude the last column so the section's bottom padding is not doubled (R0.7).
+- **Visibility** follows the audit's hide-on-mobile list; **alignment** follows any measured mobile
+  difference; **stacking** follows Part A.
 
-When the source has no mobile twin, Part B is a legitimate skip. Part A is not.
+Read every key back and treat that as necessary, not sufficient: your own write always reads back.
+The true verification is the rendered mobile output in step 5 or the export in step 6. List every
+key written in the module's report line.
+
+**Where the source has a mobile twin**, diff it first and let measured differences win over the
+derived ramp for that module, noting which. Ignore differences caused only by the narrower frame.
+Send inexpressible differences, such as different copy or image crop, to the designer in the report.
 
 ### 4. Confirm the component shape, add properties, and pick its category
 
@@ -439,9 +462,11 @@ Run the R9 post-build checklist in `render-components-validation.md`, plus:
 - Structural checklist: walk the tree and list every violation by node id in the batch report;
   an empty list is the only pass. The `name` plugin data key resolves to a real tag on every node,
   including each button's `mj-button-text`; every leaf is a complete tagged pair; both alignment
-  axes match on every auto-layout frame; no detached instances; no unrecognized frames except
-  intentional editable-image regions; `mj-column-inner`, if used, is literally `children[0]` of
-  its column. Report an alignment mismatch as `<node id>: primary=X, counter=Y`.
+  axes match on every auto-layout frame except the deliberate multi-column top-align case (primary
+  MIN with counter on the content's horizontal alignment); no detached instances; no unrecognized
+  frames except intentional editable-image regions; `mj-column-inner`, if used, is literally
+  `children[0]` of its column. Report an alignment mismatch as
+  `<node id>: primary=X, counter=Y`, marking multi-column top-align cases as intentional.
 - Sizing: walk the tree and confirm every frame is vertical HUG, the only fixed height is an
   `mj-spacer`, every FIXED width is one of the load-bearing cases, every pinned width that
   carries text has slack (render rule R3.3.1), and each button's width sizing was chosen for its
@@ -525,12 +550,15 @@ Run the R9 post-build checklist in `render-components-validation.md`, plus:
   indent, or section whose actual grouped or stacked behavior contradicts step 3 Part A. Build the
   batch, upload provisionally, render and diff, then open the next batch. Finding a construction
   error in batch 1 costs one correction; finding it in batch 5 costs five.
-- Mobile: every multi-column section has an explicit stacking decision from step 3 Part A
-  (either `mj-group` with the lockup reason, or `loose columns` with why stacking is expected),
-  and the shared plugin data keys that produce it are listed. A section with more than one
-  column and no recorded decision is a fail. An empty mobile list is impossible for a module
-  with any multi-column section: even "loose columns, stack expected, no keys set" is a real
-  answer with a visible line.
+- Mobile: every multi-column section has its Part A stacking decision recorded, and Part B's keys
+  are all present and from the observed schemas only: `fontSize` plus `fontSize_mode` on every
+  text node (read back by node id), `isPaddingActive` beside every mobile padding, and 28px bottom
+  padding on every non-last stacking column. **A mobile padding without its flag, or a font size
+  on the frame instead of the text node, is a fail that reads back perfectly**, which is why the
+  batch also needs the rendered mobile check before review.
+- **Range hygiene:** every text node returns one segment from
+  `getStyledTextSegments(['lineHeight'])`. A second segment means a bold or colour range carries
+  a detached frozen line height.
 
 ### 6. Export sniff test, once per batch
 
@@ -575,6 +603,9 @@ An empty list is the only pass.
 - All nine required root values are real and non-empty: `nodeType='mainFrame'`,
   `backgroundColor`, `contentColor`, `textColor`, `linkColor`, `buttonTextColor`,
   `buttonContentColor`, `lightThemeBackgroundColor`, and `fallBackFontName`.
+  The six theme keys hold dark-mode values from the audit Palette's dark proposal or the house
+  defaults, never the light palette repeated; `lightThemeBackgroundColor` holds the light body
+  background.
 - `emailSubject` and `emailPreHeader` are non-blank real copy, not a module name or TODO.
 - `fallBackFontName` is one family such as `Arial`, not a CSS stack.
 - Every campaign root has a specific name. Prefix scratch roots with `QA only, do not send`.

@@ -11,7 +11,7 @@ This is part 1 of the packaged transcription specification. Read it together wit
 
 This is the operative subset of `render-spec.md` and `structure.md` from the Claude skills
 at immutable upstream commit
-[`d0d88b6`](https://github.com/email-love/claude-skills/tree/d0d88b62656f8c54cc66abb20368546544c110cc),
+[`23f0d9b`](https://github.com/email-love/claude-skills/tree/23f0d9b508478fa7a0a286209e2c196f25fa60ac),
 derived from the plugin source (`email-love/Figma-plugin`), not from inference. Do not
 reconstruct these rules from memory: that is hand-authoring by another name.
 
@@ -337,7 +337,8 @@ A4's image fills sit on rectangles several levels inside an instance.
    CENTER) to center. On a VERTICAL frame that mapping is wrong for what you see on canvas,
    so the plugin's own components always set `primaryAxisAlignItems` and
    `counterAxisAlignItems` to the SAME value. Do the same on every auto-layout frame you
-   create. The shared value is what exports.
+   create, except the deliberate multi-column top-align case in R3.4: primary MIN with counter
+   on the content's horizontal alignment. The shared value is what exports everywhere else.
 6. **Fills discipline.** The exporter treats `fills[0]` as a background signal: leaf wrapper
    frames (`mj-text-Frame`, `mj-button-Frame`, `mj-divider-Frame`, `mj-spacer`) with any
    visible fill export `container-background-color`; `mj-image-Frame` must always have
@@ -415,20 +416,25 @@ whole email is meant to be reused; nothing below changes.
 - **Layer name:** the email name (this becomes the component name and storage path if the
   frame is later saved). Do NOT put a tag in the root layer name, and do NOT write a `name`
   key on it: the root is identified by `nodeType`, not by a tag.
-- **Shared plugin data (namespace `emaillove`), all REQUIRED:** the nine keys listed under
-  "Root frame" above. `nodeType` = `mainFrame`; `backgroundColor` (dark-mode page background,
-  from the mj-body or first-wrapper background hex); `contentColor` (dark-mode section
-  background, the dominant section background hex); `textColor` (the dominant mj-text
-  `color`); `linkColor` (the design link color, else same as textColor); `buttonTextColor`
-  (the button label color); `buttonContentColor` (the button background color);
-  `lightThemeBackgroundColor` (the mj-body background hex, exports as mj-body
-  `background-color`); `fallBackFontName` (`Arial`).
+- **Shared plugin data (namespace `emaillove`), all REQUIRED:**
 
-  Empty theme keys are NOT neutral: the exporter substitutes dark defaults (`#000000`
-  background, white text), which wrecks a light email. Where the values come from, in
-  priority order: an established design-system palette used identically on every email root,
-  and only when no such palette exists yet, this email's own MJML colors as a stand-in,
-  flagged for review.
+  | key | value |
+  | --- | --- |
+  | `nodeType` | `mainFrame` (how the plugin recognizes the template; without it nothing else matters) |
+  | `backgroundColor` | dark-mode page background. House default `#000000` |
+  | `contentColor` | dark-mode content/section background. House default `#1F1F1F` |
+  | `textColor` | dark-mode text color. House default `#FFFFFF` |
+  | `linkColor` | dark-mode link color. House default `#FFFFFF` |
+  | `buttonTextColor` | dark-mode button label color. House default `#000000` |
+  | `buttonContentColor` | dark-mode button background. House default `#FFFFFF` |
+  | `lightThemeBackgroundColor` | the light mj-body background; the one light value in the set |
+  | `fallBackFontName` | `Arial` |
+
+  **The six theme keys are dark-mode values, and filling them with the light palette ships
+  light-on-light.** They fire only inside the dark-mode media query. Always set all of them.
+  Use the file's established dark-mode treatment on every email root identically. Where none
+  exists, use the house defaults above and flag them for review. Never substitute the light
+  palette as a stand-in. `lightThemeBackgroundColor` is the light body value.
 - Optional: `emailSubject`, `emailPreHeader` (plain strings).
 - Also give the root frame a visible SOLID fill of the body background so the canvas looks
   right.

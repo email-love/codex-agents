@@ -206,6 +206,11 @@ would have wrapped poorly on every phone.
   the column `vertical-align`. For hug-height columns the vertical value is visually
   irrelevant, so horizontal fidelity wins; do not try to honor a worker `vertical-align: top`
   on a centered column.
+  **Exception, multi-column rows:** when a section holds two or more columns whose content heights
+  differ, set `primaryAxisAlignItems = 'MIN'` (exports vertical-align: top) while keeping
+  `counterAxisAlignItems` on the content's horizontal alignment. The two properties are independent
+  exporter reads, so this does not disturb text-align. Top is the default for multi-column rows;
+  matched axes remain the rule for single-column sections.
 - Attribute mapping:
 
   | MJML attr | Figma property |
@@ -606,7 +611,7 @@ by several pixels, measure ink height instead of guessing:
    ```
 
 Compare all-caps with all-caps and mixed-case with mixed-case. Ascenders and descenders change the
-cap-to-em ratio, so mixing casing shifts the result. Measured references from the Red Paddle
+cap-to-em ratio, so mixing casing shifts the result. Measured references from the batch 4
 migration: an all-caps line at 28px measured 20px of ink, while a mixed-case line at 36px measured
 33px.
 

@@ -11,7 +11,7 @@ This is part 1 of the packaged migration transcription specification. Read it to
 
 This is the operative migration-specific subset of `render-spec.md` and `structure.md` from
 the Claude skills at immutable upstream commit
-[`e6b532b`](https://github.com/email-love/claude-skills/tree/e6b532b2c4b3681fc4a1ac2d2090ec7e87afd2ae),
+[`23f0d9b`](https://github.com/email-love/claude-skills/tree/23f0d9b508478fa7a0a286209e2c196f25fa60ac),
 derived from the plugin source (`email-love/Figma-plugin`), not from inference. Do not
 reconstruct these rules from memory: that is rebuilding by eye under another name.
 
@@ -436,7 +436,8 @@ per instance (R4.2.1), because that is a resize aimed at a rectangle several lev
    CENTER) to center. On a VERTICAL frame that mapping is wrong for what you see on canvas,
    so the plugin's own components always set `primaryAxisAlignItems` and
    `counterAxisAlignItems` to the SAME value. Do the same on every auto-layout frame you
-   create. The shared value is what exports.
+   create, except the deliberate multi-column top-align case in R3.4: primary MIN with counter
+   on the content's horizontal alignment. The shared value is what exports everywhere else.
 6. **Fills discipline.** The exporter treats `fills[0]` as a background signal: leaf wrapper
    frames (`mj-text-Frame`, `mj-button-Frame`, `mj-divider-Frame`, `mj-spacer`) with any
    visible fill export `container-background-color`; `mj-image-Frame` must always have
@@ -523,19 +524,20 @@ email is meant to be reused; nothing below changes.
   | key | value |
   | --- | --- |
   | `nodeType` | `mainFrame` (how the plugin recognizes the template; without it nothing else matters) |
-  | `backgroundColor` | dark-mode page background. Use the mj-body or first-wrapper background hex |
-  | `contentColor` | dark-mode content/section background. Use the dominant section background hex |
-  | `textColor` | dark-mode text color. Use the dominant mj-text `color` |
-  | `linkColor` | link color. Use the design link color, else same as textColor |
-  | `buttonTextColor` | the button label `color` |
-  | `buttonContentColor` | the button `background-color` |
-  | `lightThemeBackgroundColor` | the mj-body background hex; exports as mj-body `background-color` |
+  | `backgroundColor` | dark-mode page background. House default `#000000` |
+  | `contentColor` | dark-mode content/section background. House default `#1F1F1F` |
+  | `textColor` | dark-mode text color. House default `#FFFFFF` |
+  | `linkColor` | dark-mode link color. House default `#FFFFFF` |
+  | `buttonTextColor` | dark-mode button label color. House default `#000000` |
+  | `buttonContentColor` | dark-mode button background. House default `#FFFFFF` |
+  | `lightThemeBackgroundColor` | the light mj-body background; the one light value in the set |
   | `fallBackFontName` | `Arial` |
 
-  Empty theme keys are NOT neutral: the exporter substitutes dark defaults (`#000000`
-  background, white text), which wrecks a light email. In a migration the audit's proposed
-  palette is the source, used identically on every email root; consistency across the system
-  beats per-email color matching.
+  **The six theme keys are dark-mode values, and filling them with the light palette ships
+  light-on-light.** They fire only inside the dark-mode media query. Always set all of them.
+  Use the audit Palette's dark-mode proposal on every email root identically. Where no proposal
+  exists, use the house defaults above and flag them for review. Never substitute the light
+  palette as a stand-in. `lightThemeBackgroundColor` is the light body value.
 - Optional: `emailSubject`, `emailPreHeader` (plain strings).
 - Also give the root frame a visible SOLID fill of the body background so the canvas looks
   right.

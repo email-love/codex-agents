@@ -31,10 +31,11 @@ open an instance and correct its internals, which the components already got rig
 - **An image is an `mj-image-Frame` containing a tagged `mj-image` rectangle**, as a pair.
   Never a frame with an image fill on itself: a childless wrapper exports as an empty cell.
   The same pairing applies to text, buttons, and dividers.
-- **Alignment: set both axes to the same value.** The exporter reads `primaryAxisAlignItems`
-  for **horizontal** alignment, so a vertical column that looks centered on canvas exports as
-  left. Every auto-layout frame you create must have
-  `primaryAxisAlignItems === counterAxisAlignItems`.
+- **Alignment: set both axes to the same value, except for multi-column top alignment.** The
+  exporter reads `primaryAxisAlignItems` for horizontal alignment in most frames, so a vertical
+  column that looks centered on canvas can export as left. Match the two axes everywhere except
+  the deliberate R3.4 multi-column case: primary MIN for top alignment, with counter on the
+  content's horizontal alignment.
 - **Sizing is not cosmetic: heights hug, widths are a decision.** Every frame you create,
   from the root down, is vertical HUG. A fixed height clips content in Outlook and breaks the
   first time the copy runs a line longer. Vertical rhythm is auto layout padding, never a
@@ -66,24 +67,25 @@ Preferred: duplicate an existing Email Love email frame, which carries all of th
 When you create a root from scratch, it is a top-level vertical auto-layout frame with its
 width FIXED at the email width (600 or 640), its **height Hug** (R0.1: never a fixed height,
 on the root or on anything inside it), and **all nine** keys set. Empty theme keys are not
-neutral: the exporter substitutes dark defaults, which wrecks a light email.
+neutral: the exporter substitutes its own dark defaults, which may not match the brand treatment.
 
 ```js
 frame.setSharedPluginData('emaillove', 'nodeType', 'mainFrame')
-frame.setSharedPluginData('emaillove', 'backgroundColor', '#ffffff')        // dark-mode page bg
-frame.setSharedPluginData('emaillove', 'contentColor', '#ffffff')           // dark-mode section bg
-frame.setSharedPluginData('emaillove', 'textColor', '#000000')
-frame.setSharedPluginData('emaillove', 'linkColor', '#000000')
-frame.setSharedPluginData('emaillove', 'buttonTextColor', '#ffffff')
-frame.setSharedPluginData('emaillove', 'buttonContentColor', '#000000')
-frame.setSharedPluginData('emaillove', 'lightThemeBackgroundColor', '#ffffff') // exports as mj-body bg
+frame.setSharedPluginData('emaillove', 'backgroundColor', '#000000')        // dark-mode page bg
+frame.setSharedPluginData('emaillove', 'contentColor', '#1F1F1F')           // dark-mode section bg
+frame.setSharedPluginData('emaillove', 'textColor', '#FFFFFF')
+frame.setSharedPluginData('emaillove', 'linkColor', '#FFFFFF')
+frame.setSharedPluginData('emaillove', 'buttonTextColor', '#000000')
+frame.setSharedPluginData('emaillove', 'buttonContentColor', '#FFFFFF')
+frame.setSharedPluginData('emaillove', 'lightThemeBackgroundColor', '#FFFFFF') // light mj-body bg
 frame.setSharedPluginData('emaillove', 'fallBackFontName', 'Arial')
 ```
 
-Setting the dark keys equal to the light design colors makes dark mode render like light,
-which is the right default for a first pass. For a genuinely dark email, invert them
-(backgroundColor `#000000`, contentColor `#1f1f1f`, textColor and linkColor `#ffffff`). All
-of these stay editable in the plugin's settings panel afterward.
+The six theme keys are dark-mode-only values. Use the file's established dark treatment when
+one exists; otherwise use the house defaults above and flag them for review. Never repeat the
+light palette into those keys, which can produce light-on-light content. The one light value in
+the set is `lightThemeBackgroundColor`. All of these stay editable in the plugin's settings
+panel afterward.
 
 ## Links, alt text, subject, and preheader
 
@@ -112,13 +114,26 @@ plainly to change it in the plugin.
 
 ## Mobile styles
 
-Same pattern, on the element frame, same private-data caveat: `mobileStylesPaddingTop` /
-`Right` / `Bottom` / `Left` (and `mobileStylesInnerPadding*`),
-`mobileStylesHideInMobileDevice` / `mobileStylesHideInDesktopDevice` set to `'true'` (a
-desktop-only and mobile-only variant of a region is two sibling nodes, one hidden each way),
-`mobileStylesTextAlign` / `mobileStylesAlign`, and `stackColumns` on sections and wrappers.
-Use them when the brief calls for mobile-specific behavior, and list every key you set so the
-user can check the plugin's mobile preview.
+Mobile styles are flat shared plugin-data keys on the node. The serialized
+`mobileStylesCommonProperties` object is a payload view, not a key to write. Never invent a
+plausible key: only write schemas observed in the plugin or verified by a render.
+
+**Schema A, containers and leaf wrappers:** write `mobileStylesPaddingTop`,
+`mobileStylesPaddingRight`, `mobileStylesPaddingBottom`, and `mobileStylesPaddingLeft` as numeric
+strings. Padding overrides do not activate unless the same node also carries
+`isPaddingActive = 'true'`. Other observed keys include `mobileStylesInnerPadding*`,
+`mobileStylesHideInMobileDevice`, `mobileStylesHideInDesktopDevice`, `mobileStylesTextAlign`,
+`mobileStylesAlign`, plus `stackColumns` and `reverseStack` on sections or wrappers.
+
+**Schema B, type on the inner TEXT node:** write `fontSize = '<px>'` with
+`fontSize_mode = 'override'`. The same pattern applies to verified type fields such as
+`lineHeight` plus `lineHeight_mode = 'override'`, and `letterSpacing` plus
+`letterSpacing_mode = 'override'`. Do not write guessed aliases such as
+`mobileStylesFontSize` or `isFontSizeActive`.
+
+Read every write back. Read-back proves storage, not effect, so verify the result in the plugin's
+mobile render or Preview. A successful render is sufficient evidence even when the private copy
+of plugin data is inaccessible. List every mobile key set in the handoff.
 
 ## The footer token block
 

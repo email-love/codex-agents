@@ -243,7 +243,9 @@ The worker returns structure, not a finished email. Five gaps, all observed repe
 
 AI Import produces structure, not styling. It is not a pixel copier. Once the tree is
 correct, apply the brand colors and type from B1 across every text node, button, and section
-fill, and set the root frame's theme keys to the real brand values.
+fill. Set the root frame's six dark-mode theme keys from the file's established dark treatment;
+if none exists, use the house dark defaults in R2.1 and flag them for review. The light body color
+belongs only in `lightThemeBackgroundColor`.
 
 Then offer to make it reusable. Saving into the plugin's design system is an authenticated
 plugin action on the user's current selection; you cannot push components into it. What you

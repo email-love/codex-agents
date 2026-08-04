@@ -164,6 +164,11 @@ render time and adapt. Do not pad those; the extra width would be real design dr
   the column `vertical-align`. For hug-height columns the vertical value is visually
   irrelevant, so horizontal fidelity wins; do not try to honor a worker `vertical-align: top`
   on a centered column.
+  **Exception, multi-column rows:** when a section holds two or more columns whose content heights
+  differ, set `primaryAxisAlignItems = 'MIN'` (exports vertical-align: top) while keeping
+  `counterAxisAlignItems` on the content's horizontal alignment. The two properties are independent
+  exporter reads, so this does not disturb text-align. Top is the default for multi-column rows;
+  matched axes remain the rule for single-column sections.
 - Attribute mapping:
 
   | MJML attr | Figma property |

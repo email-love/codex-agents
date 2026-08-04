@@ -31,13 +31,13 @@ references contain the full rules.
 | --- | --- | --- |
 | `name` | every tagged node | Exact MJML tag, including `-Frame` where required; never rely on the layer-name fallback |
 | `nodeType` | whole-email root only | `'mainFrame'`; forbidden everywhere in a reusable module |
-| `backgroundColor` | mainFrame | Dark-mode page background hex; empty falls back to black |
-| `contentColor` | mainFrame | Dark-mode content background hex |
-| `textColor` | mainFrame | Dark-mode text hex |
-| `linkColor` | mainFrame | Link hex |
-| `buttonTextColor` | mainFrame | Button-label hex |
-| `buttonContentColor` | mainFrame | Button-background hex |
-| `lightThemeBackgroundColor` | mainFrame | Light `mj-body` background hex |
+| `backgroundColor` | mainFrame | Dark-mode page background; house default `#000000` |
+| `contentColor` | mainFrame | Dark-mode content background; house default `#1F1F1F` |
+| `textColor` | mainFrame | Dark-mode text; house default `#FFFFFF` |
+| `linkColor` | mainFrame | Dark-mode link; house default `#FFFFFF` |
+| `buttonTextColor` | mainFrame | Dark-mode button label; house default `#000000` |
+| `buttonContentColor` | mainFrame | Dark-mode button background; house default `#FFFFFF` |
+| `lightThemeBackgroundColor` | mainFrame | The light `mj-body` background; the one light value in the set |
 | `fallBackFontName` | mainFrame | One family such as `Arial`, never a CSS stack |
 | `emailSubject` | mainFrame | Plain subject string |
 | `emailPreHeader` | mainFrame | Plain preheader string |
@@ -46,6 +46,11 @@ references contain the full rules.
 | `reverseStack` | wrapper or section | `'true'` to reverse mobile stack order |
 | `href` | `mj-image` rectangle or `mj-button` frame | Real link; omit when absent and never write `#` |
 | `altText` | `mj-image` rectangle | Meaningful alternative text, or intentionally empty for decorative imagery |
+| `mobileStylesPaddingTop/Right/Bottom/Left` (+ `Inner*`) | wrapper, section, column, or element frame | Mobile padding; inert without `isPaddingActive` |
+| `isPaddingActive` | same node as mobile padding | `'true'`; required to switch the padding override on |
+| `fontSize` + `fontSize_mode` | `mj-text` or `mj-button-text` TEXT node | Mobile font size plus `'override'`; never put it on the frame |
+| `lineHeight` + `lineHeight_mode`, `letterSpacing` + `letterSpacing_mode` | TEXT node | Same override pattern for genuine mobile exceptions |
+| `mobileStylesHideInMobileDevice` / `mobileStylesHideInDesktopDevice` | any node | `'true'` for per-device visibility |
 
 **Magic link values the exporter rewrites at export time.** These values are portable
 instructions, not placeholder URLs. Put them on the link for text, buttons, or images. Never
@@ -57,9 +62,51 @@ explicitly requests that ESP-specific value.
 | `unsubscribe.com` | Replaces it with the selected ESP's unsubscribe merge tag. Source: [Email Love unsubscribe links](https://help.emaillove.com/plugin/links/unsubscribe). |
 
 Several mobile behaviors are not shared keys. A FILL `mj-button` produces full-width mobile;
-an image whose rectangle equals its content width stays fluid; mobile padding is a node property;
-and columns stack by default unless `stackColumns='false'` or `mj-group` supplies the lockup.
+an image whose rectangle equals its content width stays fluid; and columns stack by default unless
+`stackColumns='false'` or `mj-group` supplies the lockup.
 Check Figma sizing and width relationships before hunting for a key that does not exist.
+
+### Mobile Styles are shared plugin data: two schemas, both observed
+
+Everything below was read back off nodes after the plugin's own Mobile Styles tab wrote it.
+That provenance is the point: an earlier conversion invented plausible key names
+(`mobileStylesFontSize`, `isFontSizeActive`), wrote them to 23 frames, verified them by reading
+its own writes back, and shipped a library where none of it did anything. Worse, one invented
+activation flag switched a control on at its default and the customer's body copy rendered at
+10px. **Never write a plugin-data key you have not observed the plugin itself write.** To observe
+one, have a human set the value once in the Mobile Styles tab, then dump the node's shared keys
+and copy exactly what appeared.
+
+**Schema A, container spacing.** On `mj-wrapper`, `mj-section`, `mj-column`, and leaf pair
+wrappers:
+
+| Key | Value |
+| --- | --- |
+| `mobileStylesPaddingTop/Right/Bottom/Left` | Pixel number as a string |
+| `isPaddingActive` | `'true'`, required; without it the values are stored and silently ignored |
+| `stackColumns` | `'true'` or `'false'` |
+| `mobileStylesHideInMobileDevice` / `mobileStylesHideInDesktopDevice` | `'true'` |
+
+**Schema B, type.** On the `mj-text` or `mj-button-text` TEXT node itself, not the frame:
+
+| Key | Value |
+| --- | --- |
+| `fontSize` | Mobile pixel number as a string |
+| `fontSize_mode` | `'override'`, the switch; without it the value is ignored |
+| `lineHeight`, `lineHeight_mode` | Same pattern, only for a genuine mobile exception |
+| `letterSpacing`, `letterSpacing_mode` | Same pattern |
+
+Two different conventions live in one panel: containers use a `mobileStyles` prefix plus a
+shared `isPaddingActive` flag; type uses bare property names plus a per-property `_mode` switch
+on a different node than the panel is opened from. Do not rationalise them into one scheme.
+
+Mobile keys are flat on the node. The exporter's serialised JSON groups them into
+`mobileStylesCommonProperties` objects; that is the payload view, not the node store, and writing
+objects back onto nodes does not work. Treat any key not in this table as unverified until the
+plugin has been observed writing it.
+
+**Read-back is necessary but not sufficient.** Your own write always reads back. The only
+end-to-end verification is a render: export or preview, and measure the mobile output.
 
 **Start by reading the audit's Source fidelity tier, and say which tier you are building under
 before you create a node.** It decides where every number below comes from, so it is not something
@@ -360,6 +407,25 @@ Build the scaffold every later batch depends on:
    the ramp passes, that is evidence against the FACTOR, so take it back to the audit and the
    designer and move the whole ramp together. Never adjust the one style and leave the rest of
    the ramp where it was.
+
+   **Line heights in every text style are PERCENT, never PIXELS.** The exporter emits a percent
+   line height as a unitless ratio, which scales with the font size at every breakpoint; a pixel
+   value is frozen at every breakpoint. Measured failure: 17px mobile copy rendering on its
+   desktop 33px line box, double-spaced. Converting is lossless on desktop (27px body at 33px
+   becomes 122.2%, which is still 33px) and makes mobile line heights automatic; no mobile
+   line-height override is needed. Convert the ramp's pixel values at build time:
+   `percent = px / fontSize * 100`.
+
+   **The bold-range trap that comes with this:** `setRangeFontName` detaches that range from the
+   text style, so a later style-level line-height change leaves the range frozen at the old pixel
+   value. After any per-range font work, call `setRangeLineHeight(0, length, ...)` with the
+   style's percent value, then verify `getStyledTextSegments(['lineHeight'])` returns one segment.
+
+   **Then take the mobile ramp from the audit's Mobile styles section verbatim.** It is a
+   two-anchor compression, not the scale factor applied again. Record the numbers in the report
+   and on the Type page (`Body: 27px desktop / 18px mobile`); Phase 3 writes them per module with
+   Schema B. Where the audit predates this contract, derive it with the audit's two-anchor rule
+   and say you did.
 4. **Buttons page.** Rebuild each of their button styles as a component: correct email
    construction (a styled frame with a single text node), not their app-style nested
    instances. These become the sub-components nested inside mj-button-Frames, and they are
@@ -381,6 +447,15 @@ Build the scaffold every later batch depends on:
    (render rule R4.2.1, which also has the aspect-ratio rule). This rule fires here for recurring
    assets and again in Phase 3 for each module's own image assets. Never crop an asset out of a
    full-canvas render, which bakes overlapping siblings into the image.
+   **Transparency for dark mode: key UI icons, never brand logos, and check before keying.**
+   Social icons, store badges, and decorative marks rendered off a light band should become
+   transparent PNGs so they do not ship as light boxes on a dark ground. Use a border-connected
+   flood fill, never a global colour replace, because artwork may legitimately contain the band
+   colour inside itself. A brand logo is different: a measured logo whose letterforms depended on
+   its band became illegible ink-on-ink after keying. Before keying any asset, check the surviving
+   ink against `#1F1F1F`; if it does not clear contrast, ship the asset opaque with its band intact
+   and say so in the report. Logos default to opaque. This is the dark-mode sibling of the
+   never-resize-a-logo rule.
 7. **Root EMAIL TEMPLATE frame** on Campaigns at the audit's target email width (600 or 640,
    never the source canvas width when the source was not at email scale; 600 on a REFERENCE ONLY
    source unless the customer's ESP or brand asks for 640): vertical
@@ -389,7 +464,11 @@ Build the scaffold every later batch depends on:
    `setSharedPluginData('emaillove', 'nodeType', 'mainFrame')` plus backgroundColor,
    contentColor, textColor, linkColor, buttonTextColor, buttonContentColor,
    lightThemeBackgroundColor, and fallBackFontName (render rule R2.1 has all nine and what each
-   one is for). Empty theme keys are not neutral: the exporter substitutes dark defaults.
+   one is for). **The six theme keys are dark-mode values: take them from the audit Palette's
+   dark-mode proposal, or use the house defaults (`#000000` page, `#1F1F1F` content, `#FFFFFF`
+   text and links, `#FFFFFF` button with `#000000` label). Never repeat the light palette in
+   these keys**, because they fire only in dark mode and doing so ships light-on-light.
+   `lightThemeBackgroundColor` is the one light value in the set.
    **This is the only `mainFrame` foundations produces, and it is an email, not a module.**
    It exists so batch 1 has somewhere to drop modules and see them in context. The modules
    themselves are a different shape entirely (Phase 3, and render rule R2): each one is an
@@ -471,12 +550,16 @@ Pages, in canonical order:
       standard ramp on one that was not (step 3). The target family was checked with
       `figma.listAvailableFontsAsync()` before the ramp was built, and any Arimo substitution,
       weight collapse, or intentionally added ramp-gap step is recorded in the foundations report.
+      Every text style's line height reads back as PERCENT; PIXELS anywhere is a fail. The mobile
+      ramp and its two anchors are recorded in the report and on the Type page as numbers only;
+      nothing has been written to content nodes yet.
 - [ ] **Buttons:** one component per audit button style, each labeled, each a styled frame with a
       single text node, the label's TEXT property on the component itself, no loose instances left
       on the page.
 - [ ] **Campaigns:** exactly one root frame, `nodeType = 'mainFrame'`, at the target email width,
       with all eight theme keys set (the nine of step 7 less the `nodeType` marker itself) and not
-      one of them empty.
+      one of them empty. The six dark keys match the audit's dark-mode proposal or the house dark
+      defaults; `lightThemeBackgroundColor` carries the light body value.
 
 Variables and bindings:
 
@@ -490,8 +573,8 @@ Variables and bindings:
       than a hand-typed color.
 - [ ] Binding changed nothing about export: read `fills[0].color` back off a bound node and
       confirm it hexes to the value the audit gave for that token.
-- [ ] The root frame's theme keys carry literal hex matching the semantics they mirror, because
-      plugin data cannot be bound.
+- [ ] The root frame's theme keys carry literal hex matching the audit's dark-mode proposal or the
+      house dark defaults, because plugin data cannot be bound.
 - [ ] The WCAG contrast table covers every theme and explicit text-on-fill pairing; each failure
       names a passing alternative token or an unresolved designer decision.
 

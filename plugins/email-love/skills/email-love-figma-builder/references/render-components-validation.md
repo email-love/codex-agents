@@ -218,7 +218,9 @@ foundations button component itself and let it surface through the instance.
    written into the plugin data `name` key. The one exception is a module root.
 4. Every leaf is a complete pair; every `mj-button` has a direct TEXT child; no empty wrapper
    frames.
-5. `primaryAxisAlignItems === counterAxisAlignItems` on every auto-layout frame.
+5. `primaryAxisAlignItems === counterAxisAlignItems` on every auto-layout frame, except a column
+   in a multi-column row may deliberately use primary MIN with counter on the content's horizontal
+   alignment (R3.4). Mark each such top-align exception as intentional in the mismatch report.
 6. All nodes `visible = true` (except a region deliberately left off via a BOOLEAN default);
    `itemSpacing = 0` everywhere; no stray fills.
 7. **Every frame in the tree has `layoutSizingVertical === 'HUG'`.** Walk the whole tree, root

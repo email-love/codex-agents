@@ -512,6 +512,36 @@ was measured from the source or selected from email standards.
   customer's confirmed floor. Conversion will otherwise standardize 10px and 11px values upward
   module by module for readability and client compatibility. Record this as a foundations
   decision before a batch begins.
+- **Mobile type ramp, derived, and it is a compression, not a scaling.** Required output.
+  Email clients do not scale type: a declared size renders identically on a 375pt phone and a
+  640px desktop while the line box nearly halves. Measured: 27px body copy went from 42
+  characters per line at 640 to 21 at 375, same line pitch, and the customer reported "the
+  mobile rendering is not that good", presenting as a quality feeling, not a type bug.
+  **The remedy is a second ramp via Email Love's Mobile Styles, never a smaller desktop ramp**
+  (that discards a brand decision to fix a problem the product already solves).
+  **Do not derive it with one factor.** This was tried, measured, and rejected by the customer:
+  a single factor faithfully preserves the desktop headline-to-body ratio, and that ratio is
+  exactly what reads wrong on a phone: the headline dominates a 375pt measure and body copy
+  looks tiny beside it. Mobile is a re-typesetting for a narrower measure: headlines compress
+  harder than body copy. Derive with two anchors and interpolate linearly between them:
+
+  ```
+  body anchor:     desktop body    -> 16-18 mobile (18 on a large-ramp brand)
+  headline anchor: desktop largest workhorse headline -> 26-30 mobile
+  mobile(size) = A * size + B   through the two anchors, whole-pixel rounded
+  floor at 14
+  ```
+
+  Worked, from the migration this rule comes from: anchors 27 to 18 and 50 to 28 give
+  `64->34, 50->28, 34->21, 27->18, 18->14`, moving headline:body from 1.85 on desktop to 1.56
+  on mobile. That compression is the point; there is deliberately no ratio acceptance test
+  against the desktop ramp here, because matching the desktop ratio is the failure mode, not
+  the goal. State both anchors and the floor as designer decisions.
+  **Line heights: no mobile values needed at all if the desktop ramp uses percentage line
+  heights**; a ratio rides the mobile font size automatically. Flag any pixel line heights in
+  the source for conversion (foundations step 3 has the rule and the measured failure).
+  **Where the source has mobile variants, census them instead of deriving**; the table reads
+  `measured` in place of the anchors.
 - **Palette, censused rather than sampled, and clustered by role.** Enumerate every distinct fill
   hex, including local overrides, then cluster only near-duplicates within about 2 to 3 values per
   RGB channel. Sample text-node fills as well as background fills, and treat the same hex in two
@@ -571,8 +601,8 @@ was measured from the source or selected from email standards.
 ## Step 7: Write the migration report
 
 Produce one markdown report, in this exact structure. **Source fidelity, Scale factor, Spacing
-system, Palette, and Module inventory are required sections**: they are what Phases 2 and 3
-consume, and a report missing any of them cannot be converted from.
+system, Palette, Mobile styles, and Module inventory are required sections**: they are what
+Phases 2 and 3 consume, and a report missing any of them cannot be converted from.
 
 # Migration audit: [Design system name]
 ## Summary
@@ -617,7 +647,24 @@ section side padding selected from it.]
 [REQUIRED. One row per color cluster: source hex, usage count, and modules. Then map the six
 theme roles to those clusters and list every deviation as `proposed #... vs source #..., delta
 R/G/B`. List additional source colors not used by the six roles. Close with `designer decision`.
-On REFERENCE ONLY the source palette still applies, and no role may be invented outside it.]
+On REFERENCE ONLY the source palette still applies, and no role may be invented outside it.
+Then add the dark-mode proposal, because the six theme keys are dark-mode values, not the light
+palette repeated. Filling them with the light palette ships light-on-light in dark mode. Propose
+a dark value per role, starting from the exporter's house defaults (`#000000` page, `#1F1F1F`
+content, `#FFFFFF` text and links, `#FFFFFF` button with `#000000` label) and adjusting only
+where the brand has a real dark treatment. Show the WCAG contrast ratio per pairing so the
+designer approves legible values, not hex strings.]
+## Mobile styles
+[REQUIRED. Open with the two anchors (body and headline, desktop -> mobile) and the interpolation
+they imply. Then give the mobile type ramp as a table, one row per style: style, desktop size,
+mobile size, with rows below the 14px floor marked as floored. State that line heights carry no
+mobile override because the desktop styles use percentages, or list the exceptions.
+Then give the mobile spacing overrides: the side padding text-bearing sections drop to on mobile
+(20 unless the customer says otherwise); 28px mobile bottom padding on every non-last column of
+every section that stacks; any section whose desktop padding exceeds 160px; and any `mj-group`
+needing the full viewport for the Step 5 group arithmetic. Then list hide-on-mobile items by module
+and row, with reasons. Close with `designer decision`. Where the source has mobile variants,
+report measured values and say the derivation was skipped.]
 ## Module inventory
 [REQUIRED, deduplicated, and this is the section Phase 3 works from. One row per DISTINCT
 module: module name | category | appears in (design names) | source ref | verdict A/B/C/D |
@@ -706,7 +753,9 @@ somebody's private process. There are two routes, and the report is the input to
    which decides whether the converter preserves your geometry or builds it to email standards
    and takes only your brand), the
    **Scale factor** where one applies (every number it builds is at that scale), the **Spacing
-   system**, the **Palette**, the **Brand foundations** (type
+   system**, the **Mobile styles** (the two-anchor mobile ramp, spacing overrides, and
+   hide-on-mobile list), the **Palette** (including its dark-mode proposal, which supplies the six
+   dark theme keys), the **Brand foundations** (type
    ramp on email-safe fallbacks, buttons, target email width, and
    the content margin percentage with the content width it converts to, which is where foundations
    gets its one library-wide content width), and the **Flags**.

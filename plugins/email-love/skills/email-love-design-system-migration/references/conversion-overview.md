@@ -86,8 +86,11 @@ the two halves of the migration stay one conversation:
   rhythm, gutters, inset padding, and mobile equivalents, plus named exceptions. Phase 2 builds
   the tokens; Phase 3 rejects any per-module value outside this system.
 - **Palette** (required): the complete color census and the accepted mapping from source clusters
-  to primitives and semantic roles. Phase 2 creates the variables; Phase 3 requires every
-  non-placeholder fill to bind to one.
+  to primitives and semantic roles, including the dark-mode proposal that supplies the six dark
+  theme keys. Phase 2 creates the variables; Phase 3 requires every non-placeholder fill to bind
+  to one.
+- **Mobile styles** (required): the two-anchor mobile type ramp, mobile spacing overrides, and
+  hide-on-mobile list. Phase 2 records the ramp and Phase 3 writes it on every module.
 - **Brand foundations:** the type ramp on email-safe fallbacks, the button styles, and the target
   email width, with pointers to Palette and Spacing system. Phase 2 builds from these, and it
   takes the ramp table's Email size column verbatim rather than mapping styles itself. On a

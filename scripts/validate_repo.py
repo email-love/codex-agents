@@ -80,8 +80,8 @@ def validate_manifest() -> None:
     manifest = load_json(MANIFEST)
     if manifest.get("name") != "email-love":
         fail("plugin manifest name must be 'email-love'")
-    if manifest.get("version") != "4.1.1":
-        fail("plugin manifest version must be 4.1.1 for this migration contract")
+    if manifest.get("version") != "4.2.0":
+        fail("plugin manifest version must be 4.2.0 for this migration contract")
     if not re.fullmatch(r"\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?", manifest.get("version", "")):
         fail("plugin manifest version must be strict semver")
     if manifest.get("skills") != "./skills/":
@@ -227,18 +227,29 @@ def validate_skills() -> None:
         migration / "SKILL.md": ["## Phase 0: Pick the source", "references/sources/hubspot.md"],
         migration / "references" / "audit.md": [
             "Type ramp, censused rather than sampled",
+            "Mobile type ramp, derived, and it is a compression, not a scaling",
             "Palette, censused rather than sampled, and clustered by role",
             "recommend a floor at 12px",
+            "floor at 14",
             "Spacing system, censused rather than sampled",
             "## Spacing system",
             "## Palette",
+            "dark-mode proposal",
+            "## Mobile styles",
         ],
         migration / "references" / "foundations.md": [
             "### Precondition: packaged render references",
             "### Shared plugin-data contract",
+            "### Mobile Styles are shared plugin data: two schemas, both observed",
+            "isPaddingActive",
+            "fontSize_mode",
+            "Never write a plugin-data key you have not observed",
             "Magic link values the exporter rewrites",
             "figma.listAvailableFontsAsync()",
             "A gap in the ramp is a decision for foundations",
+            "Line heights in every text style are PERCENT, never PIXELS",
+            "getStyledTextSegments(['lineHeight'])",
+            "border-connected",
             "WCAG contrast table",
             "vertical HUG with `clipsContent` off",
         ],
@@ -253,6 +264,10 @@ def validate_skills() -> None:
             "error code: 1010",
             "unsubscribe.com",
             "Semantic-token bind count",
+            "Part B: write the mobile styles. This always runs",
+            "mobileStylesPaddingBottom = '28'",
+            "Multi-column rows top-align by default",
+            "Range hygiene",
             "### 6. Export sniff test",
             "### Send-readiness pass",
             "Button label",
@@ -271,13 +286,21 @@ def validate_skills() -> None:
             "For `mj-navbar`, do not invent a mapping",
             "setRangeHyperlink",
             "resolved width at 375px per R3.3.2",
+            "Mark each such top-align exception as intentional",
         ],
     }
     for path, required_strings in required_migration_contract.items():
         text = path.read_text(encoding="utf-8")
         for required_string in required_strings:
             if required_string not in text:
-                fail(f"{path.relative_to(ROOT)}: missing v4.1.1 contract text {required_string!r}")
+                fail(f"{path.relative_to(ROOT)}: missing v4.2.0 contract text {required_string!r}")
+
+    audit_text = (migration / "references" / "audit.md").read_text(encoding="utf-8")
+    palette = audit_text.find("## Palette")
+    mobile_styles = audit_text.find("## Mobile styles")
+    inventory = audit_text.find("## Module inventory")
+    if min(palette, mobile_styles, inventory) < 0 or not palette < mobile_styles < inventory:
+        fail("audit report must place Mobile styles between Palette and Module inventory")
 
     render_nodes_text = (migration / "references" / "render-nodes.md").read_text(encoding="utf-8")
     gutter_rule = render_nodes_text.find("#### R3.4.0 Multi-column gutters")
@@ -292,6 +315,36 @@ def validate_skills() -> None:
     if min(content_width, gutter_check, naming) < 0 or not content_width < gutter_check < naming:
         fail("module gutter check must remain between Content width and Naming")
 
+    builder = SKILLS / "email-love-figma-builder"
+    required_builder_contract = {
+        builder / "references" / "shared-rules.md": [
+            "The six theme keys are dark-mode-only values",
+            "Schema A, containers and leaf wrappers",
+            "isPaddingActive = 'true'",
+            "Schema B, type on the inner TEXT node",
+            "fontSize_mode = 'override'",
+            "mobile render or Preview",
+        ],
+        builder / "references" / "render-geometry.md": [
+            "23f0d9b508478fa7a0a286209e2c196f25fa60ac",
+            "House default `#1F1F1F`",
+            "The six theme keys are dark-mode values",
+            "deliberate multi-column top-align case in R3.4",
+        ],
+        builder / "references" / "render-nodes.md": [
+            "Exception, multi-column rows",
+            "Top is the default for multi-column rows",
+        ],
+        builder / "references" / "render-components-validation.md": [
+            "Mark each such top-align exception as intentional",
+        ],
+    }
+    for path, required_strings in required_builder_contract.items():
+        text = path.read_text(encoding="utf-8")
+        for required_string in required_strings:
+            if required_string not in text:
+                fail(f"{path.relative_to(ROOT)}: missing v4.2.0 contract text {required_string!r}")
+
 
 def validate_provenance() -> None:
     sources = load_json(SOURCES)
@@ -300,14 +353,14 @@ def validate_provenance() -> None:
     if not re.fullmatch(r"[0-9a-f]{40}", commit):
         fail("sources.json upstream commit must be a full Git SHA")
     expected_upstream = {
-        "commit": "e6b532b2c4b3681fc4a1ac2d2090ec7e87afd2ae",
+        "commit": "23f0d9b508478fa7a0a286209e2c196f25fa60ac",
         "builder_tag": "emaillove-figma-builder-v2.9.2",
-        "render_tag": "emaillove-eds-converter-v1.34.0",
-        "migration_tag": "emaillove-migration-audit-v1.18.0",
+        "render_tag": "emaillove-eds-converter-v1.35.0",
+        "migration_tag": "emaillove-migration-audit-v1.19.0",
     }
     for key, expected in expected_upstream.items():
         if upstream.get(key) != expected:
-            fail(f"sources.json upstream.{key} must be {expected!r} for v4.1.1")
+            fail(f"sources.json upstream.{key} must be {expected!r} for v4.2.0")
     for snapshot in sources.get("legacy_snapshots", []):
         relative = snapshot.get("path", "")
         expected = snapshot.get("sha256", "")
@@ -351,7 +404,7 @@ def validate_repository_guidance() -> None:
         fail("root AGENTS.md must stay below the default 32 KiB instruction budget")
     compatibility_files = (agents, MIGRATION_COMPATIBILITY)
     required_compatibility_text = {
-        "codex plugin marketplace add email-love/codex-agents --ref v4.1.1",
+        "codex plugin marketplace add email-love/codex-agents --ref v4.2.0",
         "codex plugin add email-love@email-love",
     }
     for compatibility_file in compatibility_files:
@@ -372,6 +425,14 @@ def validate_repository_guidance() -> None:
     )
     if "[TODO" in active_text:
         fail("active plugin files contain TODO placeholders")
+    stale_contract_text = {
+        "Setting the dark keys equal to the light design colors": "obsolete light-for-dark guidance",
+        "which wrecks a light email": "obsolete theme-default explanation",
+        "mobile padding is a node property": "obsolete mobile padding schema",
+    }
+    for stale_text, description in stale_contract_text.items():
+        if stale_text in active_text:
+            fail(f"active plugin files contain {description}: {stale_text!r}")
 
 
 def main() -> int:
