@@ -1,5 +1,8 @@
 # Security and data handling
 
+Email Love's public privacy policy is available at
+[emaillove.com/privacy-policy](https://emaillove.com/privacy-policy).
+
 ## Figma access
 
 The Email Love skills depend on the official remote Figma MCP. Figma OAuth and any

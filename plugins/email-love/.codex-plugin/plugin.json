@@ -23,17 +23,21 @@
     "shortDescription": "Build export-ready emails and migrate email design systems.",
     "longDescription": "Build production-ready emails in Figma from Email Love components or convert legacy email design systems into reusable Email Love libraries.",
     "developerName": "Email Love",
-    "category": "Design",
+    "category": "Creativity",
     "capabilities": [
       "Interactive",
       "Write"
     ],
     "websiteURL": "https://emaillove.com",
+    "privacyPolicyURL": "https://emaillove.com/privacy-policy",
+    "termsOfServiceURL": "https://emaillove.com/terms",
     "defaultPrompt": [
       "Build an export-ready email in my Figma file.",
       "Audit this legacy email design system.",
       "Convert the next migration batch in Figma."
     ],
-    "brandColor": "#EE2461"
+    "brandColor": "#EE2461",
+    "composerIcon": "./assets/email-love-logo.png",
+    "logo": "./assets/email-love-logo.png"
   }
 }

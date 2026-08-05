@@ -16,9 +16,11 @@ PLUGIN = ROOT / "plugins" / "email-love"
 SKILLS = PLUGIN / "skills"
 MANIFEST = PLUGIN / ".codex-plugin" / "plugin.json"
 MARKETPLACE = ROOT / ".agents" / "plugins" / "marketplace.json"
+SUBMISSION = ROOT / "SUBMISSION.md"
 SOURCES = ROOT / "sources.json"
 EVALS = ROOT / "tests" / "evals.json"
 MIGRATION_COMPATIBILITY = ROOT / "migration" / "AGENTS.md"
+PUBLIC_PLUGIN_URL = "https://chatgpt.com/plugins/plugins_6a739f43c3b48191b1281a9b2d48b409"
 MAX_SKILL_LINES = 500
 MAX_SKILL_BYTES = 32 * 1024
 REQUIRED_TAGS = {
@@ -519,12 +521,27 @@ def validate_repository_guidance() -> None:
             fail(f"active plugin files contain {description}: {stale_text!r}")
 
 
+def validate_publication_guidance() -> None:
+    required_files = (ROOT / "README.md", SUBMISSION)
+    for path in required_files:
+        if not path.exists():
+            fail(f"missing publication guidance: {path.relative_to(ROOT)}")
+            continue
+        text = path.read_text(encoding="utf-8")
+        if PUBLIC_PLUGIN_URL not in text:
+            fail(f"{path.relative_to(ROOT)}: missing public plugin URL")
+        for phrase in ("GitHub", "submission portal", "review", "publish"):
+            if phrase not in text:
+                fail(f"{path.relative_to(ROOT)}: missing public release guidance {phrase!r}")
+
+
 def main() -> int:
     validate_manifest()
     validate_skills()
     validate_provenance()
     validate_evals()
     validate_repository_guidance()
+    validate_publication_guidance()
     if errors:
         print(f"Validation failed with {len(errors)} issue(s):", file=sys.stderr)
         for error in errors:

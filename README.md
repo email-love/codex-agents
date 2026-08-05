@@ -3,7 +3,8 @@
 Build real, export-ready emails in Figma and migrate legacy email design systems into Email
 Love with progressively loaded Codex skills.
 
-This repository is a Git-backed Codex plugin marketplace. It packages two focused skills:
+This repository is the source for the public Email Love plugin and a Git-backed Codex plugin
+marketplace. It packages two focused skills:
 
 - **Email Love Figma Builder:** build one email or campaign using an existing Email Love
   design system, or create a first email through the design-converter workflow.
@@ -16,29 +17,35 @@ workflows therefore protect Email Love's structural conventions, not just canvas
 
 ## Install
 
-### 1. Add the Email Love marketplace
+### 1. Install the public plugin
+
+[Install Email Love from the Plugins Directory](https://chatgpt.com/plugins/plugins_6a739f43c3b48191b1281a9b2d48b409),
+then start a new Codex task so the two skills are loaded.
+
+The public listing is the recommended customer install. It is a reviewed, published snapshot,
+not a live checkout of this repository.
+
+### Developer install from GitHub
+
+For development or testing an exact repository release, add this marketplace and install the
+plugin:
 
 ```bash
-codex plugin marketplace add email-love/codex-agents --ref main
-```
-
-For production use, replace `main` with a release tag so upgrades are deliberate.
-
-### 2. Install the plugin
-
-```bash
+codex plugin marketplace add email-love/codex-agents --ref v4.5.0
 codex plugin add email-love@email-love
 ```
 
 You can also open `/plugins` in Codex CLI, select the **Email Love** marketplace, and install
-the plugin there.
+the Git-backed plugin there. Replace `v4.5.0` with `main` only when testing unreleased work.
 
-Start a new Codex task or CLI session after installation so the bundled skills are loaded.
+The public and Git-backed installs are separate distribution paths. A GitHub push or marketplace
+refresh does not update the reviewed public plugin.
 
-### 3. Connect Figma
+### 2. Connect Figma
 
-The plugin declares the official remote Figma MCP as a dependency. If Codex does not prompt
-you to connect it automatically, run:
+The skills require the official remote Figma MCP as an external prerequisite. This
+skills-only package does not bundle or declare the Figma integration. Connect it before
+using either workflow:
 
 ```bash
 codex mcp add figma --url https://mcp.figma.com/mcp
@@ -71,7 +78,7 @@ Love's production export pipeline with no export quota and send the returned pre
 `emaillove_preview_email`. Without it, the migration skill falls back to a human-run plugin
 Export for the batch check.
 
-### 4. Install Email Love in Figma
+### 3. Install Email Love in Figma
 
 Install the latest Email Love Figma plugin.
 
@@ -152,7 +159,20 @@ not as the recommended installation path.
 
 ## Upgrade
 
-Refresh the Git marketplace, then reinstall or upgrade the plugin from `/plugins`:
+Public plugin updates follow a release process:
+
+1. Validate and tag the GitHub release.
+2. Create a new plugin version in the OpenAI submission portal and upload the final skill bundle.
+3. Submit it for review, then publish the approved version.
+4. Verify the public listing and start a new task before testing it.
+
+Pushing to GitHub alone does not update people who installed the public plugin. Once an approved
+version is published, directory users receive that published snapshot. See the
+[OpenAI plugin submission guide](https://developers.openai.com/plugins/deploy/submission) for the
+current portal workflow.
+
+For a developer install from the Git marketplace, refresh it separately, then reinstall or
+upgrade from `/plugins`:
 
 ```bash
 codex plugin marketplace upgrade email-love
@@ -196,6 +216,7 @@ packages and tests only the Codex version.
 
 ## Documentation and support
 
+- [Install the public Email Love plugin](https://chatgpt.com/plugins/plugins_6a739f43c3b48191b1281a9b2d48b409)
 - [Agents in Figma](https://help.emaillove.com/plugin/ai/agents-in-figma)
 - [Migrate an existing design system](https://help.emaillove.com/plugin/ai/migrate-design-system)
 - [Email Love support](mailto:hello@emaillove.com)
