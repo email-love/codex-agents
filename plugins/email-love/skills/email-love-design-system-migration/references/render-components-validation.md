@@ -106,6 +106,12 @@ carries the decoration and sets `mobileStylesHideInMobileDevice = 'true'`. Keep 
 inside the library content margin. This preserves live text and removes the decoration cleanly
 on mobile.
 
+`mj-column` has no background-image mapping either, so art behind live text inside a card has no
+supported construction. Place an overlapping glyph or ornament as an in-flow `mj-image` above the
+content and bind its visibility to a BOOLEAN when the source has variants without it. The loss is
+the overhang only. Do not bake the card into an image to preserve the overlap: images are not
+erased in dark mode, so a baked light card can keep its light colors under forced-light text.
+
 **For `mj-navbar`, do not invent a mapping.** Rebuild the row as one `mj-text` whose characters
 contain every label, with one `setRangeHyperlink` per label. Separate labels with a normal space
 plus one or more non-breaking spaces so the visible gap survives HTML whitespace collapsing while

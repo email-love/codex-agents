@@ -61,11 +61,11 @@ COMPONENT with no `mainFrame` above it and none on it.
 - Auto-layout: `layoutMode = 'HORIZONTAL'`, both sizing HUG (the group's width comes from the
   fixed columns inside it), `primaryAxisAlignItems = counterAxisAlignItems = 'CENTER'`
   (primary exports as horizontal alignment; counter exports as `vertical-align`).
-- **Never fill the group itself.** The dark-mode exporter recolors filled section and column
-  cells but has no group selector, so text can turn white while the group's original light fill
-  remains. Fill-less group children reset to `background-color: initial`, while filled columns
-  receive the dark `contentColor` override. Put band fills on the group's columns instead; a
-  filled `mj-group` is a verification failure. Padding, radius, and borders still map to the group.
+- **Never fill the group itself.** Dark-mode CSS paints `contentColor` on the wrapper and forces
+  section and column backgrounds to transparent, but it has no group selector. A group's own fill
+  therefore survives while its text turns white. Put band fills on the group's columns instead;
+  those fills erase to transparent over the wrapper surface in dark mode. A filled `mj-group` is a
+  verification failure. Padding, radius, and borders still map to the group.
 - Children: two or more `mj-column` frames with FIXED pixel widths.
 - Width math: the exporter emits the group width as
   `group.width / (section.width - section horizontal padding) * 100%`, and each inner column
@@ -361,7 +361,11 @@ it is this pattern and it is an A. If you cannot, it is a C.
 Use ONLY when a column needs a second, inner background or border box distinct from its own
 (a card inside a colored column). Most card-in-column designs are expressible without it: put
 the card fill, radius, and paddings directly on the `mj-column` and the outer color on the
-section. Prefer that.
+section. Prefer that. The second genuine case is a filled card that needs a gutter. A column's
+fill covers its own padding, so the gutter cannot come from that filled column without adjacent
+cards touching. Use a fill-less outer column with the gutter as its padding and a FILL inner
+column carrying the card fill, radius, and inner paddings. Measured: a 271px outer column with
+22px `paddingRight` held a filled inner column resolving to 249px.
 
 If you must use it: FRAME, the FIRST (and only) child of an `mj-column`, with the leaves moved
 inside it. This is load bearing: the exporter checks `column.children[0]` and ONLY there. In

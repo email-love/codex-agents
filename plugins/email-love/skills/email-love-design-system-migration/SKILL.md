@@ -162,10 +162,12 @@ conversion to patch missing foundations.
 
 Read the module-conversion reference and all render references.
 
-1. Before the first module, establish who will run the paid-seat plugin Upload and Export
-   clicks needed for the batch mobile render and export sniff. If Codex cannot drive them,
-   say so in the batch-1 opening and maintain the Deferred verification list defined in the
-   module-conversion reference.
+1. Before the first module, establish how the batch checks will run. Probe the Email Love MCP
+   for `emaillove_export_figma`. When present, use it with `operationType: "preview"` for a
+   quota-free headless export and use its token with `emaillove_preview_email`; no plugin click
+   is needed for covered core tags. If the tool is absent or raises a CoverageError for
+   `mj-hero`, `mj-social`, `mj-navbar`, or `mj-table`, ask a human to run the paid-seat plugin
+   Export and maintain the Deferred verification list when no human is available.
 2. A library of eight or fewer modules may run as one batch. Above that, use batches of
    roughly five modules so the first review can stop a repeated defect early.
 3. Before the first write, name the batch and its module count and give a rough estimate.

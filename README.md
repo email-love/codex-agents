@@ -59,6 +59,18 @@ export FIGMA_TOKEN=figd_...
 Create it in Figma Account Settings with Current user, File content, File metadata, and
 Library content scopes, then launch Codex from the same environment.
 
+For fully agent-run migration export and mobile QA, also connect the Email Love MCP:
+
+```bash
+codex mcp add emaillove --url https://mcp.emaillove.com/mcp
+codex mcp login emaillove
+```
+
+When `emaillove_export_figma` is available, Codex can compile a bare module through Email
+Love's production export pipeline with no export quota and send the returned preview token to
+`emaillove_preview_email`. Without it, the migration skill falls back to a human-run plugin
+Export for the batch check.
+
 ### 4. Install Email Love in Figma
 
 Install the latest Email Love Figma plugin.

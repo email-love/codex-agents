@@ -57,8 +57,18 @@ the portable rule is the chunked, ASCII-safe fallback.
    type. Group desktop and mobile twins (the same design at two widths, commonly 600 and 390);
    in Email Love these merge into ONE frame with Mobile Styles overrides, so count designs,
    not frames.
-4. **Fidelity signals, which Step 3 classifies from.** You are reading all of these already while
-   you do 1 to 3; the only new work is writing each one down as present or absent rather than
+4. **Asset survey: distinguish absent from fused.** Walk the images, logos, icon rows, badge
+   rows, and rating rows the designs use. A genuinely absent asset is a blocker and a customer
+   ask. A present-but-fused asset, such as several icons in one screenshot strip, is buildable:
+   render and slice it rather than reporting it missing. Before writing that rebuild remedy,
+   search the OTHER designs in the file for the same artwork as separate nodes. Teams often
+   paste one raster strip into several designs while another email still carries clean vectors.
+   Prefer `rebuild from the vectors at <node id>` over slicing or upscaling whenever those
+   vectors exist. On every affected Module inventory row, name the state and remedy explicitly:
+   `asset absent, blocked on customer`, `slice the fused N-item strip, do not treat as missing`,
+   or `rebuild from the vectors at <node id>`.
+5. **Fidelity signals, which Step 3 classifies from.** You are reading all of these already while
+   you do 1 to 4; the only new work is writing each one down as present or absent rather than
    using it and moving on: a standard email width or not, local text styles, local paint styles,
    variable collections, components or component sets (as opposed to loose frames and groups),
    auto layout (as opposed to absolute positioning), mobile variants. Add one measurement the
@@ -90,7 +100,7 @@ Two sources can look equally finished in a screenshot and mean completely differ
   is the brand: palette, typefaces, logo, the copy, and the module structure, meaning which blocks
   exist and in what order.
 
-**Classify from the census you already have** (Step 2, item 4). This step adds no new inspection
+**Classify from the census you already have** (Step 2, item 5). This step adds no new inspection
 work: the signals are the counts and the presence-or-absence notes you just wrote down.
 
 Two of the signals are load bearing and the rest are hygiene:
@@ -559,8 +569,12 @@ was measured from the source or selected from email standards.
   `measured` in place of the anchors.
 - **Palette, censused rather than sampled, and clustered by role.** Enumerate every distinct fill
   hex, including local overrides, then cluster only near-duplicates within about 2 to 3 values per
-  RGB channel. Sample text-node fills as well as background fills, and treat the same hex in two
-  roles as two rows. A band and body copy may share `#222222`, but the semantic layer must be able
+  RGB channel. Sample text-node fills at SEGMENT level with
+  `getStyledTextSegments(['fills'])`, never `node.fills` alone: a mixed-run node reports
+  `figma.mixed` or its first run and leaves every other color invisible. Measured: secondary-gray
+  body copy at `#727272` across two modules was missed until the converter needed the primitive
+  mid-batch. Sample background fills separately, and treat the same hex in two roles as two rows. A band and body copy may share
+  `#222222`, but the semantic layer must be able
   to change them independently. For every cluster list the exact source hex, role, fill count,
   and modules where it appears. Propose the six Email Love theme roles (`backgroundColor`,
   `contentColor`, `textColor`, `linkColor`, `buttonTextColor`, `buttonContentColor`) from those
@@ -673,12 +687,15 @@ a dark value per role, starting from the exporter's house defaults (`#000000` pa
 content, `#FFFFFF` text and links, `#FFFFFF` button with `#000000` label) and adjusting only
 where the brand has a real dark treatment. Show the WCAG contrast ratio per pairing so the
 designer approves legible values, not hex strings.
-**`contentColor` is a global knob; never promote a single surface's brand color into it.** The
-exporter recolors every filled content cell to that one value in dark mode. Keep it at the neutral
-house default unless the brand's dark treatment demonstrably covers most content surfaces. Record
-a band or footer that keeps its own color in both modes as a per-node override recommendation,
-naming the module; conversion writes it once on that module's main component. Show image-ink
-contrast against the color each surface will actually become, because images do not recolor.]
+**`contentColor` is a global knob; never promote a single surface's brand color into it.** In dark
+mode the exporter paints that value on each module wrapper and forces section and column fills to
+transparent. Module fills are erased, not recolored, so every card, strip, and band flattens into
+one wrapper surface. Keep `contentColor` at the neutral house default unless the brand's dark
+treatment demonstrably covers most content surfaces. Record a band or footer that keeps its own
+color in both modes as a per-node override recommendation, naming the module; conversion writes it
+once on that module's main component. State two consequences for the designer: cards do not read as
+cards in dark mode whatever the value, which is a plugin limitation rather than a build choice, and
+image ink must clear contrast against the flattened surface because images are not erased.]
 ## Mobile styles
 [REQUIRED. Open with the two anchors (body and headline, desktop -> mobile) and the interpolation
 they imply. Then give the mobile type ramp as a table, one row per style: style, desktop size,

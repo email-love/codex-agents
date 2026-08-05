@@ -11,7 +11,7 @@ This is part 1 of the packaged migration transcription specification. Read it to
 
 This is the operative migration-specific subset of `render-spec.md` and `structure.md` from
 the Claude skills at immutable upstream commit
-[`fff9223`](https://github.com/email-love/claude-skills/tree/fff9223a784686bf16efb1aa10983230024609d8),
+[`ab8d3dd`](https://github.com/email-love/claude-skills/tree/ab8d3dd8451c227afb995802f2c3fa50999d3727),
 derived from the plugin source (`email-love/Figma-plugin`), not from inference. Do not
 reconstruct these rules from memory: that is rebuilding by eye under another name.
 
@@ -374,6 +374,14 @@ The worker JSON paddings are authoritative and already complete for vertical rhy
 horizontal section padding is the one value foundations overrides, R0.3.1), so a vertical padding
 you add on top of them is almost always this bug.
 
+**At library level the inter-module gap has one fixed owner: the module wrapper's
+`paddingBottom`.** Give every module wrapper a `paddingBottom` from the audit's spacing ladder (32
+in the measured library) and the LAST module, normally the footer, 0. Zero section-level vertical
+padding that was doing inter-module duty; three measured modules got shorter when their 24/24
+section padding stopped double-serving as the gap. Then a disabled module takes its spacing with
+it and cannot leave a hole. Two modules touching with zero gap on the canvas is the tell that the
+owner is missing.
+
 ### R0.8 A geometry write inside an INSTANCE can silently NO-OP, so read it back
 
 `resize()` on a node nested three or more levels deep inside a component instance does nothing.
@@ -550,9 +558,14 @@ email is meant to be reused; nothing below changes.
   Use the audit Palette's dark-mode proposal on every email root identically. Where no proposal
   exists, use the house defaults above and flag them for review. Never substitute the light
   palette as a stand-in. `lightThemeBackgroundColor` is the light body value. Before writing
-  `contentColor`, confirm it represents the treatment for most filled content surfaces. A brand
-  color used by one footer or card belongs on that module as a per-node override; promoting it
-  globally recolors every filled content cell and can collapse image contrast.
+  `contentColor`, confirm it represents the treatment for most filled content surfaces. Dark-mode
+  CSS paints it on the WRAPPER and forces section and column fills to transparent, so every filled
+  cell flattens into that one surface. A brand color used by one footer or card belongs on that
+  module as a per-node override rather than the global value.
+
+  **State at hand-off that dark mode flattens module fills.** Cards do not remain visually distinct,
+  and this exporter behavior is unreachable from Figma. An image background is not a workaround:
+  images are not erased, so a baked light card can keep its light colors under forced-light text.
 - Optional: `emailSubject`, `emailPreHeader` (plain strings).
 - Also give the root frame a visible SOLID fill of the body background so the canvas looks
   right.

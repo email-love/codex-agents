@@ -171,6 +171,22 @@
         "handoff campaigns with placeholder legal copy",
         "treat absent image links or alt text as automatically intentional"
       ]
+    },
+    {
+      "id": "migration_headless_export_check",
+      "prompt": "The first migration batch is built. Run the export sniff and mobile check before review.",
+      "expected_skill": "email-love-design-system-migration",
+      "expected_route": "headless-batch-verification",
+      "must_do": [
+        "probe the Email Love MCP for emaillove_export_figma",
+        "use operationType preview for a covered module",
+        "inspect the returned HTML",
+        "send the returned token to emaillove_preview_email"
+      ],
+      "must_not_do": [
+        "consume export quota for a preview check",
+        "defer verification before probing the MCP"
+      ]
     }
   ]
 }

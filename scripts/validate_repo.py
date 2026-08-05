@@ -80,8 +80,8 @@ def validate_manifest() -> None:
     manifest = load_json(MANIFEST)
     if manifest.get("name") != "email-love":
         fail("plugin manifest name must be 'email-love'")
-    if manifest.get("version") != "4.3.0":
-        fail("plugin manifest version must be 4.3.0 for this migration contract")
+    if manifest.get("version") != "4.4.0":
+        fail("plugin manifest version must be 4.4.0 for this migration contract")
     if not re.fullmatch(r"\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?", manifest.get("version", "")):
         fail("plugin manifest version must be strict semver")
     if manifest.get("skills") != "./skills/":
@@ -224,7 +224,11 @@ def validate_skills() -> None:
         validate_links(adapter, adapter_text)
 
     required_migration_contract = {
-        migration / "SKILL.md": ["## Phase 0: Pick the source", "references/sources/hubspot.md"],
+        migration / "SKILL.md": [
+            "## Phase 0: Pick the source",
+            "references/sources/hubspot.md",
+            "emaillove_export_figma",
+        ],
         migration / "references" / "audit.md": [
             "Type ramp, censused rather than sampled",
             "Mobile type ramp, derived, and it is a compression, not a scaling",
@@ -241,6 +245,9 @@ def validate_skills() -> None:
             "measure the button component itself",
             "Apparent Email Love structure in the source is a hint",
             "`contentColor` is a global knob",
+            "getStyledTextSegments(['fills'])",
+            "rebuild from the vectors at <node id>",
+            "Module fills are erased, not recolored",
         ],
         migration / "references" / "foundations.md": [
             "### Precondition: packaged render references",
@@ -288,6 +295,9 @@ def validate_skills() -> None:
             "Customer-facing copy gets TEXT properties by default",
             "Never fill the group itself",
             "manage-preferences.com",
+            "emaillove_export_figma",
+            "operationType: \"preview\"",
+            "CoverageError",
         ],
         migration / "references" / "render-nodes.md": [
             "R3.3.2 Group columns shrink on mobile",
@@ -303,6 +313,12 @@ def validate_skills() -> None:
             "The source family may have been substituted",
             "source geometry as a mask",
             "spacer is itself a colored band",
+            "filled card that needs a gutter",
+        ],
+        migration / "references" / "render-geometry.md": [
+            "ab8d3dd8451c227afb995802f2c3fa50999d3727",
+            "inter-module gap has one fixed owner",
+            "dark mode flattens module fills",
         ],
         migration / "references" / "render-components-validation.md": [
             "For `mj-navbar`, do not invent a mapping",
@@ -313,13 +329,14 @@ def validate_skills() -> None:
             "For unpublished local components, `.key` is empty",
             "Customer-facing headlines, eyebrows, subheads, body copy",
             "No `mj-group` has a fill",
+            "`mj-column` has no background-image mapping",
         ],
     }
     for path, required_strings in required_migration_contract.items():
         text = path.read_text(encoding="utf-8")
         for required_string in required_strings:
             if required_string not in text:
-                fail(f"{path.relative_to(ROOT)}: missing v4.3.0 contract text {required_string!r}")
+                fail(f"{path.relative_to(ROOT)}: missing v4.4.0 contract text {required_string!r}")
 
     audit_text = (migration / "references" / "audit.md").read_text(encoding="utf-8")
     palette = audit_text.find("## Palette")
@@ -353,13 +370,15 @@ def validate_skills() -> None:
             "manage-preferences.com",
         ],
         builder / "references" / "render-geometry.md": [
-            "fff9223a784686bf16efb1aa10983230024609d8",
+            "ab8d3dd8451c227afb995802f2c3fa50999d3727",
             "House default `#1F1F1F`",
             "The six theme keys are dark-mode values",
             "deliberate multi-column top-align case in R3.4",
             "Card and inset blocks",
             "Range writes share the failure mode",
             "module's main component",
+            "inter-module gap has one fixed owner",
+            "dark mode flattens module fills",
         ],
         builder / "references" / "render-nodes.md": [
             "Exception, multi-column rows",
@@ -369,19 +388,21 @@ def validate_skills() -> None:
             "A bordered group needs width headroom",
             "use it as a mask first",
             "spacer is itself a colored band",
+            "filled card that needs a gutter",
         ],
         builder / "references" / "render-components-validation.md": [
             "Mark each such top-align exception as intentional",
             "A band with decorative art",
             "For unpublished local components, `.key` is empty",
             "No `mj-group` has a fill",
+            "`mj-column` has no background-image mapping",
         ],
     }
     for path, required_strings in required_builder_contract.items():
         text = path.read_text(encoding="utf-8")
         for required_string in required_strings:
             if required_string not in text:
-                fail(f"{path.relative_to(ROOT)}: missing v4.3.0 contract text {required_string!r}")
+                fail(f"{path.relative_to(ROOT)}: missing v4.4.0 contract text {required_string!r}")
 
 
 def validate_provenance() -> None:
@@ -391,14 +412,14 @@ def validate_provenance() -> None:
     if not re.fullmatch(r"[0-9a-f]{40}", commit):
         fail("sources.json upstream commit must be a full Git SHA")
     expected_upstream = {
-        "commit": "fff9223a784686bf16efb1aa10983230024609d8",
+        "commit": "ab8d3dd8451c227afb995802f2c3fa50999d3727",
         "builder_tag": "emaillove-figma-builder-v2.9.2",
-        "render_tag": "emaillove-eds-converter-v1.40.0",
-        "migration_tag": "emaillove-migration-audit-v1.21.0",
+        "render_tag": "emaillove-eds-converter-v1.42.0",
+        "migration_tag": "emaillove-migration-audit-v1.22.0",
     }
     for key, expected in expected_upstream.items():
         if upstream.get(key) != expected:
-            fail(f"sources.json upstream.{key} must be {expected!r} for v4.3.0")
+            fail(f"sources.json upstream.{key} must be {expected!r} for v4.4.0")
     for snapshot in sources.get("legacy_snapshots", []):
         relative = snapshot.get("path", "")
         expected = snapshot.get("sha256", "")
@@ -414,8 +435,8 @@ def validate_provenance() -> None:
 def validate_evals() -> None:
     payload = load_json(EVALS)
     cases = payload.get("cases", [])
-    if len(cases) < 11:
-        fail("tests/evals.json must contain at least eleven representative cases")
+    if len(cases) < 12:
+        fail("tests/evals.json must contain at least twelve representative cases")
     seen: set[str] = set()
     required = {"id", "prompt", "expected_skill", "expected_route", "must_do", "must_not_do"}
     for index, case in enumerate(cases):
@@ -442,7 +463,7 @@ def validate_repository_guidance() -> None:
         fail("root AGENTS.md must stay below the default 32 KiB instruction budget")
     compatibility_files = (agents, MIGRATION_COMPATIBILITY)
     required_compatibility_text = {
-        "codex plugin marketplace add email-love/codex-agents --ref v4.3.0",
+        "codex plugin marketplace add email-love/codex-agents --ref v4.4.0",
         "codex plugin add email-love@email-love",
     }
     for compatibility_file in compatibility_files:
@@ -467,6 +488,8 @@ def validate_repository_guidance() -> None:
         "Setting the dark keys equal to the light design colors": "obsolete light-for-dark guidance",
         "which wrecks a light email": "obsolete theme-default explanation",
         "mobile padding is a node property": "obsolete mobile padding schema",
+        "recolors every filled content cell": "obsolete dark-mode mechanism",
+        "recolors filled section and column": "obsolete dark-mode mechanism",
     }
     for stale_text, description in stale_contract_text.items():
         if stale_text in active_text:

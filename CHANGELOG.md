@@ -1,5 +1,38 @@
 # Changelog
 
+## 4.4.0 - 2026-08-05
+
+Ports claude-skills batches 10 and 11 from `ab8d3dd`: the corrected dark-mode mechanism,
+three library-construction rules, two audit census fixes, and headless exporter verification.
+
+- Corrects the dark CSS mechanism: global `contentColor` paints each module wrapper while
+  section and column fills are forced transparent. Module fills are erased rather than
+  recolored, producing the same flattened dark-mode surface. Cards do not remain visually
+  distinct, and baked image backgrounds are unsafe under forced-light text.
+- Gives the inter-module gap one owner library-wide: wrapper `paddingBottom` from the audit's
+  spacing ladder, with zero on the final module. Section padding no longer double-serves as
+  the space between modules.
+- Documents unsupported art behind live card text: `mj-column` has no background-image
+  mapping, so use an in-flow `mj-image` with evidence-based BOOLEAN visibility rather than
+  baking the card. Adds the fill-less outer column plus filled `mj-column-inner` construction
+  for cards that need a gutter.
+- Makes the palette census inspect text fills at segment level and makes the asset survey
+  search other designs for clean vector instances before prescribing a fused-raster rebuild.
+- Runs migration export sniffs headlessly through `emaillove_export_figma` when the Email Love
+  MCP exposes it. `operationType: "preview"` charges no export quota, accepts a bare wrapper,
+  compiles through the production export pipeline, and returns a token for
+  `emaillove_preview_email` mobile QA.
+- Keeps the human plugin-Export fallback for an absent tool and for CoverageError nodes outside
+  the core tag set. Deferred verification now contains only checks that neither the MCP nor a
+  human could run.
+- Applies universal render corrections to both the migration and email-builder skills and adds
+  an Email Love MCP setup note to the repository documentation.
+
+Pins upstream provenance to `ab8d3dd8451c227afb995802f2c3fa50999d3727`, migration tag
+`emaillove-migration-audit-v1.22.0`, converter tag
+`emaillove-eds-converter-v1.42.0`, and unchanged builder tag
+`emaillove-figma-builder-v2.9.2`.
+
 ## 4.3.0 - 2026-08-04
 
 Completes the combined port from claude-skills `fff9223`, spanning verification

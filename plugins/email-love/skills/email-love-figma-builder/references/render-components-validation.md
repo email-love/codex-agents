@@ -101,6 +101,12 @@ carries the decoration and sets `mobileStylesHideInMobileDevice = 'true'`. Keep 
 inside the email content margin. This preserves live text and removes the decoration cleanly
 on mobile.
 
+`mj-column` has no background-image mapping either, so art behind live text inside a card has no
+supported construction. Place an overlapping glyph or ornament as an in-flow `mj-image` above the
+content and bind its visibility to a BOOLEAN when the source has variants without it. The loss is
+the overhang only. Do not bake the card into an image to preserve the overlap: images are not
+erased in dark mode, so a baked light card can keep its light colors under forced-light text.
+
 ## R7. Components: when a node is a COMPONENT instead of a FRAME
 
 **Make it a COMPONENT when it is meant to be reused**: a design-system module (always), a

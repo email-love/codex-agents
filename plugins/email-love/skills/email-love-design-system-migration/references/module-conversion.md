@@ -12,12 +12,16 @@
 - Report and gate each batch
 - Run send readiness and hand off the migration
 
-**Before the first module, establish who runs the batch checks.** Step 6's mobile render and
-export sniff need the plugin's Upload and Export buttons, which are human clicks on a paid
-seat. If Codex cannot drive them, say so in the batch-1 opening and state the consequence:
-mobile behavior will be built and computed but not verified against exporter output until a
-human runs the checks. Maintain one Deferred verification list across the migration rather
-than discovering this limitation after several batches.
+**Before the first module, establish how the batch checks will run.** Check the Email Love MCP
+(`mcp.emaillove.com`) for `emaillove_export_figma`. When present, step 6's export sniff is fully
+agent-run with `operationType: "preview"`, with no plugin click and no export quota, and the mobile
+render runs through `emaillove_preview_email`. Its v1 coverage is the core tag set:
+`mj-wrapper`, `mj-section`, `mj-group`, `mj-column`, `mj-column-inner`, `mj-text`, `mj-image`,
+`mj-button`, `mj-divider`, and `mj-spacer`. It rejects `mj-hero`, `mj-social`, `mj-navbar`, and
+`mj-table` with a CoverageError naming the node; only those modules still need a human plugin
+Export. When the tool is absent, say in the batch-1 opening that a paid-seat human must run the
+Export sniff. Maintain one Deferred verification list for checks that neither the MCP nor a human
+can run rather than discovering this limitation after several batches.
 
 ### 0. What you are building: a module, not a small email
 
@@ -578,9 +582,10 @@ audit, never with how the module looks.
   from the audit's Palette. List each unbound node id, raw hex, and intended role. Placeholder gray
   image fills are the only exception, and each must be identified as intentional. An empty
   violation list is the only pass.
-- **Never fill the group itself: no `mj-group` carries a fill of its own.** The exporter's dark-mode CSS never recolors a
-  group, so forced-light text can land on the original fill in dark mode. Put a band fill on
-  the group's columns and list every filled group by node id as a failure.
+- **Never fill the group itself: no `mj-group` carries a fill of its own.** The exporter's
+  dark-mode CSS erases section and column fills to transparent but never touches a group's own
+  fill, so forced-light text can land on that original fill. Put a band fill on the group's
+  columns and list every filled group by node id as a failure.
 - Naming: every layer carries the display name for its tag, and no friendly string leaked into
   the plugin data `name` key.
 - Component: the module root is a direct child of its category page, not inside a component
@@ -622,8 +627,15 @@ ratio that differs from desktop, a stacked column retaining its desktop gutter, 
 stacked behavior that contradicts step 3.
 
 **Export sniff.** Pick a representative multi-column module, or a button-bearing module when
-the batch is single-column. Put an instance in the temporary Campaigns root and use the plugin
-Export, asking the user to drive the click if Codex cannot. Save and inspect the HTML. Confirm:
+the batch is single-column. Export it headless first: call `emaillove_export_figma` with the target
+file key, the module wrapper's node id, and `operationType: "preview"`. It accepts a bare
+`mj-wrapper`, compiles it through the production `/getHtml` pipeline without charging export quota,
+and returns the HTML plus a token accepted by `emaillove_preview_email` for a per-module mobile
+render. Its output is golden-diffed against real plugin exports on every worker deploy. On a
+production proof it was HTML-equivalent with an identical dark-mode CSS block. On a
+CoverageError for `mj-hero`, `mj-social`, `mj-navbar`, or `mj-table`, or when the tool is absent,
+fall back to the plugin: put an instance in the temporary Campaigns root and ask a human to click
+Export. Save and inspect the HTML either way. Confirm:
 
 - body width matches foundations;
 - an `@media only screen and (max-width` block exists;
@@ -633,10 +645,11 @@ Export, asking the user to drive the click if Codex cannot. Save and inspect the
 On a failure, repair the Figma source, re-upload if needed, and rerun both affected checks
 before review. These checks inspect exporter output and do not replace step 5.
 
-**When the checks cannot run in-session, do not mark them skipped.** Accumulate a Deferred
-verification list across all batches, one line per module naming the exact behavior a human
-must confirm, such as a group staying unstacked, a button going full width, or an image staying
-fluid. Hand over the combined list in step 7.
+**When a check cannot run in-session** because `emaillove_export_figma` is absent and no human can
+click, or because a CoverageError module has no human available, do not mark it skipped. Accumulate
+a Deferred verification list across all batches, one line per module naming the exact behavior a
+human must confirm, such as a group staying unstacked, a button going full width, or an image
+staying fluid. Hand over the combined list in step 7.
 
 ### 7. Batch report and gate
 
