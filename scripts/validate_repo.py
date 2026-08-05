@@ -15,10 +15,12 @@ ROOT = Path(__file__).resolve().parents[1]
 PLUGIN = ROOT / "plugins" / "email-love"
 SKILLS = PLUGIN / "skills"
 MANIFEST = PLUGIN / ".codex-plugin" / "plugin.json"
+MCP_CONFIG = PLUGIN / ".mcp.json"
 MARKETPLACE = ROOT / ".agents" / "plugins" / "marketplace.json"
 SUBMISSION = ROOT / "SUBMISSION.md"
 SOURCES = ROOT / "sources.json"
 EVALS = ROOT / "tests" / "evals.json"
+SUBMISSION_CASES = ROOT / "tests" / "submission-cases.json"
 MIGRATION_COMPATIBILITY = ROOT / "migration" / "AGENTS.md"
 PUBLIC_PLUGIN_URL = "https://chatgpt.com/plugins/plugins_6a739f43c3b48191b1281a9b2d48b409"
 MAX_SKILL_LINES = 500
@@ -82,12 +84,24 @@ def validate_manifest() -> None:
     manifest = load_json(MANIFEST)
     if manifest.get("name") != "email-love":
         fail("plugin manifest name must be 'email-love'")
-    if manifest.get("version") != "4.6.0":
-        fail("plugin manifest version must be 4.6.0 for this migration contract")
+    if manifest.get("version") != "4.6.1":
+        fail("plugin manifest version must be 4.6.1 for this migration contract")
     if not re.fullmatch(r"\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?", manifest.get("version", "")):
         fail("plugin manifest version must be strict semver")
     if manifest.get("skills") != "./skills/":
         fail("plugin manifest must point skills to ./skills/")
+    if manifest.get("mcpServers") != "./.mcp.json":
+        fail("plugin manifest must point mcpServers to ./.mcp.json")
+    mcp_config = load_json(MCP_CONFIG)
+    if set(mcp_config) != {"mcpServers"}:
+        fail(".mcp.json must use the mcpServers wrapper")
+    servers = mcp_config.get("mcpServers", {})
+    if set(servers) != {"emaillove"}:
+        fail(".mcp.json must declare exactly the emaillove server")
+    elif servers["emaillove"].get("type") != "http":
+        fail(".mcp.json emaillove server type must be http")
+    elif servers["emaillove"].get("url") != "https://mcp.emaillove.com/mcp":
+        fail(".mcp.json emaillove server must use the production MCP URL")
     author = manifest.get("author", {})
     if author.get("name") != "Email Love":
         fail("plugin manifest author.name must be 'Email Love'")
@@ -353,7 +367,7 @@ def validate_skills() -> None:
         text = path.read_text(encoding="utf-8")
         for required_string in required_strings:
             if required_string not in text:
-                fail(f"{path.relative_to(ROOT)}: missing v4.6.0 contract text {required_string!r}")
+                fail(f"{path.relative_to(ROOT)}: missing v4.6.1 contract text {required_string!r}")
 
     audit_text = (migration / "references" / "audit.md").read_text(encoding="utf-8")
     palette = audit_text.find("## Palette")
@@ -427,7 +441,7 @@ def validate_skills() -> None:
         text = path.read_text(encoding="utf-8")
         for required_string in required_strings:
             if required_string not in text:
-                fail(f"{path.relative_to(ROOT)}: missing v4.6.0 contract text {required_string!r}")
+                fail(f"{path.relative_to(ROOT)}: missing v4.6.1 contract text {required_string!r}")
 
 
 def validate_provenance() -> None:
@@ -444,7 +458,7 @@ def validate_provenance() -> None:
     }
     for key, expected in expected_upstream.items():
         if upstream.get(key) != expected:
-            fail(f"sources.json upstream.{key} must be {expected!r} for v4.6.0")
+            fail(f"sources.json upstream.{key} must be {expected!r} for v4.6.1")
     for snapshot in sources.get("legacy_snapshots", []):
         relative = snapshot.get("path", "")
         expected = snapshot.get("sha256", "")
@@ -488,7 +502,7 @@ def validate_repository_guidance() -> None:
         fail("root AGENTS.md must stay below the default 32 KiB instruction budget")
     compatibility_files = (agents, MIGRATION_COMPATIBILITY)
     required_compatibility_text = {
-        "codex plugin marketplace add email-love/codex-agents --ref v4.6.0",
+        "codex plugin marketplace add email-love/codex-agents --ref v4.6.1",
         "codex plugin add email-love@email-love",
     }
     for compatibility_file in compatibility_files:
@@ -533,6 +547,14 @@ def validate_publication_guidance() -> None:
         for phrase in ("GitHub", "submission portal", "review", "publish"):
             if phrase not in text:
                 fail(f"{path.relative_to(ROOT)}: missing public release guidance {phrase!r}")
+
+    cases = load_json(SUBMISSION_CASES)
+    positive = cases.get("positive_cases", [])
+    negative = cases.get("negative_cases", [])
+    if len(positive) != 5:
+        fail("tests/submission-cases.json must contain exactly five positive cases")
+    if len(negative) != 3:
+        fail("tests/submission-cases.json must contain exactly three negative cases")
 
 
 def main() -> int:

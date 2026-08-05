@@ -56,19 +56,6 @@
    "fixture_requirements": "An accepted audit, completed foundations, a read-only source Figma file, and a separate writable target Figma file."
   },
   {
-   "id": "read_only_figma_fallback",
-   "user_prompt": "Build this Email Love campaign, but my connected Figma tools only provide screenshots and metadata and do not provide use_figma.",
-   "expected_skill": "email-love-figma-builder",
-   "expected_behavior": [
-    "State clearly that the connection is read-only.",
-    "Do not promise or simulate a canvas build.",
-    "Offer an email plan or the documented AI Import handoff.",
-    "Explain what the user must do before the workflow can continue."
-   ],
-   "expected_result_shape": "A concise read-only limitation notice followed by the two supported fallback paths and precise reconnection requirements.",
-   "fixture_requirements": "A session where Figma exposes screenshot and metadata tools but not use_figma."
-  },
-  {
    "id": "headless_export_verification",
    "user_prompt": "The Email Love MCP is connected. Verify the migrated module wrapper in this Figma file through the production export pipeline and show me the mobile render.",
    "expected_skill": "email-love-design-system-migration",

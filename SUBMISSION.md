@@ -1,13 +1,13 @@
 # Email Love plugin submission
 
-This is the portal-ready submission brief for the `email-love` skills-only plugin.
+This is the portal-ready submission brief for the `email-love` skills-and-MCP plugin.
 
 ## Submission type
 
 - **Type:** MCP server with skills
 - **Plugin name:** Email Love
 - **Publisher:** Email Love
-- **Version:** 4.6.0
+- **Version:** 4.6.1
 - **Category:** Creativity
 - **Repository:** https://github.com/email-love/codex-agents
 
@@ -88,12 +88,12 @@ processing purposes, recipients, retention behavior, and user controls.
 
 ## Reviewer tests
 
-The required cases (six positive, three negative) are in
+The required cases (five positive, three negative) are in
 `tests/submission-cases.json`. Provide reviewer-accessible fixture links in the portal for
 the cases that require Figma files. Keep those links out of the public repository if they
 grant write access.
 
-## Release notes for 4.6.0
+## Release notes for 4.6.1
 
 Email Love now bundles its MCP connection. Installing the plugin registers the Email Love
 MCP (`emaillove`), so one clearly labelled sign-in replaces the manual server-add step that
@@ -101,7 +101,8 @@ previously confused users, and the migration skill's headless export verificatio
 (`emaillove_export_figma` plus `emaillove_preview_email`) works out of the box after
 authorization. Skill guidance updated to match: absent exporter tools now mean an
 unauthorized connection, and the skill hands the user the one-time login step instead of
-falling back silently. No workflow or check behavior changed otherwise.
+falling back silently. This patch also corrects the package and portal wording for the
+skills-and-MCP submission type. No workflow or check behavior changed otherwise.
 
 ## Initial release notes (4.5.0, for the record)
 
@@ -139,7 +140,7 @@ each submission.
 - Select the verified Email Love business identity.
 - Upload the final skill bundle and logo.
 - Add the three starter prompts above.
-- Add the six positive and three negative reviewer tests from
+- Add the five positive and three negative reviewer tests from
   `tests/submission-cases.json`.
 - Complete MCP domain verification for `mcp.emaillove.com` and enter the server URL and
   OAuth details from the Bundled MCP server section above.

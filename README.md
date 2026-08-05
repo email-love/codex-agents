@@ -31,21 +31,20 @@ For development or testing an exact repository release, add this marketplace and
 plugin:
 
 ```bash
-codex plugin marketplace add email-love/codex-agents --ref v4.6.0
+codex plugin marketplace add email-love/codex-agents --ref v4.6.1
 codex plugin add email-love@email-love
 ```
 
 You can also open `/plugins` in Codex CLI, select the **Email Love** marketplace, and install
-the Git-backed plugin there. Replace `v4.5.0` with `main` only when testing unreleased work.
+the Git-backed plugin there. Replace `v4.6.1` with `main` only when testing unreleased work.
 
 The public and Git-backed installs are separate distribution paths. A GitHub push or marketplace
 refresh does not update the reviewed public plugin.
 
 ### 2. Connect Figma
 
-The skills require the official remote Figma MCP as an external prerequisite. This
-skills-only package does not bundle or declare the Figma integration. Connect it before
-using either workflow:
+The skills require the official remote Figma MCP as an external prerequisite. The Email Love
+plugin does not bundle or declare the Figma integration. Connect it before using either workflow:
 
 ```bash
 codex mcp add figma --url https://mcp.figma.com/mcp

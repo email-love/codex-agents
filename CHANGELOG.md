@@ -1,5 +1,18 @@
 # Changelog
 
+## 4.6.1 - 2026-08-05
+
+Corrects the public submission package before the MCP-backed portal upload.
+
+- Replaces stale skills-only wording with the correct skills-and-MCP submission type.
+- Updates current install and compatibility examples to the `v4.6.1` release tag.
+- Keeps exactly five positive and three negative portal reviewer cases, retaining the new
+  headless-export verification case while leaving read-only Figma fallback coverage in the
+  internal eval suite.
+- Corrects the companion `.mcp.json` to use the required `mcpServers` wrapper and explicit
+  HTTP transport, then adds repository checks for that declaration and the portal case counts.
+- No runtime skill behavior changed.
+
 ## 4.6.0 - 2026-08-05
 
 Bundles the Email Love MCP connection and makes the exporter path self-explanatory.
