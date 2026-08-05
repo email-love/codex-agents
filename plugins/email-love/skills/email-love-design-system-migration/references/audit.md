@@ -616,6 +616,16 @@ was measured from the source or selected from email standards.
   text starting between 109 and 118px in on a 1092 wide design is about 10.5 percent, which on a
   600px target is a 63px margin and a 474px content width. Report the percentage, the converted
   margin, the implied content width, and which designs you measured.
+  - **Measure leaf content, never container padding.** Use the resolved left edge of the actual
+    text and image nodes relative to the module root. Container padding answers a different
+    question: a full-bleed section can have zero side padding while its real inset lives one or
+    two levels down on a column. A measured source had section side padding at zero on 116 of
+    roughly 180 modules, while the leaf insets clustered at 16, 20, 24, 30, 32, and 40. Reading
+    only the sections would have made the whole library too wide.
+  - **Report the distribution, not only an average, and break it out by category.** A source can
+    vary across the library while remaining exact inside one category. Preserve a category's
+    consistent margin as evidence instead of standardizing it away, and name those categories so
+    Phase 2 can retain them.
   - **A consistent source margin is evidence worth carrying, and say so in those terms.** It means
     the customer's own system has ONE margin, so the converted library should have one too, and that
     is the finding foundations acts on.
@@ -710,8 +720,13 @@ report measured values and say the derivation was skipped.]
 ## Module inventory
 [REQUIRED, deduplicated, and this is the section Phase 3 works from. One row per DISTINCT
 module: module name | category | appears in (design names) | source ref | verdict A/B/C/D |
-concession | build constraints | effort S/M/L | notes. The name is the name the converted
-component will carry. **Source ref is REQUIRED on every row** and names the one appearance to
+concession | build constraints | content census | effort S/M/L | notes. The name is the name the
+converted component will carry. **Content census is REQUIRED on every row** and contains two
+integers, `T/I`: the source module's TEXT-node count and image-bearing-node count. An
+image-bearing node is any node whose `fills[0].type` is `IMAGE`, including a frame background.
+Collect both counts with one `findAll` while walking each module. They let Phase 3 prove that the
+rebuild retained the customer's module rather than merely producing a plausible replacement.
+**Source ref is REQUIRED on every row** and names the one appearance to
 convert from, precisely enough to screenshot without re-deriving the split (Step 5): a design name
 plus a node name or id, or, where there is no node to name, a position within that design ("top 0
 to 480", "between the divider and the footer rule"). Every A row states either `none` or a named

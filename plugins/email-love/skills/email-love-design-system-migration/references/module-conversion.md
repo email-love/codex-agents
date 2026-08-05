@@ -496,9 +496,35 @@ fail above roughly 80KB or on non-ASCII layer names, use the available Figma exe
 in batches of about twelve nodes and emit one ASCII-sanitized line per node. Include node
 type, layer name, layout and sizing, both alignment axes, paddings, resolved x and width,
 fills and variable bindings, all `emaillove` shared plugin data, component-property
-references, and `getStyledTextSegments(['lineHeight'])` for text. Evaluate R9 and the five
+references, and `getStyledTextSegments(['lineHeight'])` for text. Evaluate R9 and the seven
 groups below against that dump locally. List every violation by node id; an empty list per
 group is the only pass.
+
+**Group 0: parity with the source. Run this first.** The remaining groups ask whether the build is
+internally consistent; this one asks whether it is still the module the customer supplied. For
+every module, pair source and build by the Module inventory name and compare:
+
+- TEXT-node count against the audit row's census `T`, then the trimmed first 40 characters of
+  every text node, sorted, in both trees. A matching count with different strings still fails.
+- Image-bearing-node count against census `I`, plus each node's rounded width x height. This
+  catches a background photograph rebuilt as a flat fill and a grid rebuilt with missing cells.
+- Text alignment per node and the module's band fills.
+
+Any difference fails and must name the module and delta. Exactly three explained resolutions are
+allowed, and each goes in the batch report:
+
+1. An intentionally added optional region, defaulted to `visible = false` so the module still
+   matches the source out of the box.
+2. A deliberate consolidation required by that module's inventory row.
+3. A named source defect corrected by the rebuild.
+
+Anything else added is invented content; anything absent is dropped content. Copy comes from the
+source. If a module needs a region that the source lacks, use resolution 1 and hide it by default.
+"The transcription is a summary" and "the module looked right" do not resolve a mismatch.
+
+When modules are built through a serializer-and-builder pair, run Group 0 on every module, never a
+sample. Anything the compact spec does not model disappears silently, and checks performed only on
+the build cannot detect that loss.
 
 **Group 1: shape and tags.**
 
@@ -534,6 +560,10 @@ group is the only pass.
 **Group 3: geometry against foundations.** Compare these numbers with foundations and the
 audit, never with how the module looks.
 
+- **Typography includes weight as well as size.** Check every text node's family and style against
+  the audit's Brand foundations census, not only against the new ramp. Assert that every style name
+  matches its read-back value and that the ramp's dominant body weight matches the source census.
+  A ramp can be internally consistent while placing the entire library at the wrong weight.
 - Scale: the module root is at the audit's target email width, and its type sizes, paddings, and
   image dimensions are at email scale rather than source scale (render rule R0.6). A module built at
   source scale looks correct in isolation and wrong the moment it sits next to another module, so
@@ -579,9 +609,15 @@ audit, never with how the module looks.
 **Group 4: fills and bindings.**
 
 - **Semantic-token bind count:** every non-placeholder solid fill resolves to a semantic variable
-  from the audit's Palette. List each unbound node id, raw hex, and intended role. Placeholder gray
-  image fills are the only exception, and each must be identified as intentional. An empty
-  violation list is the only pass.
+  from the audit's Palette. List each unbound node id, raw hex, and intended role. Test the binding,
+  not the property: Figma returns `boundVariables` as `{}` for an unbound paint, so
+  `!fills[0].boundVariables` can never catch it. The working predicate is
+  `!fills[0].boundVariables?.color`. Name the value that makes every validation predicate fail and
+  confirm that value is reachable. Placeholder gray image fills are the only exception, and each
+  must be identified as intentional. An empty violation list is the only pass.
+- **Text-on-background contrast:** compare every text node with its nearest filled ancestor. Report
+  every ratio below 3.0 with both hex values. Never silently change a brand color to make a failure
+  pass; report the ratio and options for designer review.
 - **Never fill the group itself: no `mj-group` carries a fill of its own.** The exporter's
   dark-mode CSS erases section and column fills to transparent but never touches a group's own
   fill, so forced-light text can land on that original fill. Put a band fill on the group's
@@ -607,9 +643,24 @@ audit, never with how the module looks.
   `getStyledTextSegments(['lineHeight'])`. A second segment means a bold or colour range carries
   a detached frozen line height.
 
-**Then take one desktop screenshot.** Compare the rebuild with the source screenshot from
+**Group 6: asset identity.** A correctly tagged image at the correct dimensions can still contain
+the wrong asset.
+
+- Same dimensions do not prove identity. Compare the asset's luminance with its nearest filled
+  ancestor and fail a light mark on a light band or a dark mark on a dark band.
+- Match the source icon set at that node, not merely the platform names or dimensions. Bare and
+  circled social icons can share subjects while being different assets.
+- Compare a downloaded asset's aspect ratio with the source node. A large mismatch can indicate a
+  sprite sheet; split it at the transparent gutter instead of placing the full sheet in one node.
+- Read `placedOnNodeId` from every `upload_assets` response. If it differs from the intended node,
+  use the returned `imageHash` to set the fill and delete the stray frame.
+- Never hand-transcribe image bytes between files. Use `download_assets` followed by
+  `upload_assets`.
+
+**Then take one desktop screenshot per module.** Compare each rebuild with its source screenshot from
 step 1 and flag divergences. On REFERENCE ONLY, compare content and structure only; margins,
-type sizes, and spacing are expected to differ. If the rebuild is 20 to 40px taller than the
+type sizes, and spacing are expected to differ. This check remains mandatory as batches speed up:
+read-back proves what was written, while the image shows what a person sees. If the rebuild is 20 to 40px taller than the
 source, detect content bands in both renders and derive the padding correction instead of
 eyeballing a nudge. The mobile render belongs to the batch checks in step 6.
 
@@ -653,7 +704,10 @@ staying fluid. Hand over the combined list in step 7.
 
 ### 7. Batch report and gate
 
-One report per batch: per module, keyed by its Module inventory row name, what was rebuilt, the
+One report per batch. **Open with the Group 0 parity table:** for every module, show the source
+`T/I` census beside the built counts and leave the delta column blank when they agree. Any
+unexplained row fails the gate regardless of the remaining groups. Then report, per module and
+keyed by its Module inventory row name, what was rebuilt, the
 design you converted it from, verdict honored or changed (with reason), any concession and whether
 it was accepted and by whom (and for a bleed concession, the two column widths you landed on, so a
 reviewer can check the sum), which input path you used and why, plus what the worker returned

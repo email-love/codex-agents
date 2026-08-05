@@ -112,6 +112,10 @@ Keep the source file read-only.
 The migration skill always audits first, builds in a separate target file, and converts no
 more than five modules before a review gate.
 
+Each audit records source text and image counts for every module. Before design review, every
+rebuild must pass source-parity checks for content, alignment, band fills, typography weight,
+semantic bindings, contrast, and asset identity, with a fresh screenshot for each module.
+
 At the start of an audit it asks where the current emails live. Supported sources are:
 
 - Figma;

@@ -214,8 +214,10 @@ Use the phase checklist and R9 from the references. At minimum verify:
 
 - source file unchanged;
 - source account, folder, and templates unchanged for non-Figma adapters;
+- every audit inventory row contains a source `T/I` content census;
 - prescribed target pages present in the correct order;
 - foundations and semantic bindings intact;
+- every text style name matches its read-back value, including weight;
 - one canonical body width and content width;
 - module root is a direct-page-child COMPONENT tagged `mj-wrapper`;
 - no `nodeType` exists anywhere in a module tree;
@@ -224,12 +226,16 @@ Use the phase checklist and R9 from the references. At minimum verify:
 - fixed widths are documented load-bearing cases;
 - pinned text widths include fallback slack;
 - images use source-node renders with preserved aspect ratios;
+- source and build pass Group 0 parity for text, images, alignment, and band fills;
+- image assets match the source identity, icon set, luminance context, and sprite crop;
 - overlaps use the Two Column Swap;
 - component-property bindings were read back;
 - every customer-facing text node is reachable through a module-root TEXT property except
   boilerplate and link-bearing text;
 - no `mj-group` carries its own fill;
-- fresh screenshots match the accepted fidelity tier;
+- semantic fill bindings use the `.boundVariables?.color` predicate;
+- text-on-background contrast failures below 3.0 are reported without silently changing brand colors;
+- one fresh screenshot per module matches the accepted fidelity tier;
 - the batch mobile render and export sniff passed, or every outstanding check appears in the
   Deferred verification list;
 - the batch contains no unreviewed modules beyond its declared scope.

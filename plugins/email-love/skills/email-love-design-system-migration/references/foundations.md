@@ -561,6 +561,10 @@ Pages, in canonical order:
       standard ramp on one that was not (step 3). The target family was checked with
       `figma.listAvailableFontsAsync()` before the ramp was built, and any Arimo substitution,
       weight collapse, or intentionally added ramp-gap step is recorded in the foundations report.
+      Every text style's NAME matches its read-back VALUE: a style named `P2/Regular` whose
+      `fontName.style` is `Light` is a fail even when it applies cleanly. Compare the ramp's
+      dominant body weight with the dominant body weight in the audit census as well. An internally
+      consistent ramp is still wrong when its weight differs from the source library.
       Every text style's line height reads back as PERCENT; PIXELS anywhere is a fail. The mobile
       ramp and its two anchors are recorded in the report and on the Type page as numbers only;
       nothing has been written to content nodes yet.

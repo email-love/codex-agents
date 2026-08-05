@@ -80,8 +80,8 @@ def validate_manifest() -> None:
     manifest = load_json(MANIFEST)
     if manifest.get("name") != "email-love":
         fail("plugin manifest name must be 'email-love'")
-    if manifest.get("version") != "4.4.0":
-        fail("plugin manifest version must be 4.4.0 for this migration contract")
+    if manifest.get("version") != "4.5.0":
+        fail("plugin manifest version must be 4.5.0 for this migration contract")
     if not re.fullmatch(r"\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?", manifest.get("version", "")):
         fail("plugin manifest version must be strict semver")
     if manifest.get("skills") != "./skills/":
@@ -248,6 +248,10 @@ def validate_skills() -> None:
             "getStyledTextSegments(['fills'])",
             "rebuild from the vectors at <node id>",
             "Module fills are erased, not recolored",
+            "Measure leaf content, never container padding",
+            "Report the distribution, not only an average",
+            "Content census is REQUIRED on every row",
+            "`T/I`",
         ],
         migration / "references" / "foundations.md": [
             "### Precondition: packaged render references",
@@ -268,6 +272,8 @@ def validate_skills() -> None:
             "Gelasio",
             "modules use inline buttons",
             "module's main component",
+            "Every text style's NAME matches its read-back VALUE",
+            "dominant body weight",
         ],
         migration / "references" / "module-conversion.md": [
             "render each whole design once at 1:1",
@@ -298,6 +304,15 @@ def validate_skills() -> None:
             "emaillove_export_figma",
             "operationType: \"preview\"",
             "CoverageError",
+            "**Group 0: parity with the source. Run this first.**",
+            "trimmed first 40 characters",
+            "**Typography includes weight as well as size.**",
+            "!fills[0].boundVariables?.color",
+            "**Text-on-background contrast:**",
+            "**Group 6: asset identity.**",
+            "placedOnNodeId",
+            "one desktop screenshot per module",
+            "Open with the Group 0 parity table",
         ],
         migration / "references" / "render-nodes.md": [
             "R3.3.2 Group columns shrink on mobile",
@@ -316,7 +331,7 @@ def validate_skills() -> None:
             "filled card that needs a gutter",
         ],
         migration / "references" / "render-geometry.md": [
-            "ab8d3dd8451c227afb995802f2c3fa50999d3727",
+            "eb2cc3ad59d8f0551f652d753a1e647a9f9af975",
             "inter-module gap has one fixed owner",
             "dark mode flattens module fills",
         ],
@@ -336,7 +351,7 @@ def validate_skills() -> None:
         text = path.read_text(encoding="utf-8")
         for required_string in required_strings:
             if required_string not in text:
-                fail(f"{path.relative_to(ROOT)}: missing v4.4.0 contract text {required_string!r}")
+                fail(f"{path.relative_to(ROOT)}: missing v4.5.0 contract text {required_string!r}")
 
     audit_text = (migration / "references" / "audit.md").read_text(encoding="utf-8")
     palette = audit_text.find("## Palette")
@@ -352,6 +367,14 @@ def validate_skills() -> None:
         fail("render rule R3.4.0 must remain before R3.4.1 Two Column Swap")
 
     module_text = (migration / "references" / "module-conversion.md").read_text(encoding="utf-8")
+    group_zero = module_text.find("**Group 0: parity with the source.")
+    group_one = module_text.find("**Group 1: shape and tags.**")
+    group_five = module_text.find("**Group 5: mobile data.**")
+    group_six = module_text.find("**Group 6: asset identity.**")
+    if min(group_zero, group_one, group_five, group_six) < 0 or not (
+        group_zero < group_one < group_five < group_six
+    ):
+        fail("module verification groups must run Group 0 first and Group 6 after Group 5")
     content_width = module_text.find("- **Content width:")
     gutter_check = module_text.find("- **Multi-column gutter present.")
     naming = module_text.find("- Naming:")
@@ -370,7 +393,7 @@ def validate_skills() -> None:
             "manage-preferences.com",
         ],
         builder / "references" / "render-geometry.md": [
-            "ab8d3dd8451c227afb995802f2c3fa50999d3727",
+            "eb2cc3ad59d8f0551f652d753a1e647a9f9af975",
             "House default `#1F1F1F`",
             "The six theme keys are dark-mode values",
             "deliberate multi-column top-align case in R3.4",
@@ -402,7 +425,7 @@ def validate_skills() -> None:
         text = path.read_text(encoding="utf-8")
         for required_string in required_strings:
             if required_string not in text:
-                fail(f"{path.relative_to(ROOT)}: missing v4.4.0 contract text {required_string!r}")
+                fail(f"{path.relative_to(ROOT)}: missing v4.5.0 contract text {required_string!r}")
 
 
 def validate_provenance() -> None:
@@ -412,14 +435,14 @@ def validate_provenance() -> None:
     if not re.fullmatch(r"[0-9a-f]{40}", commit):
         fail("sources.json upstream commit must be a full Git SHA")
     expected_upstream = {
-        "commit": "ab8d3dd8451c227afb995802f2c3fa50999d3727",
+        "commit": "eb2cc3ad59d8f0551f652d753a1e647a9f9af975",
         "builder_tag": "emaillove-figma-builder-v2.9.2",
-        "render_tag": "emaillove-eds-converter-v1.42.0",
-        "migration_tag": "emaillove-migration-audit-v1.22.0",
+        "render_tag": "emaillove-eds-converter-v1.43.0",
+        "migration_tag": "emaillove-migration-audit-v1.23.0",
     }
     for key, expected in expected_upstream.items():
         if upstream.get(key) != expected:
-            fail(f"sources.json upstream.{key} must be {expected!r} for v4.4.0")
+            fail(f"sources.json upstream.{key} must be {expected!r} for v4.5.0")
     for snapshot in sources.get("legacy_snapshots", []):
         relative = snapshot.get("path", "")
         expected = snapshot.get("sha256", "")
@@ -435,8 +458,8 @@ def validate_provenance() -> None:
 def validate_evals() -> None:
     payload = load_json(EVALS)
     cases = payload.get("cases", [])
-    if len(cases) < 12:
-        fail("tests/evals.json must contain at least twelve representative cases")
+    if len(cases) < 13:
+        fail("tests/evals.json must contain at least thirteen representative cases")
     seen: set[str] = set()
     required = {"id", "prompt", "expected_skill", "expected_route", "must_do", "must_not_do"}
     for index, case in enumerate(cases):
@@ -463,7 +486,7 @@ def validate_repository_guidance() -> None:
         fail("root AGENTS.md must stay below the default 32 KiB instruction budget")
     compatibility_files = (agents, MIGRATION_COMPATIBILITY)
     required_compatibility_text = {
-        "codex plugin marketplace add email-love/codex-agents --ref v4.4.0",
+        "codex plugin marketplace add email-love/codex-agents --ref v4.5.0",
         "codex plugin add email-love@email-love",
     }
     for compatibility_file in compatibility_files:

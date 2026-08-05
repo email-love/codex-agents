@@ -1,5 +1,33 @@
 # Changelog
 
+## 4.5.0 - 2026-08-05
+
+Ports claude-skills batch 12 from `eb2cc3a`: source-content parity, typography fidelity,
+binding and contrast checks, asset identity, and mandatory per-module screenshots.
+
+- Adds a required `T/I` content census to every audit inventory row: source TEXT nodes and
+  image-bearing nodes, including frame backgrounds. Content margins now measure resolved leaf
+  positions and report category-level distributions instead of relying on container padding or
+  a single average.
+- Adds Group 0 as the first module gate. Every source/build pair must match text counts and
+  strings, image counts and dimensions, text alignment, and band fills. Only documented optional
+  hidden regions, inventory-directed consolidations, and named source-defect fixes may differ.
+- Verifies typography family and weight against the audit census and requires each style name to
+  match its read-back value. A consistently named ramp no longer passes when its actual weights
+  differ from the source.
+- Fixes semantic-binding verification for Figma's empty `boundVariables` object by checking
+  `.boundVariables?.color`, and adds text-to-nearest-background contrast reporting below 3.0
+  without silently altering brand colors.
+- Adds asset-identity checks for luminance context, icon-set fidelity, sprite-sheet aspect ratios,
+  and `upload_assets` placement. Asset transfer must use `download_assets` and `upload_assets`.
+- Requires one fresh desktop screenshot per module and opens every batch report with the Group 0
+  source/build parity table.
+
+Pins upstream provenance to `eb2cc3ad59d8f0551f652d753a1e647a9f9af975`, migration tag
+`emaillove-migration-audit-v1.23.0`, converter tag
+`emaillove-eds-converter-v1.43.0`, and unchanged builder tag
+`emaillove-figma-builder-v2.9.2`.
+
 ## 4.4.0 - 2026-08-05
 
 Ports claude-skills batches 10 and 11 from `ab8d3dd`: the corrected dark-mode mechanism,

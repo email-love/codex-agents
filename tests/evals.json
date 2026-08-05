@@ -187,6 +187,24 @@
         "consume export quota for a preview check",
         "defer verification before probing the MCP"
       ]
+    },
+    {
+      "id": "migration_source_parity_gate",
+      "prompt": "The next migration batch is rebuilt. Verify it against the source before design review.",
+      "expected_skill": "email-love-design-system-migration",
+      "expected_route": "source-parity-verification",
+      "must_do": [
+        "compare every module with its source T/I census",
+        "compare text strings, image dimensions, alignment, and band fills",
+        "verify typography weight, semantic bindings, contrast, and asset identity",
+        "take one source comparison screenshot per module",
+        "open the batch report with the Group 0 parity table"
+      ],
+      "must_not_do": [
+        "sample only some modules",
+        "accept unexplained invented or dropped content",
+        "silently change brand colors to repair contrast"
+      ]
     }
   ]
 }

@@ -8,7 +8,7 @@ to build an email. Tell the user to install the supported plugin, then stop so t
 new Codex task:
 
 ```bash
-codex plugin marketplace add email-love/codex-agents --ref v4.4.0
+codex plugin marketplace add email-love/codex-agents --ref v4.5.0
 codex plugin add email-love@email-love
 ```
 
