@@ -40,7 +40,12 @@ report from guessing about components it cannot see.
 
 ## Step 2: Survey the file
 
-Build the inventory with read-only calls:
+Build the inventory with read-only calls. **Know the transport limits before relying on one
+full-file response:** metadata reads can fail with an opaque SSE parse error above roughly 80KB
+or on non-ASCII layer names. When that happens, keep the source read-only and use the available
+Figma read tool in batches of about 12 nodes, one compact line per node, with names sanitized to
+ASCII using `.replace(/[^\x20-\x7E]/g, '?')`. Adapt the tool name to the Codex Figma connection;
+the portable rule is the chunked, ASCII-safe fallback.
 
 1. **Pages** and what each holds (component libraries, template galleries, guidelines,
    icon sets, font fallback references).
@@ -338,6 +343,12 @@ Three passes:
    the pixels.** Rows of pure canvas background between mixed-content bands are candidate module
    gaps. Record exact y-coordinates such as `top 128 to 540` on the source ref. This gives Phase 3
    a deterministic local crop and prevents a second agent from re-inferring different boundaries.
+   **Apparent Email Love structure in the source is a hint, not a finding.** Source frames can
+   retain `mj-*` names or nesting from an earlier export while their geometry no longer matches
+   the tags. Verify the structure semantically. The common failure is a frame acting as an
+   `mj-section` that is narrower than its wrapper content box: a section always spans its wrapper
+   on export, so the row's build constraint must say `inset belongs on the wrapper padding, not
+   the section`.
    **Then write the boundary down on the row.** Whoever converts the module has to
    screenshot exactly the region you cut, and a boundary you found but did not record is a
    boundary they have to infer again, differently. So record a source ref per module: the design to
@@ -503,7 +514,11 @@ was measured from the source or selected from email standards.
 
 - **Type ramp, censused rather than sampled.** Enumerate every distinct `(family, size, weight,
   line-height)` tuple across the surveyed source, including local overrides. Cluster values only
-  when they differ by a point or two and report every cluster. Map the complete census to
+  when they differ by a point or two and report every cluster. **Cluster within a family, never
+  across families.** Two typefaces at one size are two rows because one text style carries one
+  family. Name the distinction (`Subhead`, `Subhead Serif`) and settle at foundations whether the
+  second family is load bearing or a consolidation candidate. A row naming two families is an
+  unresolved decision, not a ramp row. Map the complete census to
   email-safe fallbacks. For AUTHORITATIVE and PARTIAL sources, use Step 4's four-column table with
   the same factor printed on every row and run the ratio acceptance test. For REFERENCE ONLY,
   retain the source typefaces and weights but map them to the standard 12, 14, 16, 20, and 24 to
@@ -560,7 +575,11 @@ was measured from the source or selected from email standards.
   full-bleed band or wide-quote outset. Any mobile padding above 160px on a 320px viewport is a
   defect. On REFERENCE ONLY, do not census source geometry; use 8, 16, 24, 32, 40, and 48 and
   state the selected section side padding.
-- **Buttons:** their button styles as candidates for the Email Love button component page.
+- **Buttons: measure the button component itself, never infer it from the palette census.** Open
+  every source button style and record its own background hex, label hex, corner radius, inner
+  padding, and label type style. A color census can contain the correct hex and still assign it to
+  the wrong role. Report each button style as measured values, and list any theme-versus-button
+  difference under the Palette delta rule.
 - **Target email width:** the width the converted system gets built at, which is 600 or 640 and
   nothing else. It is a hard constraint from the email clients rather than something the factor
   derives, so do not divide the source width by the factor to get it: on the measured case that
@@ -653,7 +672,13 @@ palette repeated. Filling them with the light palette ships light-on-light in da
 a dark value per role, starting from the exporter's house defaults (`#000000` page, `#1F1F1F`
 content, `#FFFFFF` text and links, `#FFFFFF` button with `#000000` label) and adjusting only
 where the brand has a real dark treatment. Show the WCAG contrast ratio per pairing so the
-designer approves legible values, not hex strings.]
+designer approves legible values, not hex strings.
+**`contentColor` is a global knob; never promote a single surface's brand color into it.** The
+exporter recolors every filled content cell to that one value in dark mode. Keep it at the neutral
+house default unless the brand's dark treatment demonstrably covers most content surfaces. Record
+a band or footer that keeps its own color in both modes as a per-node override recommendation,
+naming the module; conversion writes it once on that module's main component. Show image-ink
+contrast against the color each surface will actually become, because images do not recolor.]
 ## Mobile styles
 [REQUIRED. Open with the two anchors (body and headline, desktop -> mobile) and the interpolation
 they imply. Then give the mobile type ramp as a table, one row per style: style, desktop size,

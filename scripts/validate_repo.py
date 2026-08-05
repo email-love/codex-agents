@@ -80,8 +80,8 @@ def validate_manifest() -> None:
     manifest = load_json(MANIFEST)
     if manifest.get("name") != "email-love":
         fail("plugin manifest name must be 'email-love'")
-    if manifest.get("version") != "4.2.0":
-        fail("plugin manifest version must be 4.2.0 for this migration contract")
+    if manifest.get("version") != "4.3.0":
+        fail("plugin manifest version must be 4.3.0 for this migration contract")
     if not re.fullmatch(r"\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?", manifest.get("version", "")):
         fail("plugin manifest version must be strict semver")
     if manifest.get("skills") != "./skills/":
@@ -236,6 +236,11 @@ def validate_skills() -> None:
             "## Palette",
             "dark-mode proposal",
             "## Mobile styles",
+            "chunked, ASCII-safe fallback",
+            "Cluster within a family, never",
+            "measure the button component itself",
+            "Apparent Email Love structure in the source is a hint",
+            "`contentColor` is a global knob",
         ],
         migration / "references" / "foundations.md": [
             "### Precondition: packaged render references",
@@ -252,6 +257,10 @@ def validate_skills() -> None:
             "border-connected",
             "WCAG contrast table",
             "vertical HUG with `clipsContent` off",
+            "manage-preferences.com",
+            "Gelasio",
+            "modules use inline buttons",
+            "module's main component",
         ],
         migration / "references" / "module-conversion.md": [
             "render each whole design once at 1:1",
@@ -268,9 +277,17 @@ def validate_skills() -> None:
             "mobileStylesPaddingBottom = '28'",
             "Multi-column rows top-align by default",
             "Range hygiene",
-            "### 6. Export sniff test",
+            "### 1. Choose direct tree read or the design-converter worker",
+            "### 5. Verify per module: one read-back pass, then one screenshot",
+            "**Group 1: shape and tags.**",
+            "**Group 5: mobile data.**",
+            "### 6. Batch checks: mobile render and export sniff",
+            "Deferred verification list",
             "### Send-readiness pass",
             "Button label",
+            "Customer-facing copy gets TEXT properties by default",
+            "Never fill the group itself",
+            "manage-preferences.com",
         ],
         migration / "references" / "render-nodes.md": [
             "R3.3.2 Group columns shrink on mobile",
@@ -281,19 +298,28 @@ def validate_skills() -> None:
             "R5.2.1 Measuring a type size off a screenshot",
             "Open the PNG and look at it before uploading",
             "The neighbour's content",
+            "A group may be narrower than the section content box",
+            "A bordered group needs width headroom",
+            "The source family may have been substituted",
+            "source geometry as a mask",
+            "spacer is itself a colored band",
         ],
         migration / "references" / "render-components-validation.md": [
             "For `mj-navbar`, do not invent a mapping",
             "setRangeHyperlink",
             "resolved width at 375px per R3.3.2",
             "Mark each such top-align exception as intentional",
+            "A band with decorative art",
+            "For unpublished local components, `.key` is empty",
+            "Customer-facing headlines, eyebrows, subheads, body copy",
+            "No `mj-group` has a fill",
         ],
     }
     for path, required_strings in required_migration_contract.items():
         text = path.read_text(encoding="utf-8")
         for required_string in required_strings:
             if required_string not in text:
-                fail(f"{path.relative_to(ROOT)}: missing v4.2.0 contract text {required_string!r}")
+                fail(f"{path.relative_to(ROOT)}: missing v4.3.0 contract text {required_string!r}")
 
     audit_text = (migration / "references" / "audit.md").read_text(encoding="utf-8")
     palette = audit_text.find("## Palette")
@@ -324,26 +350,38 @@ def validate_skills() -> None:
             "Schema B, type on the inner TEXT node",
             "fontSize_mode = 'override'",
             "mobile render or Preview",
+            "manage-preferences.com",
         ],
         builder / "references" / "render-geometry.md": [
-            "23f0d9b508478fa7a0a286209e2c196f25fa60ac",
+            "fff9223a784686bf16efb1aa10983230024609d8",
             "House default `#1F1F1F`",
             "The six theme keys are dark-mode values",
             "deliberate multi-column top-align case in R3.4",
+            "Card and inset blocks",
+            "Range writes share the failure mode",
+            "module's main component",
         ],
         builder / "references" / "render-nodes.md": [
             "Exception, multi-column rows",
             "Top is the default for multi-column rows",
+            "R3.3.2 Group columns shrink on mobile",
+            "Never fill the group itself",
+            "A bordered group needs width headroom",
+            "use it as a mask first",
+            "spacer is itself a colored band",
         ],
         builder / "references" / "render-components-validation.md": [
             "Mark each such top-align exception as intentional",
+            "A band with decorative art",
+            "For unpublished local components, `.key` is empty",
+            "No `mj-group` has a fill",
         ],
     }
     for path, required_strings in required_builder_contract.items():
         text = path.read_text(encoding="utf-8")
         for required_string in required_strings:
             if required_string not in text:
-                fail(f"{path.relative_to(ROOT)}: missing v4.2.0 contract text {required_string!r}")
+                fail(f"{path.relative_to(ROOT)}: missing v4.3.0 contract text {required_string!r}")
 
 
 def validate_provenance() -> None:
@@ -353,14 +391,14 @@ def validate_provenance() -> None:
     if not re.fullmatch(r"[0-9a-f]{40}", commit):
         fail("sources.json upstream commit must be a full Git SHA")
     expected_upstream = {
-        "commit": "23f0d9b508478fa7a0a286209e2c196f25fa60ac",
+        "commit": "fff9223a784686bf16efb1aa10983230024609d8",
         "builder_tag": "emaillove-figma-builder-v2.9.2",
-        "render_tag": "emaillove-eds-converter-v1.35.0",
-        "migration_tag": "emaillove-migration-audit-v1.19.0",
+        "render_tag": "emaillove-eds-converter-v1.40.0",
+        "migration_tag": "emaillove-migration-audit-v1.21.0",
     }
     for key, expected in expected_upstream.items():
         if upstream.get(key) != expected:
-            fail(f"sources.json upstream.{key} must be {expected!r} for v4.2.0")
+            fail(f"sources.json upstream.{key} must be {expected!r} for v4.3.0")
     for snapshot in sources.get("legacy_snapshots", []):
         relative = snapshot.get("path", "")
         expected = snapshot.get("sha256", "")
@@ -404,7 +442,7 @@ def validate_repository_guidance() -> None:
         fail("root AGENTS.md must stay below the default 32 KiB instruction budget")
     compatibility_files = (agents, MIGRATION_COMPATIBILITY)
     required_compatibility_text = {
-        "codex plugin marketplace add email-love/codex-agents --ref v4.2.0",
+        "codex plugin marketplace add email-love/codex-agents --ref v4.3.0",
         "codex plugin add email-love@email-love",
     }
     for compatibility_file in compatibility_files:

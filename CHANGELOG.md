@@ -1,5 +1,43 @@
 # Changelog
 
+## 4.3.0 - 2026-08-04
+
+Completes the combined port from claude-skills `fff9223`, spanning verification
+consolidation, default text properties, and batches 7 through 9. Version 4.2.0 already
+contained batch 6, so this release preserves that published tag and advances the completed
+combined state to 4.3.0.
+
+- Consolidates module verification into one ASCII-safe read-back pass evaluated against five
+  predicate groups, followed by one desktop screenshot. Mobile render and export sniff now run
+  once per batch after provisional upload, with a Deferred verification list when the paid-seat
+  plugin clicks cannot run in-session. Libraries of eight or fewer modules may use one batch.
+- Chooses direct source-tree reads for authoritative or partial Figma sources with real
+  components, auto layout, and target-width frames. Unstructured, flattened, and non-Figma
+  sources continue through the design-converter worker.
+- Makes customer-facing copy TEXT properties the default, with boilerplate and link-bearing
+  text as the exceptions. BOOLEAN and INSTANCE_SWAP remain evidence-gated. Module buttons are
+  inline so their labels can be exposed at module-root level.
+- Adds the audit and foundations corrections: ASCII-safe metadata chunking, semantic checks for
+  apparent `mj-*` structure, type clustering within families, direct source-button measurement,
+  Arimo, Gelasio, and Tinos fallback clones, and neutral global `contentColor` proposals.
+- Adds the render corrections: two sanctioned content-width exceptions with a band-edge
+  invariant, range-write read-back, geometry-first asset masks, local component ids for
+  INSTANCE_SWAP, colored spacer fills, narrower and bordered group handling, mobile group
+  expansion, and the full-bleed decorative-art group pattern.
+- Forbids fills on `mj-group`, because dark-mode CSS does not recolor groups. Band fills now live
+  on columns and any filled group fails validation.
+- Documents the `manage-preferences.com` injection trap. Only Klaviyo replaces it with a merge
+  tag, so preference wording must always carry an explicit safe link.
+- Supports single-surface dark treatments as per-node `contentColor` overrides written once on
+  the module main component, while keeping the global root value neutral unless most content
+  surfaces share the treatment.
+- Applies universal render corrections to both the migration and email-builder skills.
+
+Pins upstream provenance to `fff9223a784686bf16efb1aa10983230024609d8`, migration tag
+`emaillove-migration-audit-v1.21.0`, converter tag
+`emaillove-eds-converter-v1.40.0`, and unchanged builder tag
+`emaillove-figma-builder-v2.9.2`.
+
 ## 4.2.0 - 2026-08-03
 
 Batch 6 port from claude-skills `23f0d9b`: verified mobile schemas, a complete mobile type

@@ -162,9 +162,14 @@ conversion to patch missing foundations.
 
 Read the module-conversion reference and all render references.
 
-1. Convert in batches of no more than five modules.
-2. Before the first write, name the batch and its module count and give a rough estimate.
-3. For each module:
+1. Before the first module, establish who will run the paid-seat plugin Upload and Export
+   clicks needed for the batch mobile render and export sniff. If Codex cannot drive them,
+   say so in the batch-1 opening and maintain the Deferred verification list defined in the
+   module-conversion reference.
+2. A library of eight or fewer modules may run as one batch. Above that, use batches of
+   roughly five modules so the first review can stop a repeated defect early.
+3. Before the first write, name the batch and its module count and give a rough estimate.
+4. For each module:
    - read its audit row and build constraints;
    - fetch or screenshot the source item at the target email width using its adapter;
    - send only that customer's source render to the converter;
@@ -173,10 +178,13 @@ Read the module-conversion reference and all render references.
    - apply the library's foundations and canonical content width;
    - repair known worker limitations;
    - create a reusable `mj-wrapper` component with no `mainFrame` marker;
-   - add only evidence-backed component properties;
-   - verify and screenshot it.
-4. Stop after the batch report for human review.
-5. Continue only after the batch is accepted.
+   - add customer-facing TEXT properties by default, while keeping boilerplate and
+     link-bearing text unbound; add BOOLEAN and INSTANCE_SWAP properties only from evidence;
+   - verify it with one compact read-back pass and one desktop screenshot.
+5. After provisional upload, run the mobile render and export sniff once for the batch, or
+   add specific outstanding checks to the Deferred verification list.
+6. Stop after the batch report for human review.
+7. Continue only after the batch is accepted.
 
 Never send a competitor email or Email Love inspiration preview to the converter.
 
@@ -216,7 +224,12 @@ Use the phase checklist and R9 from the references. At minimum verify:
 - images use source-node renders with preserved aspect ratios;
 - overlaps use the Two Column Swap;
 - component-property bindings were read back;
+- every customer-facing text node is reachable through a module-root TEXT property except
+  boilerplate and link-bearing text;
+- no `mj-group` carries its own fill;
 - fresh screenshots match the accepted fidelity tier;
+- the batch mobile render and export sniff passed, or every outstanding check appears in the
+  Deferred verification list;
 - the batch contains no unreviewed modules beyond its declared scope.
 
 Fix failures before presenting a batch.

@@ -11,7 +11,7 @@ This is part 1 of the packaged migration transcription specification. Read it to
 
 This is the operative migration-specific subset of `render-spec.md` and `structure.md` from
 the Claude skills at immutable upstream commit
-[`23f0d9b`](https://github.com/email-love/claude-skills/tree/23f0d9b508478fa7a0a286209e2c196f25fa60ac),
+[`fff9223`](https://github.com/email-love/claude-skills/tree/fff9223a784686bf16efb1aa10983230024609d8),
 derived from the plugin source (`email-love/Figma-plugin`), not from inference. Do not
 reconstruct these rules from memory: that is rebuilding by eye under another name.
 
@@ -69,8 +69,8 @@ containers cause content clipping, especially in Outlook.
 | Sizing | Where it belongs |
 | --- | --- |
 | FILL | `mj-wrapper` under an email root; `mj-section` under a wrapper; a single `mj-column` in its section; `mj-column-inner`; every leaf pair wrapper as a column child; the `mj-text` TEXT node inside its frame; the `mj-divider` LINE for a full-width rule; an `mj-button` frame chosen full width (R0.4) |
-| HUG | `mj-group` (its width comes from the fixed columns inside it); the `mj-button` frame when it is auto-width, which is R0.4's default rather than a rule of this table; `mj-button-text`; and the transient state of any frame you created but have not yet appended and set to FILL |
-| FIXED | the four cases below, and nothing else except a button deliberately pinned per R0.4 |
+| HUG | `mj-group` unless R3.3 requires a bordered group to be pinned for headroom; the `mj-button` frame when it is auto-width, which is R0.4's default rather than a rule of this table; `mj-button-text`; and the transient state of any frame you created but have not yet appended and set to FILL |
+| FIXED | the four cases below, a bordered group under R3.3, and a button deliberately pinned per R0.4 |
 
 FIXED width is correct for:
 
@@ -85,6 +85,9 @@ FIXED width is correct for:
    exporter derives them from your pixels.
 4. **The `mj-image` RECTANGLE**, whose pixel width also decides whether the image stays fluid
    on mobile (R4.2).
+
+A bordered `mj-group` is the one container exception: R3.3 pins it so its columns can sum
+short of 100 percent by the total border width. An ordinary group stays HUG.
 
 Anywhere else, a FIXED width is a latent bug: it stops tracking the section content box the
 moment a padding value changes.
@@ -143,9 +146,14 @@ reason. **This rule holds on every fidelity tier**, because it is about agreemen
 rather than agreement with the source: on a reference-only source the number is simply 560 on a 600
 body, taken from the standards instead of derived from a source margin.
 
-**Full-bleed image bands are the ONLY exception**, at the full body width, because bleeding is the
-design intent rather than a padding difference. A 600 wide image band beside a 560 content width is
-correct; a 600 wide text row is not.
+**Two sanctioned exceptions, governed by one invariant:** the outer edge of a text-bearing
+block sits at the library content width. Full-bleed image bands may run to the body width,
+because bleeding is the design intent. Card and inset blocks may add their own audited card
+padding inside an outer edge at the library content width, or inside a narrower width explicitly
+named by the audit's Spacing system. A 540 card with 25px padding around 490px of content is
+correct; a plain text section with a different total side inset is not. Verify the band edge,
+not the innermost content box, and remember that columns in an `mj-group` sum to the group
+width rather than the section content box.
 
 For a multi-column row the content width is still the number the columns sum to (R3.3, R3.4, R5.4):
 a 560 content width takes columns plus gutters summing to 560. Widening a row from 520 to 560 means
@@ -380,6 +388,10 @@ number you passed, the units, the order of the calls, and the parent's sizing, b
 that is actually wrong, that the write never landed at all, is the one thing the API did not tell
 you.
 
+**Range writes share the failure mode.** A `setRangeFills` or other `setRange*` call can
+silently fail. After every range write, read back the property with
+`getStyledTextSegments` and confirm that the intended segmentation landed.
+
 **The working pattern**, in this order:
 
 1. Set `layoutSizingVertical = 'FILL'` down the whole descendant chain, from the instance's own
@@ -537,7 +549,10 @@ email is meant to be reused; nothing below changes.
   light-on-light.** They fire only inside the dark-mode media query. Always set all of them.
   Use the audit Palette's dark-mode proposal on every email root identically. Where no proposal
   exists, use the house defaults above and flag them for review. Never substitute the light
-  palette as a stand-in. `lightThemeBackgroundColor` is the light body value.
+  palette as a stand-in. `lightThemeBackgroundColor` is the light body value. Before writing
+  `contentColor`, confirm it represents the treatment for most filled content surfaces. A brand
+  color used by one footer or card belongs on that module as a per-node override; promoting it
+  globally recolors every filled content cell and can collapse image contrast.
 - Optional: `emailSubject`, `emailPreHeader` (plain strings).
 - Also give the root frame a visible SOLID fill of the body background so the canvas looks
   right.
@@ -589,7 +604,12 @@ moduleRoot.setSharedPluginData('emaillove', 'name', 'mj-wrapper')    // the ONLY
   unconditionally whenever they are non-empty, without comparing them to the enclosing email,
   so a module carrying them ships its own dark-mode CSS into every email it is placed in. A
   module inherits nothing and conflicts with everything, so the safe default for a converted
-  module is **no theme keys at all**; the email root supplies them.
+  module is **no theme keys at all**; the email root supplies them. One sanctioned exception is
+  a surface that keeps the same brand color in both themes. Write `contentColor` once on the
+  module's main component; instances mirror that shared plugin data. The conditional
+  `backgroundColor`, `contentColor`, `textColor`, and `linkColor` keys are safe when explicitly
+  required, while `buttonContentColor` and `buttonTextColor` remain unconditional and should
+  stay absent.
 
 ### R2.3 The evidence, so this reads as ground truth rather than preference
 

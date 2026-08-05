@@ -60,6 +60,10 @@ explicitly requests that ESP-specific value.
 | Put this on the link | What the exporter does |
 | --- | --- |
 | `unsubscribe.com` | Replaces it with the selected ESP's unsubscribe merge tag. Source: [Email Love unsubscribe links](https://help.emaillove.com/plugin/links/unsubscribe). |
+| `manage-preferences.com` | Replaces it with Klaviyo's preference-center merge tag only. Every other target can ship the literal URL. Use it only when Klaviyo is confirmed; otherwise use a real preference-center URL or the portable `unsubscribe.com` fallback. |
+
+The exporter can inject `manage-preferences.com` when it sees unlinked preference wording.
+Never leave preference copy unlinked: only Klaviyo turns that placeholder into a merge tag.
 
 Several mobile behaviors are not shared keys. A FILL `mj-button` produces full-width mobile;
 an image whose rectangle equals its content width stays fluid; and columns stack by default unless
@@ -163,8 +167,9 @@ REFERENCE ONLY source the number is 560 on a 600 body**, straight off the defaul
 derivation from a source margin: a margin nobody chose carries no information, and converting a
 percentage of an arbitrary canvas width is how a library ends up with 20px margins that came out of
 arithmetic rather than out of a decision. With a 600
-body and a 560 content width, every text-bearing section carries 20/20 padding. Full-bleed image
-bands at the body width are the only exception. You may overrule a derived value, but say
+body and a 560 content width, every plain text-bearing section carries 20/20 padding. Full-bleed
+bands may use body width, while card and inset blocks may add audited inner padding inside the
+library band edge. You may overrule a derived value, but say
 so and say why, exactly as you would for a type size.
 
 Why this needs saying: the design-converter worker in Phase 3 returns a section padding per
@@ -278,8 +283,8 @@ Build the scaffold every later batch depends on:
      **The content width is required here** because it is
      the number every later module is measured against and the one a module dropped in from elsewhere
      will get wrong: state it as the number plus the side margin it implies (for example `560px
-     content width, 20px side margins on a 600px body`), and say that full-bleed image bands at the
-     full body width are the only exception.
+     content width, 20px side margins on a 600px body`), and document R0.3.1's full-bleed and
+     card/inset outer-edge exceptions.
    - **Foundations.** The token sheet. Required: a swatch per color, each labeled with BOTH its
      hex and its variable name, with primitives and semantic aliases in two clearly separated
      groups so a reader can see which name to reach for; the spacing scale rendered as visible
@@ -366,9 +371,12 @@ Build the scaffold every later batch depends on:
 
    **Check that the target font is installed before building the ramp.** Call
    `figma.listAvailableFontsAsync()` and look for the family by name. Agent-run Figma environments
-   commonly expose Google Fonts but not Helvetica, Helvetica Neue, or Arial. When Arial or
-   Helvetica is the target and is unavailable, build in **Arimo**, the metrically compatible Arial
-   clone, so advance widths and pinned-column slack remain representative. Record the consequence
+   commonly expose Google Fonts but not Helvetica, Helvetica Neue, Arial, Georgia, or Times New
+   Roman. Use **Arimo** for Arial or Helvetica, **Gelasio** for Georgia, and **Tinos** for Times New
+   Roman when the intended family is unavailable. These are metric-compatible with those fallback
+   targets, not with an unrelated brand face, and they can still drift at display sizes. Re-measure
+   every pinned headline or navigation label in the substituted family before setting its boundary;
+   a one- or two-pixel overflow can wrap a display line. Record the consequence
    in the foundations report: the exporter writes the Figma family into `font-family`, so output
    will say Arimo until the family is swapped or Arial is accepted at send time. Also record any
    collapse from brand weights such as Light, Extra Bold, or Black to the Regular and Bold weights
@@ -426,12 +434,12 @@ Build the scaffold every later batch depends on:
    and on the Type page (`Body: 27px desktop / 18px mobile`); Phase 3 writes them per module with
    Schema B. Where the audit predates this contract, derive it with the audit's two-anchor rule
    and say you did.
-4. **Buttons page.** Rebuild each of their button styles as a component: correct email
-   construction (a styled frame with a single text node), not their app-style nested
-   instances. These become the sub-components nested inside mj-button-Frames, and they are
-   the INSTANCE_SWAP targets for module-level "Button Style" properties later. Put the
-   label's TEXT property on the button component itself: a label living inside a nested
-   instance cannot be bound from the module that uses it (render rule R8).
+4. **Buttons page.** Measure the source button component directly: background, label color,
+   radius, inner padding, label family, weight, and size. Do not infer those values from the
+   palette census. Rebuild each style as a correct email component, a styled frame with one
+   text node. These components are the visual references and INSTANCE_SWAP targets for later
+   Button Style properties, but modules use inline buttons so their label can be exposed at the
+   module root. Match each inline button exactly to the foundations component.
 5. **Spacing.** Build the audit's accepted Spacing system by role. For AUTHORITATIVE or PARTIAL,
    preserve its decided values at email scale and its named exceptions; never recover a discarded
    per-module outlier during conversion. Recreate spacer components only when the source had them,
@@ -468,7 +476,10 @@ Build the scaffold every later batch depends on:
    dark-mode proposal, or use the house defaults (`#000000` page, `#1F1F1F` content, `#FFFFFF`
    text and links, `#FFFFFF` button with `#000000` label). Never repeat the light palette in
    these keys**, because they fire only in dark mode and doing so ships light-on-light.
-   `lightThemeBackgroundColor` is the one light value in the set.
+   `lightThemeBackgroundColor` is the one light value in the set. Sanity-check `contentColor`
+   before writing it: it is global and should stay neutral unless the proposed brand treatment
+   covers most filled surfaces. A one-off footer or card color belongs as `contentColor` on that
+   module's main component, with the override named in the report.
    **This is the only `mainFrame` foundations produces, and it is an email, not a module.**
    It exists so batch 1 has somewhere to drop modules and see them in context. The modules
    themselves are a different shape entirely (Phase 3, and render rule R2): each one is an

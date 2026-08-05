@@ -61,14 +61,26 @@ COMPONENT with no `mainFrame` above it and none on it.
 - Auto-layout: `layoutMode = 'HORIZONTAL'`, both sizing HUG (the group's width comes from the
   fixed columns inside it), `primaryAxisAlignItems = counterAxisAlignItems = 'CENTER'`
   (primary exports as horizontal alignment; counter exports as `vertical-align`).
-- `background-color` to fill, `padding-*` to paddings, `border-radius` to radius, borders to
-  strokes.
+- **Never fill the group itself.** The dark-mode exporter recolors filled section and column
+  cells but has no group selector, so text can turn white while the group's original light fill
+  remains. Fill-less group children reset to `background-color: initial`, while filled columns
+  receive the dark `contentColor` override. Put band fills on the group's columns instead; a
+  filled `mj-group` is a verification failure. Padding, radius, and borders still map to the group.
 - Children: two or more `mj-column` frames with FIXED pixel widths.
 - Width math: the exporter emits the group width as
   `group.width / (section.width - section horizontal padding) * 100%`, and each inner column
   as `column.width / (group.width - group horizontal padding) * 100%`. A 560 group containing
   280 + 280 exports 50%/50%.
 - Columns inside a group keep their elements side by side on mobile.
+- A group may be narrower than the section content box. Its columns sum to the group's width,
+  never the section content width.
+- A bordered group needs width headroom. Pin the group FIXED at its intended width and make
+  its columns sum short by at least the total border width; a HUG group forces columns to 100
+  percent and can wrap the last bordered column.
+- On mobile the exporter expands a group to the viewport and applies its column percentages to
+  that width. A tight icon cluster therefore spreads across the phone. If tight clustering is
+  mandatory, the only reliable fallback is one combined image with one href, which loses
+  per-icon links and needs the designer's approval.
 - **A group is not the vehicle for the Two Column Swap** (R3.4.1, the standard rebuild for an
   overlapping or bleeding image). That pattern wants the mobile stacking a group suppresses, so
   it uses a plain `mj-section` holding two `mj-column`s. Reach for a group only when the design
@@ -95,6 +107,10 @@ Two independent sources of drift stack up:
    `Arial`. Measured drift on real strings against Figma's Inter runs as high as +11.5 percent,
    and it goes both ways: do not assume the fallback is always narrower or always wider than
    what you see.
+3. **The source family may have been substituted.** A boundary measured in the source face
+   is not valid after a fallback substitution. Re-measure the natural hug width in the
+   substituted family and feed that value to the formula below; a metric clone matches its
+   target fallback, not the unrelated brand face it replaced.
 
 So take the text node's natural hug width in Figma, then pin the column at:
 
@@ -137,6 +153,22 @@ measure the string against the **exported** font stack rather than trusting the 
 
 It does NOT apply to FILL columns or FILL buttons, which resolve against the content box at
 render time and adapt. Do not pad those; the extra width would be real design drift for no gain.
+
+#### R3.3.2 Group columns shrink on mobile, and R3.3.1 does not protect them
+
+A group never stacks, so each fixed desktop column becomes a percentage at smaller viewports.
+Before pinning one, compute:
+
+```
+resolved = columnWidth / groupWidth * (mobileViewport - mobile section side padding)
+```
+
+For text, require the resolved width to exceed the longest unbreakable word in the exported
+font by at least 5 percent. For a fixed-aspect image, require at least its natural width. If a
+column fails, widening usually just transfers the defect to a neighbor. Collapse the row into
+one reflowing `mj-text` with hyperlink ranges, let loose columns stack, or hide decorative
+content on mobile. Character-by-character wrapping that appears only in the mobile export is
+the signature of this defect.
 
 ### R3.4 mj-column
 
@@ -362,10 +394,14 @@ The route, since `figma.createImageAsync` is unavailable to an agent:
 1. `download_assets` on the NODE in the source file (`get_screenshot` on the node, or
    `node.exportAsync`, do the same job), at 2x, to a local PNG. Reading `fills[0].imageHash` and
    fetching that asset instead is the mistake, not the shortcut.
-2. `upload_assets` to place that PNG onto the `mj-image` rectangle in the build file. The crop is
+2. **Inspect baked backgrounds before upload.** When the source geometry defines the
+   silhouette, use it as a mask first: a corner radius at least half the shorter side, an
+   ellipse, vector mask, or clipping parent can composite the render exactly. Use color keying
+   or border-connected flood fill only when geometry cannot recover the silhouette.
+3. `upload_assets` to place that PNG onto the `mj-image` rectangle in the build file. The crop is
    baked into the pixels now, so the fill is a plain `scaleMode: 'FILL'` with an identity transform
    and there is no crop left to reproduce.
-3. Verify against a screenshot of the SOURCE NODE, never against the source's raw asset.
+4. Verify against a screenshot of the SOURCE NODE, never against the source's raw asset.
 
 **Aspect ratio: preserve the render's, never stretch to fit a chosen width.** Measure the ratio on
 the rendered PNG and derive the height from the width you picked: `height = round(targetWidth *
@@ -460,11 +496,11 @@ Inner LINE node (use `figma.createLine()`, not a rectangle: the exporter reads `
 ### R4.5 mj-spacer: single FRAME (no pair), and the one fixed height in the spec
 
 **Try not to need one** (R0.2). When you do build one: FRAME, direct child of the column,
-shared `name` = `mj-spacer`, layer name `Spacer`, `layoutMode = 'HORIZONTAL'`, `fills = []`
-(any visible fill exports as `container-background-color`), `resize(width, H)` with H from
-the `height` attr, then `layoutSizingVertical = 'FIXED'` and
-`layoutSizingHorizontal = 'FILL'`. `padding-*` attrs map to the frame's paddings. No
-children.
+shared `name` = `mj-spacer`, layer name `Spacer`, and `layoutMode = 'HORIZONTAL'`. Use
+`fills = []` for a plain gap. When the spacer is itself a colored band, use one bound SOLID
+fill so it exports as `container-background-color`. Then `resize(width, H)` from the height
+attribute, set `layoutSizingVertical = 'FIXED'` and `layoutSizingHorizontal = 'FILL'`, map
+padding, and add no children.
 
 ## R5. Cross-cutting attribute rules
 
@@ -500,8 +536,8 @@ as percentages of the section content box. The worker may bake gutters as column
 itemSpacing. **The content box itself is one decision for the whole email, not a per-section one**
 (R0.3.1): the number a single column resolves to, and the number a multi-column split sums to, is
 the content width you fixed before you started rather than the side margin the worker returned for
-that screenshot. Reproduce the worker's paddings everywhere else; this is the one you override, and
-full-bleed image bands at the body width are its only exception.
+that screenshot. Reproduce the worker's paddings everywhere else; this is the one you override.
+Apply R0.3.1's full-bleed and card/inset exceptions by checking their outer band edges.
 
 **R5.5 href and alt.** Never in layer names or geometry; always shared plugin data. `href` on
 the `mj-image` rectangle and on the `mj-button` frame; `altText` on the `mj-image` rectangle.

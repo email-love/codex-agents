@@ -19,7 +19,9 @@ Four questions, one batch, on top of the Step 1 brief:
 
 1. **Brand basics:** logo file, primary and secondary colors as hex, and the brand fonts. Ask
    for an email-safe fallback for any font that is not web-safe (Arial, Georgia, Helvetica,
-   Times, Verdana, Tahoma, Trebuchet, Courier). Never invent a substitution silently.
+   Times, Verdana, Tahoma, Trebuchet, Courier). Never invent a substitution silently. If the
+   chosen fallback is unavailable in Figma, use Arimo for Arial or Helvetica, Gelasio for
+   Georgia, or Tinos for Times New Roman, and report that the exported family will be the clone.
 2. **Email width:** 600 or 640. Everything downstream is measured against this.
 3. **Footer requirements:** postal address, unsubscribe mechanism, and whether their ESP
    injects the footer with a merge token (see "The footer token block" below).
@@ -216,7 +218,9 @@ The worker returns structure, not a finished email. Five gaps, all observed repe
    stack (badge rows, icon rows, two-up cards) and rebuild those as an `mj-group` per R3.3.
    The columns inside that group are pinned to pixel widths, so pin them with slack rather
    than at the width Figma hugged to (R3.3.1: a pinned column cannot grow, and the email
-   renders a different font binary than the canvas does).
+   renders a different font binary than the canvas does). Never put a fill on the group;
+   put band fills on its columns so dark-mode text cannot go white-on-white. Run R3.3.2's
+   mobile shrink calculation before accepting the row.
 3. **Every `src` is `"placeholder"`.** Place the customer's real logo and imagery yourself;
    use flat gray fills at the correct dimensions everywhere else and list them in your
    report. When an image comes out of their own Figma design, export the RENDERED node, never
@@ -245,7 +249,9 @@ AI Import produces structure, not styling. It is not a pixel copier. Once the tr
 correct, apply the brand colors and type from B1 across every text node, button, and section
 fill. Set the root frame's six dark-mode theme keys from the file's established dark treatment;
 if none exists, use the house dark defaults in R2.1 and flag them for review. The light body color
-belongs only in `lightThemeBackgroundColor`.
+belongs only in `lightThemeBackgroundColor`. Keep global `contentColor` neutral unless the brand
+treatment covers most filled surfaces. A one-off footer or card color belongs as a per-node
+`contentColor` override on that module's main component.
 
 Then offer to make it reusable. Saving into the plugin's design system is an authenticated
 plugin action on the user's current selection; you cannot push components into it. What you
@@ -269,12 +275,13 @@ Then, either way:
   storage path, and there is no rename field in the save dialog. A frame left at its import
   name saves as a component literally called `EmailLove_clone`.
 - **Add properties to anything meant for reuse.** A one-off campaign email can stay a frame
-  with no properties. A module gets the two to five properties a marketer will actually
-  change, added to the wrapper component itself, since that is the component that directly
-  owns the nodes. R7 and R8 cover why a COMPONENT root is safe (the plugin builds every
-  wrapper as one), the rules that keep it working, and the exact per-element bindings. A
-  property whose binding is wrong is worse than no property, so re-read each binding back off
-  the node before you present.
+  with no properties. A module exposes customer-facing headlines, eyebrows, subheads, body,
+  and button labels as module-root TEXT properties by default, usually two to seven. Keep
+  boilerplate and link-bearing text unbound because a characters binding wipes hyperlink
+  ranges. Require evidence only for BOOLEAN and INSTANCE_SWAP properties. Build a module's
+  button inline to surface its label; a nested foundation-button instance cannot remap that
+  TEXT property to the module root. R7 and R8 carry the exact bindings. Re-read every binding
+  before presenting.
 - **Use the customer's real category names** when you propose where each upload goes. If the
   Email Love MCP is connected, `list_components` returns their categories; otherwise ask them
   to read the section names off the plugin's Assets sidebar, which ships 13 predefined

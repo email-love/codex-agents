@@ -32,10 +32,12 @@ Two hard rules:
   designer can overrule; if they do, build under theirs and record whose call it was.
 
 And one method rule that governs everything below: **you do not rebuild a module by eye.**
-Structure comes from the design-converter worker and you transcribe what it returns, per the
-packaged render references. A frame you build from your own mental model of email structure
-looks correct on canvas and silently drops content on export, because the plugin keeps its real
-conventions in private plugin data you cannot read.
+For AUTHORITATIVE and PARTIAL Figma sources with components, auto layout, and target-width
+frames, structure comes from a direct read of the source node tree. For unstructured,
+flattened, or non-Figma sources, structure comes from the design-converter worker and you
+transcribe what it returns per the packaged render references. A frame you build from your
+own mental model of email structure looks correct on canvas and silently drops content on
+export, because the plugin keeps its real conventions in private plugin data you cannot read.
 
 ## Inputs
 
@@ -45,9 +47,9 @@ conventions in private plugin data you cannot read.
 3. The target file: an existing one the team designates, or create one named
    "[Customer] Email Love Design System" via the Figma MCP.
 4. Which batch to run: "foundations", or a batch of modules named by their rows in the audit's
-   **Module inventory** ("batch 1: the five modules the audit's Recommended next step lists
-   first", or an explicit list of row names). An explicit list from the user wins over the
-   audit's proposed batch.
+   **Module inventory**. A library of eight or fewer modules may run as one batch; above that,
+   use roughly five modules per batch. An explicit list from the user wins over the audit's
+   proposed batch.
 
 Once you have those four, and **before the first write to the canvas**, tell the user what the
 run covers and roughly how long to expect, per "How long this takes, and what to tell the user

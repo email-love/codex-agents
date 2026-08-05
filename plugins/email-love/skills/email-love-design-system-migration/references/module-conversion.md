@@ -3,7 +3,7 @@
 ## Contents
 
 - Confirm the reusable module shape
-- Send the source render to the converter
+- Choose direct source-tree read or the design-converter worker
 - Transcribe the returned JSON
 - Decide mobile behavior and merge a twin when present
 - Add component properties and categories
@@ -11,6 +11,13 @@
 - Sniff one exported HTML artifact per batch
 - Report and gate each batch
 - Run send readiness and hand off the migration
+
+**Before the first module, establish who runs the batch checks.** Step 6's mobile render and
+export sniff need the plugin's Upload and Export buttons, which are human clicks on a paid
+seat. If Codex cannot drive them, say so in the batch-1 opening and state the consequence:
+mobile behavior will be built and computed but not verified against exporter output until a
+human runs the checks. Maintain one Deferred verification list across the migration rather
+than discovering this limitation after several batches.
 
 ### 0. What you are building: a module, not a small email
 
@@ -27,8 +34,11 @@ module of a batch. If you are picking up a batch converted with an older copy of
 instructions, read `nodeType` back off each module root: a leftover `mainFrame`, or a wrapper
 nested inside a wrapper, means that module uploads as a broken email and has to be reshaped.
 
-**One module per row of the audit's Module inventory.** The batch is a group of those rows, and
-each row already tells you the module's name (use it verbatim as the component name), its
+**One module per row of the audit's Module inventory.** The batch is a group of those rows. A
+library of eight or fewer modules may run as one batch with one design review before upload,
+because there is no later batch for a construction defect to propagate into. Above that, stay
+at roughly five modules per batch so the first review can catch repeated defects early. Each
+row already tells you the module's name (use it verbatim as the component name), its
 category, the designs it appears in, its source ref, its verdict, its concession if any, its build
 constraints, and its effort. Where a module appears in several designs, the source ref names the
 one appearance to convert from, so convert it ONCE from there and note that design; the other
@@ -57,9 +67,11 @@ content widths, and a text left edge that moved as the reader scrolled, with eve
 value looking reasonable on its own. So transcribe the worker's paddings, then set the horizontal
 section padding to whatever foundations' content width requires (a 560 content width on a 600 body
 means 20/20), and re-derive any multi-column split so the columns plus gutters still sum to that
-content width. Full-bleed image bands stay at the body width and are the only exception. Appendix
+content width. Apply R0.3.1's full-bleed and card/inset exceptions by their outer band edges. Appendix
 R0.3.1 is the rule and carries the measured case; list in the batch report every module whose worker
-padding you overrode to reach the library number.
+padding you overrode to reach the library number. Full-bleed image bands and deliberately
+inset card blocks are the two sanctioned content-width exceptions; apply the band-edge and
+inset geometry rules in R0.3.1 rather than treating either as worker drift.
 
 Before building any module whose inventory row carries a concession, check the audit's Flags for
 a human "yes" on it. If there is none, ask, and record the answer in the batch report. Building
@@ -83,9 +95,24 @@ block to an image because the row said C.
 
 For each module in the batch, in order:
 
-### 1. Convert the source design to MJML JSON via the design-converter worker
+### 1. Choose direct tree read or the design-converter worker
 
-Do not rebuild by eye and do not run the plugin's Convert button for migration batches. The
+**First decide whether the worker is the right input.** The worker is a structure detector
+for sources where structure must be inferred from pixels. When the audit classified the
+source AUTHORITATIVE or PARTIAL and the source carries components, auto layout, and frames at
+the target email width, read the source node tree directly. It already holds exact fills,
+sizes, paddings, nesting, crop transforms, container clipping, zero-height text, and fills
+stacked under images. Use the worker for unstructured sources, flattened mockups, and every
+non-Figma adapter. Record the path and why in the batch report.
+
+On the direct-tree path, recursively inspect the audited module boundary and translate its
+semantic hierarchy into the mapped Email Love primitives in step 2. Preserve exact measured
+values after the audit's scale and foundation rules. Existing `mj-*` names are hints only;
+validate the geometry and semantics before accepting a tag. Save the compact source-tree dump
+alongside the module report as the stable transcription input.
+
+On the worker path, do not rebuild by eye and do not run the plugin's Convert button for
+migration batches. The
 pipeline is: screenshot the source module (read-only), POST it to the design-converter
 worker, transcribe the returned MJML JSON into the target file, then verify.
 
@@ -164,7 +191,7 @@ Fallback only: users without Figma MCP write access can select frames in the Fig
 AI Import screen and click Convert there; it calls this same worker. The agent path above is
 preferred for migration batches because every node it writes is inspectable and repairable.
 
-### 2. Transcribe the MJML JSON into the target file
+### 2. Build the module in the target file from the chosen input
 
 Follow [render-geometry.md](render-geometry.md), [render-nodes.md](render-nodes.md), and
 [render-components-validation.md](render-components-validation.md) exactly. Together they map
@@ -172,9 +199,9 @@ every MJML tag and attribute to the Figma node, auto-layout, fill, and shared pl
 plugin's exporter reads back. **Start at R2 and build the MODULE shape**, not the
 email-template shape.
 
-The worker returns a whole MJML document, so its JSON has an `mjml` / `mj-body` envelope and
-one or more wrappers inside. You do not transcribe that envelope. Take the module's wrapper
-and make it the component:
+On the worker path, the returned JSON has an `mjml` / `mj-body` envelope and one or more
+wrappers. Do not transcribe the envelope. On the direct-tree path there is no envelope; the
+audited module boundary becomes the one wrapper component. In both cases create the same root:
 
 ```js
 const moduleRoot = figma.createComponent()                          // the mj-wrapper itself
@@ -184,7 +211,7 @@ moduleRoot.setSharedPluginData('emaillove', 'name', 'mj-wrapper')
 ```
 
 - **No `mainFrame`, no theme keys, no wrapper-inside-a-wrapper.** If the worker JSON returns
-  several wrappers for one source module, that is usually one module per wrapper: convert
+  several wrappers for one source module on the worker path, that is usually one module per wrapper: convert
   them as separate modules, or, when they genuinely are one block, merge their sections under
   a single wrapper component. Never nest one wrapper inside another to keep them together.
 - **The layer name is load bearing here**, unlike everywhere else in the file. It becomes the
@@ -223,8 +250,8 @@ moduleRoot.setSharedPluginData('emaillove', 'name', 'mj-wrapper')
   hold the image column and the gutter, and give the difference to the column that has slack, normally
   the text column. Widening a 520 row to 560 is
   `20 margin + 136 image + 24 gutter + 400 text + 20 margin`, not a new margin invented for this
-  module. Full-bleed image bands keep the full body width, and they are the only exception
-  (render rule R0.3.1).
+  module. Full-bleed bands and card/inset blocks follow R0.3.1's two sanctioned outer-edge
+  exceptions.
 
 **Start from the visual pattern, not the layer name.** Most conversion mistakes come from
 rebuilding what a design *looks like* instead of reaching for the primitive that produces it.
@@ -318,7 +345,9 @@ This mapping covers almost everything you will meet:
   produced nine mismatches, from `#CCCCCC` for `#FFFFFF` through four wrong reds to a 40px headline
   where the approved ramp said 36px and had no 40px step.
 - Map every text node to the type styles from foundations.
-- Buttons: `mj-button-Frame` wrapping an instance of the foundations button component.
+- Buttons: `mj-button-Frame` wrapping an inline styled `mj-button` frame and direct text node
+  that match the foundations button component. Do not instance the foundation component inside
+  a module, because its label property cannot be remapped to the module root.
 - **Honor the inventory row's verdict.** Verdict A: live text throughout. **Verdict
   `A (concession: ...)`: build it as live text like any other A and apply the named substitute,
   nothing more.** Do not quietly reproduce the effect the concession gave up, in an image or
@@ -418,19 +447,24 @@ marker must be absent.
 bound to `characters` on the inner text node, BOOLEAN bound to `visible` on the block wrapper,
 INSTANCE_SWAP bound to `mainComponent` on a nested instance. There is no image property type.
 
-Derive them from evidence in the source library rather than adding them everywhere: a BOOLEAN
-needs a sibling design where that region is genuinely absent; a TEXT needs evidence the copy
-changes between sends; boilerplate stays unbound. Two to five per module is the working range,
-and zero is a legitimate answer for a fixed block like a logo header. **A property whose
-binding is wrong is worse than no property**, so re-read `componentPropertyReferences` back
-off each node to confirm the binding landed. Record the properties you added, and why, in the
-module's report line.
+**Customer-facing copy gets TEXT properties by default.** Headlines, eyebrows, subheads,
+body copy, and button labels are what a marketer changes every send, so do not require sibling
+evidence that the copy varies. Keep boilerplate that should not change per send unbound,
+including legal copy, postal addresses, and unsubscribe lines. Keep link-bearing text unbound
+too: binding `characters` wipes hyperlink ranges at bind time and on later edits through the
+property. The evidence gate applies to the other property types: a BOOLEAN needs a sibling
+design where the region is absent, and an INSTANCE_SWAP needs a real variant. Two to seven
+properties per module is the working range; zero is legitimate only when the module has no
+customer-facing copy. **A property whose binding is wrong is worse than no property**, so
+re-read `componentPropertyReferences` from every bound node. Record what you exposed and why.
 
 **Every module containing a button must expose its label as a TEXT property on the module
-root.** Use `Button label` for one CTA or `Card N button label` for a grid. A label property on
-the nested foundation button is not surfaced to the marketer who selects the module instance.
-This requirement is independent of an optional Show Button BOOLEAN, which still needs evidence
-from a sibling design where the button is absent.
+root.** Use `Button label` for one CTA or `Card N button label` for a grid. Figma rejects
+remapping a nested instance's TEXT property to a module-root property, so build the module's
+button inline as a styled frame plus one text node that matches the foundations button exactly.
+The foundations component remains the style reference and the INSTANCE_SWAP target for a
+Button Style property; do not instance it inside a module. An optional Show Button BOOLEAN
+still needs evidence from a sibling design where the button is absent.
 
 Then confirm its category for the upload. **The Module inventory row already proposes one**, so
 start there and change it only when the rebuilt structure contradicts it, saying so in the batch
@@ -450,9 +484,19 @@ component name** becomes the component name, so the layer name you set in step 2
 thing that carries. Record the category you chose per module in the batch report, so a human
 can correct any misfits in one pass rather than hunting for them later.
 
-### 5. Verify per module
+### 5. Verify per module: one read-back pass, then one screenshot
 
-Run the R9 post-build checklist in `render-components-validation.md`, plus:
+Verification is expensive in Figma round trips, so do not walk the tree once per check.
+Read the built module back once into one compact record per node. Because metadata responses
+fail above roughly 80KB or on non-ASCII layer names, use the available Figma execution tool
+in batches of about twelve nodes and emit one ASCII-sanitized line per node. Include node
+type, layer name, layout and sizing, both alignment axes, paddings, resolved x and width,
+fills and variable bindings, all `emaillove` shared plugin data, component-property
+references, and `getStyledTextSegments(['lineHeight'])` for text. Evaluate R9 and the five
+groups below against that dump locally. List every violation by node id; an empty list per
+group is the only pass.
+
+**Group 1: shape and tags.**
 
 - **Shape, first and hardest:** the root is a COMPONENT tagged `mj-wrapper`, its layer name is
   the module name, and `nodeType` is empty on the root **and on every node below it**. Read it
@@ -467,7 +511,9 @@ Run the R9 post-build checklist in `render-components-validation.md`, plus:
   frames except intentional editable-image regions; `mj-column-inner`, if used, is literally
   `children[0]` of its column. Report an alignment mismatch as
   `<node id>: primary=X, counter=Y`, marking multi-column top-align cases as intentional.
-- Sizing: walk the tree and confirm every frame is vertical HUG, the only fixed height is an
+**Group 2: sizing.**
+
+- Walk the tree and confirm every frame is vertical HUG, the only fixed height is an
   `mj-spacer`, every FIXED width is one of the load-bearing cases, every pinned width that
   carries text has slack (render rule R3.3.1), and each button's width sizing was chosen for its
   mobile behavior (render rule R0). **The wrapper itself is FIXED at the target email width, on
@@ -481,6 +527,9 @@ Run the R9 post-build checklist in `render-components-validation.md`, plus:
   content width with the crop's natural aspect for its height, there is no `mj-group` around the
   pair, and nothing in the block was flattened to an image (render rule R3.4.1). Confirm too that the
   overlap was not reproduced by some other means.
+**Group 3: geometry against foundations.** Compare these numbers with foundations and the
+audit, never with how the module looks.
+
 - Scale: the module root is at the audit's target email width, and its type sizes, paddings, and
   image dimensions are at email scale rather than source scale (render rule R0.6). A module built at
   source scale looks correct in isolation and wrong the moment it sits next to another module, so
@@ -500,10 +549,6 @@ Run the R9 post-build checklist in `render-components-validation.md`, plus:
   empty list is the only pass. Repair a failure by collapsing to one reflowing `mj-text` with
   hyperlink ranges, dropping the group so columns stack, or hiding decorative content on mobile.
   Desktop Figma and desktop preview cannot expose this defect.
-- **Semantic-token bind count:** every non-placeholder solid fill resolves to a semantic variable
-  from the audit's Palette. List each unbound node id, raw hex, and intended role. Placeholder gray
-  image fills are the only exception, and each must be identified as intentional. An empty
-  violation list is the only pass.
 - **Content width: read the resolved x and width of the text-bearing column off the built module and
   confirm it equals the library content width from foundations**, not the worker's number. On a
   multi-column row confirm the columns plus gutters sum to it. This is a cross-module check by nature,
@@ -526,30 +571,27 @@ Run the R9 post-build checklist in `render-components-validation.md`, plus:
   a pixel from a neighbour. Treat any of those as a gutter failure, not a typography
   problem. From Codex's build of a three-column module with zero column padding: geometry
   validated, content collapsed.
+
+**Group 4: fills and bindings.**
+
+- **Semantic-token bind count:** every non-placeholder solid fill resolves to a semantic variable
+  from the audit's Palette. List each unbound node id, raw hex, and intended role. Placeholder gray
+  image fills are the only exception, and each must be identified as intentional. An empty
+  violation list is the only pass.
+- **Never fill the group itself: no `mj-group` carries a fill of its own.** The exporter's dark-mode CSS never recolors a
+  group, so forced-light text can land on the original fill in dark mode. Put a band fill on
+  the group's columns and list every filled group by node id as a failure.
 - Naming: every layer carries the display name for its tag, and no friendly string leaked into
   the plugin data `name` key.
 - Component: the module root is a direct child of its category page, not inside a component
   set or a Figma section, with no stray instances of it left loose on the page. Every property
-  binding re-read and confirmed. If the module contains a button, the module root exposes its
-  label as a TEXT property. List by node id every button whose label is not surfaced.
-- Visual: screenshot the rebuild next to the source screenshot from step 1; flag divergences
-  rather than silently accepting them. **On a REFERENCE ONLY source, read that comparison for content
-  and structure only:** the same blocks, in the same order, with the same copy and the same imagery.
-  Margins, type sizes, and spacing are expected to differ, and listing them as divergences buries the
-  ones that matter under noise a reviewer will then try to fix.
-  If the rebuild is 20 to 40px taller than the source, detect runs of non-canvas pixels in both
-  renders and derive the padding correction from their content-band differences. Do not eyeball a
-  nudge; band detection makes the second pass deterministic.
-  **Mobile visual: render it, do not reason about it.** Figma has no mobile breakpoint, so a
-  `get_screenshot` call at 390px only rescales desktop-shaped canvas pixels. After the batch is
-  provisionally uploaded to the plugin library, compose a QA email from its wrappers and call
-  `emaillove_preview_email` with the compose token. Its exporter-generated response contains the
-  desktop and mobile renders. Diff the mobile render against the source's mobile design, or against
-  the source screenshot when no mobile design exists. Fail the batch on any word broken mid-string,
-  image aspect ratio that differs from desktop, stacked column retaining a desktop gutter as an
-  indent, or section whose actual grouped or stacked behavior contradicts step 3 Part A. Build the
-  batch, upload provisionally, render and diff, then open the next batch. Finding a construction
-  error in batch 1 costs one correction; finding it in batch 5 costs five.
+  binding re-read and confirmed. Every customer-facing headline, eyebrow, subhead, body, and
+  button label is reachable through a module-root TEXT property. Boilerplate and link-bearing
+  text are the only allowed exceptions. If the module contains a button, its property is named
+  `Button label` or `Card N button label`; list every missing exposure by node id.
+
+**Group 5: mobile data.**
+
 - Mobile: every multi-column section has its Part A stacking decision recorded, and Part B's keys
   are all present and from the observed schemas only: `fontSize` plus `fontSize_mode` on every
   text node (read back by node id), `isPaddingActive` beside every mobile padding, and 28px bottom
@@ -560,30 +602,53 @@ Run the R9 post-build checklist in `render-components-validation.md`, plus:
   `getStyledTextSegments(['lineHeight'])`. A second segment means a bold or colour range carries
   a detached frozen line height.
 
-### 6. Export sniff test, once per batch
+**Then take one desktop screenshot.** Compare the rebuild with the source screenshot from
+step 1 and flag divergences. On REFERENCE ONLY, compare content and structure only; margins,
+type sizes, and spacing are expected to differ. If the rebuild is 20 to 40px taller than the
+source, detect content bands in both renders and derive the padding correction instead of
+eyeballing a nudge. The mobile render belongs to the batch checks in step 6.
 
-After every module passes step 5, inspect one representative exported HTML artifact. Prefer a
-multi-column module; otherwise choose one with a button. Place an instance in the temporary
-Campaigns email root and ask the user to run the plugin Export if the agent cannot drive that UI.
-Save and read the HTML. Confirm and record:
+### 6. Batch checks: mobile render and export sniff, once per batch
+
+After every module passes step 5, provisionally upload the batch wrappers to the plugin
+library. Run both checks before opening the next batch.
+
+**Mobile render.** Compose a QA email from the uploaded wrappers and call
+`emaillove_preview_email`, or the current Email Love preview tool, on its compose token. A
+390px Figma screenshot only scales desktop pixels and is
+not a mobile test. Diff the exporter-generated mobile render against the source mobile design,
+or the source screenshot when none exists. Fail on a word broken mid-string, an image aspect
+ratio that differs from desktop, a stacked column retaining its desktop gutter, or grouped and
+stacked behavior that contradicts step 3.
+
+**Export sniff.** Pick a representative multi-column module, or a button-bearing module when
+the batch is single-column. Put an instance in the temporary Campaigns root and use the plugin
+Export, asking the user to drive the click if Codex cannot. Save and inspect the HTML. Confirm:
 
 - body width matches foundations;
 - an `@media only screen and (max-width` block exists;
 - mobile classes exist for each recorded stack, fluid image, or full-width button behavior;
 - column widths and gutters sum to the intended content box, with no column wider than the body.
 
-On a failure, repair the Figma source of the export, re-export, and re-read before review. This is
-not a replacement for step 5; it checks the artifact step 5 cannot see.
+On a failure, repair the Figma source, re-upload if needed, and rerun both affected checks
+before review. These checks inspect exporter output and do not replace step 5.
+
+**When the checks cannot run in-session, do not mark them skipped.** Accumulate a Deferred
+verification list across all batches, one line per module naming the exact behavior a human
+must confirm, such as a group staying unstacked, a button going full width, or an image staying
+fluid. Hand over the combined list in step 7.
 
 ### 7. Batch report and gate
 
 One report per batch: per module, keyed by its Module inventory row name, what was rebuilt, the
 design you converted it from, verdict honored or changed (with reason), any concession and whether
 it was accepted and by whom (and for a bleed concession, the two column widths you landed on, so a
-reviewer can check the sum), what the worker returned and what you repaired, mobile decisions,
-divergences flagged, component properties added and the evidence for each, the category you kept
+reviewer can check the sum), which input path you used and why, plus what the worker returned
+and what you repaired when the worker path applied, mobile decisions,
+divergences flagged, component properties added and the reason for each, the category you kept
 or changed, the per-node violation lists, semantic bind count, spacing-system check, and the four
-export-sniff confirmations. **Open with the source fidelity tier, the target email width, and the content width the
+export-sniff confirmations, the mobile-render result, and the Deferred verification list when
+anything remains. **Open with the source fidelity tier, the target email width, and the content width the
 batch was built at, plus the scale factor where one applies**, so a reviewer can check three or four
 numbers instead of measuring modules. On a REFERENCE ONLY source, open instead with the tier and the
 standards, and repeat the one sentence that the geometry is ours: a batch report is the document a
@@ -617,6 +682,10 @@ An empty list is the only pass.
   unsubscribe merge tag. Use a specific merge tag only when the customer explicitly asks for that
   ESP-specific value. No lorem ipsum, literal `Address`, placeholder legal copy, invented
   unsubscribe URL, or `#` unsubscribe link.
+- Footer preference wording is explicitly linked. The exporter may inject
+  `manage-preferences.com` when it sees unlinked preference text, but only Klaviyo replaces
+  that placeholder with a merge tag; every other target can ship the literal third-party URL.
+  Use `unsubscribe.com` as the portable default when no real preference-center URL is supplied.
 
 Fix every violation, or explicitly classify and rename a campaign as non-sending QA. Do not open
 the customer handoff while this list is non-empty.

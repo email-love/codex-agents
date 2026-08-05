@@ -112,6 +112,13 @@ existing one appears to succeed and does nothing. Treat every link you set as pr
 list them in your report, and when a user asks you to change an existing link, tell them
 plainly to change it in the plugin.
 
+**Magic footer links need explicit handling.** `unsubscribe.com` is the portable placeholder
+the exporter replaces with the selected ESP's unsubscribe merge tag. The similar
+`manage-preferences.com` value is replaced only for Klaviyo; other targets can ship that literal
+third-party URL. Never leave preference wording unlinked, because the exporter may inject that
+placeholder. Use the customer's real preference-center URL, a confirmed Klaviyo placeholder,
+or `unsubscribe.com` as the portable fallback.
+
 ## Mobile styles
 
 Mobile styles are flat shared plugin-data keys on the node. The serialized
@@ -224,6 +231,8 @@ consistent with the file's real campaigns. Then check structure:
   re-read and confirmed.
 - Every `mj-raw` frame contains its text child. Dark mode overrides intact. Exactly one
   visible CTA button per email unless the user asked otherwise.
+- Footer preference wording is explicitly linked and no non-Klaviyo export relies on
+  `manage-preferences.com` being rewritten.
 
 Fix what fails before presenting. Then report: what you built, which path and why, which
 components you chose or what the converter returned and what you repaired, what you assumed,

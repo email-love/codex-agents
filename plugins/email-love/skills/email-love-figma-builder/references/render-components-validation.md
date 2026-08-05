@@ -95,6 +95,12 @@ core set only (R3, R4). When the worker returns one of the others, compose the r
 mapped primitives instead (B4), and reserve `mj-hero` for the case where a design genuinely
 needs live text over a full-bleed background image.
 
+**A band with decorative art needs neither `mj-hero` nor baked text.** Build a full-bleed
+`mj-group`: the copy column carries the band fill and rounded edge, while a narrow art column
+carries the decoration and sets `mobileStylesHideInMobileDevice = 'true'`. Keep the copy
+inside the email content margin. This preserves live text and removes the decoration cleanly
+on mobile.
+
 ## R7. Components: when a node is a COMPONENT instead of a FRAME
 
 **Make it a COMPONENT when it is meant to be reused**: a design-system module (always), a
@@ -173,33 +179,34 @@ const showBtn = moduleRoot.addComponentProperty('Show Button', 'BOOLEAN', true)
 ctaFrame.componentPropertyReferences = { visible: showBtn }
 
 // INSTANCE_SWAP, bound to mainComponent, for style variants.
-const style = moduleRoot.addComponentProperty('Button Style', 'INSTANCE_SWAP', primaryButton.key, {
+const style = moduleRoot.addComponentProperty('Button Style', 'INSTANCE_SWAP', primaryButton.id, {
   preferredValues: [
-    { type: 'LOCAL_COMPONENT', key: primaryButton.key },
-    { type: 'LOCAL_COMPONENT', key: inverseButton.key },
+    { type: 'COMPONENT', key: primaryButton.id },
+    { type: 'COMPONENT', key: inverseButton.id },
   ],
 })
 buttonInstance.componentPropertyReferences = { mainComponent: style }
 ```
+
+For unpublished local components, `.key` is empty and `LOCAL_COMPONENT` is rejected. Use the
+node id with preferred-value type `COMPONENT`; switch to published keys only after publishing.
 
 BOOLEAN composes exactly with the exporter, which returns early on any node where `visible`
 is false, so flipping it off genuinely removes the block from the exported HTML rather than
 shipping a hidden element. VARIANT is only meaningful on a ComponentSetNode; skip it for
 email modules, and remember rule 1 in R7.
 
-**Which properties to add.** A property whose binding is wrong is worse than no property: it
-looks editable, does nothing or edits the wrong node, and the person who trusted it ships the
-mistake. Derive them from evidence, not imagination. A BOOLEAN needs a sibling design where
-that region is genuinely absent. A TEXT needs evidence the copy changes between sends.
-Boilerplate stays unbound: mailing address, legal lines, standing disclosures. Two to five
-per module is the working range, and zero is legitimate for a fixed block like a logo header.
-Name them in plain language ("Show Button", "Headline", "Body", "Button Style") and reuse the
-same names across modules. Re-read `componentPropertyReferences` back off the node after you
-set it.
+**Which properties to add.** Customer-facing headlines, eyebrows, subheads, body copy, and
+button labels receive module-root TEXT properties by default. Keep legal copy, addresses,
+unsubscribe lines, and link-bearing text unbound; binding `characters` wipes hyperlink ranges.
+Require source evidence only for BOOLEAN and INSTANCE_SWAP properties. Two to seven properties
+per module is the working range, with zero only when there is no customer-facing copy. Name
+properties consistently and read every binding back.
 
-**The known failure:** a button label that lives on a sublayer inside a nested button
-instance cannot be bound from the module. The fix is to add the TEXT property to the
-foundations button component itself and let it surface through the instance.
+**The known button failure:** Figma cannot remap a nested button instance's TEXT property to
+the module root. Build buttons inside modules as inline styled frames with one direct text node,
+matching the foundations component as the style reference, and bind that node's label at the
+module root.
 
 ## R9. Post-build checklist (run per email or module before handing off)
 
@@ -228,7 +235,7 @@ foundations button component itself and let it surface through the instance.
    the `mj-image` rectangle and the `mj-divider` line, neither of which is a frame.
 8. **Every FIXED width is one of the four load-bearing cases** (root, columns in a
    multi-column section, columns in a group, the image rectangle). Lone columns are FILL and
-   groups are HUG. A button is not one of the four: its width is R0.4's mobile-behavior
+   groups are HUG except a bordered group deliberately pinned for border headroom. A button is not one of the four: its width is R0.4's mobile-behavior
    decision, so HUG, FILL, and a deliberately pinned FIXED are all valid there, and item 10 is
    where it is checked.
 9. **Every pinned-width column that contains text has slack, and every pinned string was
@@ -248,9 +255,10 @@ foundations button component itself and let it surface through the instance.
     **And every text-bearing column resolves to the email's ONE content width**, not to the side
     margin the worker returned for that screenshot (R0.3.1): read the resolved width back off the
     column, compare it against the number you fixed before you started, and check that a
-    multi-column split still sums to it. Full-bleed image bands at the body width are the only
-    exception. That is the check you cannot do by looking at one section, only by comparing the
-    sections to each other.
+    multi-column split still sums to it. Apply R0.3.1's two sanctioned exceptions by checking
+    the outer edge: full-bleed bands may use body width, while a card or inset block may add
+    deliberate inner padding. That is the check you cannot
+    do by looking at one section, only by comparing the sections to each other.
 13. If it is a module: the root is a COMPONENT tagged `mj-wrapper`, a direct child of its
     category page, not inside a COMPONENT_SET or a Figma SECTION, with no stray instances
     left on the page, and no second `mj-wrapper` nested inside it.
@@ -273,3 +281,7 @@ foundations button component itself and let it surface through the instance.
     slack, the image column the remainder, the `mj-image` height the render's natural aspect at
     the image column's content width, no `mj-group`, and the gutter paid by one column only.
     Your report names the swap and states that the overlap is the whole of what was lost.
+20. **No `mj-group` has a fill.** Band fills belong on its columns. For bordered groups, the
+    pinned group has enough headroom that column widths plus borders do not exceed 100 percent.
+21. For every reusable module, customer-facing text is reachable through module-root TEXT
+    properties except boilerplate and link-bearing text. Every button label is exposed there.

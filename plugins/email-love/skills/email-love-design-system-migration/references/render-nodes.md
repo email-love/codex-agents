@@ -61,8 +61,11 @@ COMPONENT with no `mainFrame` above it and none on it.
 - Auto-layout: `layoutMode = 'HORIZONTAL'`, both sizing HUG (the group's width comes from the
   fixed columns inside it), `primaryAxisAlignItems = counterAxisAlignItems = 'CENTER'`
   (primary exports as horizontal alignment; counter exports as `vertical-align`).
-- `background-color` to fill, `padding-*` to paddings, `border-radius` to radius, borders to
-  strokes.
+- **Never fill the group itself.** The dark-mode exporter recolors filled section and column
+  cells but has no group selector, so text can turn white while the group's original light fill
+  remains. Fill-less group children reset to `background-color: initial`, while filled columns
+  receive the dark `contentColor` override. Put band fills on the group's columns instead; a
+  filled `mj-group` is a verification failure. Padding, radius, and borders still map to the group.
 - Children: two or more `mj-column` frames with FIXED pixel widths.
 - Width math: the exporter emits the group width as
   `group.width / (section.width - section horizontal padding) * 100%`, and each inner column
@@ -70,6 +73,15 @@ COMPONENT with no `mainFrame` above it and none on it.
   280 + 280 exports 50%/50%. MJML requires percentage columns inside a group; you get that for
   free by setting exact pixel widths and letting the exporter divide.
 - Columns inside a group keep their elements side by side on mobile.
+- A group may be narrower than the section content box. Its columns sum to the group's width,
+  never the section content width.
+- A bordered group needs width headroom. Pin the group FIXED at its intended width and make
+  its columns sum short by at least the total border width; a HUG group forces columns to 100
+  percent and can wrap the last bordered column.
+- On mobile the exporter expands a group to the viewport and applies its column percentages to
+  that width. A tight icon cluster therefore spreads across the phone. If tight clustering is
+  mandatory, the only reliable fallback is one combined image with one href, which loses
+  per-icon links and needs the designer's approval.
 - **A group is not the vehicle for the Two Column Swap** (R3.4.1, the standard rebuild for an
   overlapping or bleeding image). That pattern wants the mobile stacking a group suppresses, so
   it uses a plain `mj-section` holding two `mj-column`s. Reach for a group only when the design
@@ -96,6 +108,10 @@ Two independent sources of drift stack up:
    `Arial`. Measured drift on real strings against Figma's Inter runs as high as +11.5 percent,
    and it goes both ways: do not assume the fallback is always narrower or always wider than
    what you see.
+3. **The source family may have been substituted.** A boundary measured in the source face
+   is not valid after foundations replace that face. Re-measure the natural hug width in the
+   substituted family and feed that value to the formula below; a metric clone matches its
+   target fallback, not the unrelated brand face it replaced.
 
 So take the text node's natural hug width in Figma, then pin the column at:
 
@@ -460,7 +476,10 @@ The route, since `figma.createImageAsync` is unavailable to an agent:
 2. **Open the PNG and look at it before uploading.** Three defects present as layout bugs rather
    than asset bugs:
    1. **Baked-in white.** A node with its own white background exports opaque and becomes a white
-      box on a colored band. For line art, key white to transparency and set the color explicitly.
+      box on a colored band. First use the source geometry as a mask when it defines the
+      silhouette: a corner radius at least half the shorter side, an ellipse, vector mask, or
+      clipping parent can composite the render exactly without color tolerance. Use color
+      keying only when the silhouette cannot be recovered from geometry. For line art, key white to transparency and set the color explicitly.
       For a photographic cutout, flood-fill the surround from the border to the real band color so
       white highlights inside the product survive.
    2. **The neighbour's content.** When cropping from a rendered parent, compare the far edge with
@@ -578,11 +597,11 @@ Inner LINE node (use `figma.createLine()`, not a rectangle: the exporter reads `
 ### R4.5 mj-spacer: single FRAME (no pair), and the one fixed height in the spec
 
 **Try not to need one** (R0.2). When you do build one: FRAME, direct child of the column,
-shared `name` = `mj-spacer`, layer name `Spacer`, `layoutMode = 'HORIZONTAL'`, `fills = []`
-(any visible fill exports as `container-background-color`), `resize(width, H)` with H from
-the `height` attr, then `layoutSizingVertical = 'FIXED'` and
-`layoutSizingHorizontal = 'FILL'`. `padding-*` attrs map to the frame's paddings. No
-children.
+shared `name` = `mj-spacer`, layer name `Spacer`, and `layoutMode = 'HORIZONTAL'`. Use
+`fills = []` for a plain gap. When the spacer is itself a colored band, use one bound SOLID
+fill so it exports as `container-background-color`. Then `resize(width, H)` from the height
+attribute, set `layoutSizingVertical = 'FIXED'` and `layoutSizingHorizontal = 'FILL'`, map
+padding, and add no children.
 
 ## R5. Cross-cutting attribute rules
 
@@ -644,8 +663,8 @@ itemSpacing. Inside `mj-group`: same math against the group's content box. **The
 itself is a library decision, not a per-module one:** the number a single column resolves to, and
 the number a multi-column split sums to, is the one content width foundations settled for the whole
 library, not the side margin the worker happened to return for this screenshot (R0.3.1). Reproduce
-the worker's paddings everywhere else; this is the one padding you override, and full-bleed image
-bands at the body width are its only exception.
+the worker's paddings everywhere else; this is the one padding you override. Apply R0.3.1's
+full-bleed and card/inset exceptions by checking their outer band edges.
 
 **R5.5 href and alt.** Never in layer names or geometry; always shared plugin data. `href` on
 the `mj-image` rectangle and on the `mj-button` frame; `altText` on the `mj-image` rectangle.
