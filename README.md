@@ -31,7 +31,7 @@ For development or testing an exact repository release, add this marketplace and
 plugin:
 
 ```bash
-codex plugin marketplace add email-love/codex-agents --ref v4.5.0
+codex plugin marketplace add email-love/codex-agents --ref v4.6.0
 codex plugin add email-love@email-love
 ```
 
@@ -66,7 +66,18 @@ export FIGMA_TOKEN=figd_...
 Create it in Figma Account Settings with Current user, File content, File metadata, and
 Library content scopes, then launch Codex from the same environment.
 
-For fully agent-run migration export and mobile QA, also connect the Email Love MCP:
+For fully agent-run migration export and mobile QA, the plugin bundles the Email Love MCP
+(server name `emaillove`, `https://mcp.emaillove.com/mcp`) as of v4.6.0. On a public directory
+install, authorize it once:
+
+```bash
+codex mcp login emaillove
+```
+
+The sign-in it opens is Email Love's normal account flow, the same sign-in the Figma plugin
+uses; completing it authorizes the MCP connection, not the plugin. Start a new task after
+connecting. On a developer Git install, or a public version before 4.6.0, add the server
+manually first:
 
 ```bash
 codex mcp add emaillove --url https://mcp.emaillove.com/mcp

@@ -4,15 +4,33 @@ This is the portal-ready submission brief for the `email-love` skills-only plugi
 
 ## Submission type
 
-- **Type:** Skills only
+- **Type:** MCP server with skills
 - **Plugin name:** Email Love
 - **Publisher:** Email Love
-- **Version:** 4.5.0
+- **Version:** 4.6.0
 - **Category:** Creativity
 - **Repository:** https://github.com/email-love/codex-agents
 
-The package does not bundle an MCP server. Its workflows require the official remote Figma
-MCP as an external prerequisite and the Email Love plugin installed in Figma.
+The package bundles the Email Love MCP (server name `emaillove`) and two skills. Its
+workflows additionally require the official remote Figma MCP as an external prerequisite for
+canvas builds, and the Email Love plugin installed in Figma.
+
+## Bundled MCP server
+
+- **Server name:** `emaillove`
+- **URL:** `https://mcp.emaillove.com/mcp` (streamable HTTP)
+- **Domain:** `mcp.emaillove.com`, a subdomain of `emaillove.com` (same publisher; use for
+  domain verification)
+- **Authentication:** OAuth 2.1 with PKCE and dynamic client registration
+  (`/.well-known/oauth-authorization-server` on the same origin). The consent page also
+  accepts an Email Love license key for legacy accounts. The sign-in screen is Email Love's
+  standard account flow, shared with the Figma plugin.
+- **Tool annotations:** declared by the server per tool (`readOnlyHint`, `destructiveHint`,
+  `idempotentHint`, `openWorldHint` on every tool definition).
+- **What it adds:** design-system access (brands, components, templates), email composition,
+  and the headless exporter: `emaillove_export_figma` compiles a Figma template or module to
+  production HTML with no plugin click (`operationType: "preview"` charges no export quota),
+  and its token feeds `emaillove_preview_email` for desktop and mobile renders.
 
 ## Listing details
 
@@ -51,8 +69,10 @@ Reviewer setup requires:
 - the latest Email Love Figma plugin;
 - normal approval prompts enabled for canvas writes.
 
-The optional Email Love MCP adds quota-free preview export and mobile verification. The
-skills include a human-run plugin Export fallback when that MCP is unavailable.
+The bundled Email Love MCP adds quota-free preview export and mobile verification once the
+reviewer authorizes it (`codex mcp login emaillove`; any Email Love account works, including
+a free one). The skills include a human-run plugin Export fallback when the MCP is not
+authorized or a module is outside the exporter's core-tag coverage.
 
 ## Data handling disclosure
 
@@ -68,12 +88,22 @@ processing purposes, recipients, retention behavior, and user controls.
 
 ## Reviewer tests
 
-The required five positive and three negative cases are in
+The required cases (six positive, three negative) are in
 `tests/submission-cases.json`. Provide reviewer-accessible fixture links in the portal for
 the cases that require Figma files. Keep those links out of the public repository if they
 grant write access.
 
-## Initial release notes
+## Release notes for 4.6.0
+
+Email Love now bundles its MCP connection. Installing the plugin registers the Email Love
+MCP (`emaillove`), so one clearly labelled sign-in replaces the manual server-add step that
+previously confused users, and the migration skill's headless export verification
+(`emaillove_export_figma` plus `emaillove_preview_email`) works out of the box after
+authorization. Skill guidance updated to match: absent exporter tools now mean an
+unauthorized connection, and the skill hands the user the one-time login step instead of
+falling back silently. No workflow or check behavior changed otherwise.
+
+## Initial release notes (4.5.0, for the record)
 
 Initial public submission of Email Love for ChatGPT and Codex. The plugin packages two
 skills for building export-ready emails in Figma and migrating legacy email design systems.
@@ -89,8 +119,9 @@ For every public update:
 
 1. Port and validate the final Codex skill changes in this repository.
 2. Tag and push the GitHub release.
-3. Create a new plugin version in the OpenAI submission portal and upload the final skills-only
-   bundle, logo, listing details, reviewer tests, and release notes.
+3. Create a new plugin version in the OpenAI submission portal and upload the final bundle
+   (skills plus the bundled MCP declaration), logo, listing details, reviewer tests, and
+   release notes. Keep the MCP server details section current.
 4. Submit the version for review.
 5. Publish it after approval.
 6. Verify the public listing at
@@ -108,8 +139,10 @@ each submission.
 - Select the verified Email Love business identity.
 - Upload the final skill bundle and logo.
 - Add the three starter prompts above.
-- Add the five positive and three negative reviewer tests from
+- Add the six positive and three negative reviewer tests from
   `tests/submission-cases.json`.
+- Complete MCP domain verification for `mcp.emaillove.com` and enter the server URL and
+  OAuth details from the Bundled MCP server section above.
 - Supply reviewer-accessible Figma fixtures without MFA, email confirmation, or private
   network requirements.
 - Confirm the public privacy policy covers the converter disclosure above.

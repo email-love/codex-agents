@@ -82,8 +82,8 @@ def validate_manifest() -> None:
     manifest = load_json(MANIFEST)
     if manifest.get("name") != "email-love":
         fail("plugin manifest name must be 'email-love'")
-    if manifest.get("version") != "4.5.0":
-        fail("plugin manifest version must be 4.5.0 for this migration contract")
+    if manifest.get("version") != "4.6.0":
+        fail("plugin manifest version must be 4.6.0 for this migration contract")
     if not re.fullmatch(r"\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?", manifest.get("version", "")):
         fail("plugin manifest version must be strict semver")
     if manifest.get("skills") != "./skills/":
@@ -333,7 +333,7 @@ def validate_skills() -> None:
             "filled card that needs a gutter",
         ],
         migration / "references" / "render-geometry.md": [
-            "eb2cc3ad59d8f0551f652d753a1e647a9f9af975",
+            "000502dec6215da200995a2367539bf8cc0d93b5",
             "inter-module gap has one fixed owner",
             "dark mode flattens module fills",
         ],
@@ -353,7 +353,7 @@ def validate_skills() -> None:
         text = path.read_text(encoding="utf-8")
         for required_string in required_strings:
             if required_string not in text:
-                fail(f"{path.relative_to(ROOT)}: missing v4.5.0 contract text {required_string!r}")
+                fail(f"{path.relative_to(ROOT)}: missing v4.6.0 contract text {required_string!r}")
 
     audit_text = (migration / "references" / "audit.md").read_text(encoding="utf-8")
     palette = audit_text.find("## Palette")
@@ -395,7 +395,7 @@ def validate_skills() -> None:
             "manage-preferences.com",
         ],
         builder / "references" / "render-geometry.md": [
-            "eb2cc3ad59d8f0551f652d753a1e647a9f9af975",
+            "000502dec6215da200995a2367539bf8cc0d93b5",
             "House default `#1F1F1F`",
             "The six theme keys are dark-mode values",
             "deliberate multi-column top-align case in R3.4",
@@ -427,7 +427,7 @@ def validate_skills() -> None:
         text = path.read_text(encoding="utf-8")
         for required_string in required_strings:
             if required_string not in text:
-                fail(f"{path.relative_to(ROOT)}: missing v4.5.0 contract text {required_string!r}")
+                fail(f"{path.relative_to(ROOT)}: missing v4.6.0 contract text {required_string!r}")
 
 
 def validate_provenance() -> None:
@@ -437,14 +437,14 @@ def validate_provenance() -> None:
     if not re.fullmatch(r"[0-9a-f]{40}", commit):
         fail("sources.json upstream commit must be a full Git SHA")
     expected_upstream = {
-        "commit": "eb2cc3ad59d8f0551f652d753a1e647a9f9af975",
+        "commit": "000502dec6215da200995a2367539bf8cc0d93b5",
         "builder_tag": "emaillove-figma-builder-v2.9.2",
-        "render_tag": "emaillove-eds-converter-v1.43.0",
+        "render_tag": "emaillove-eds-converter-v1.43.1",
         "migration_tag": "emaillove-migration-audit-v1.23.0",
     }
     for key, expected in expected_upstream.items():
         if upstream.get(key) != expected:
-            fail(f"sources.json upstream.{key} must be {expected!r} for v4.5.0")
+            fail(f"sources.json upstream.{key} must be {expected!r} for v4.6.0")
     for snapshot in sources.get("legacy_snapshots", []):
         relative = snapshot.get("path", "")
         expected = snapshot.get("sha256", "")
@@ -488,7 +488,7 @@ def validate_repository_guidance() -> None:
         fail("root AGENTS.md must stay below the default 32 KiB instruction budget")
     compatibility_files = (agents, MIGRATION_COMPATIBILITY)
     required_compatibility_text = {
-        "codex plugin marketplace add email-love/codex-agents --ref v4.5.0",
+        "codex plugin marketplace add email-love/codex-agents --ref v4.6.0",
         "codex plugin add email-love@email-love",
     }
     for compatibility_file in compatibility_files:

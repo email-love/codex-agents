@@ -1,6 +1,6 @@
 {
   "name": "email-love",
-  "version": "4.5.0",
+  "version": "4.6.0",
   "description": "Build export-ready emails and migrate legacy email design systems in Figma with Email Love",
   "author": {
     "name": "Email Love",
@@ -18,10 +18,11 @@
     "email-love"
   ],
   "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "Email Love",
     "shortDescription": "Build export-ready emails and migrate email design systems.",
-    "longDescription": "Build production-ready emails in Figma from Email Love components or convert legacy email design systems into reusable Email Love libraries.",
+    "longDescription": "Build production-ready emails in Figma from Email Love components or convert legacy email design systems into reusable Email Love libraries. Bundles the Email Love MCP connection for headless HTML export, deliverability validation, and desktop and mobile previews; sign in with your Email Love account when prompted.",
     "developerName": "Email Love",
     "category": "Creativity",
     "capabilities": [

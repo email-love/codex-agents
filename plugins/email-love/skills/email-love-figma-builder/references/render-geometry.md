@@ -11,7 +11,7 @@ This is part 1 of the packaged transcription specification. Read it together wit
 
 This is the operative subset of `render-spec.md` and `structure.md` from the Claude skills
 at immutable upstream commit
-[`eb2cc3a`](https://github.com/email-love/claude-skills/tree/eb2cc3ad59d8f0551f652d753a1e647a9f9af975),
+[`eb2cc3a`](https://github.com/email-love/claude-skills/tree/000502dec6215da200995a2367539bf8cc0d93b5),
 derived from the plugin source (`email-love/Figma-plugin`), not from inference. Do not
 reconstruct these rules from memory: that is hand-authoring by another name.
 

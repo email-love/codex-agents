@@ -1,95 +1,107 @@
 {
-  "schema_version": 1,
-  "positive_cases": [
-    {
-      "id": "build_with_existing_library",
-      "user_prompt": "Build a product-launch email in this Figma file using our synced Email Love design system. The goal is trial signups, the CTA is Start a free trial, and the supplied launch facts must remain unchanged.",
-      "expected_skill": "email-love-figma-builder",
-      "expected_behavior": [
-        "Confirm the required Figma tools are available.",
-        "Inventory the synced component library and choose Path A.",
-        "Use intact component instances without detaching or restructuring them.",
-        "Build one visible primary CTA and verify the finished email."
-      ],
-      "expected_result_shape": "A verified export-ready email frame in the target Figma file, followed by a concise handoff with the chosen components, assumptions, subject, preheader, and placeholders.",
-      "fixture_requirements": "A reviewer-accessible writable Figma file with a synced Email Love design system and at least one existing Email Love email root."
-    },
-    {
-      "id": "build_first_email_from_customer_comp",
-      "user_prompt": "We do not have an Email Love design system. Convert this customer-owned Figma email comp into our first exportable email at 600 pixels wide, with one CTA to the supplied landing page.",
-      "expected_skill": "email-love-figma-builder",
-      "expected_behavior": [
-        "Confirm the required Figma tools are available and choose Path B.",
-        "Assess the source scale and render only the customer-owned comp.",
-        "Save the converter JSON before transcription.",
-        "Apply the packaged render rules and repair known converter limitations.",
-        "Verify scale, structure, imagery, spacing, and the single CTA."
-      ],
-      "expected_result_shape": "A verified 600-pixel export-ready email frame plus a handoff naming converter repairs, source-image decisions, assumptions, and any placeholders.",
-      "fixture_requirements": "A reviewer-accessible writable Figma file containing a customer-owned email comp and no synced Email Love design system."
-    },
-    {
-      "id": "audit_legacy_figma_library",
-      "user_prompt": "Audit this legacy Figma email design system for an Email Love migration. Keep the source file read-only and stop after the migration report.",
-      "expected_skill": "email-love-design-system-migration",
-      "expected_behavior": [
-        "Keep the source file read-only.",
-        "Inventory the source and classify its fidelity using evidence.",
-        "Record reusable modules, foundations, scale evidence, and blocking judgments.",
-        "Stop at the human gate without creating foundations or modules."
-      ],
-      "expected_result_shape": "A structured migration report with source scope, content census, fidelity tier, scale evidence, module inventory, risks, and explicit decisions requiring approval.",
-      "fixture_requirements": "A reviewer-accessible read-only Figma file containing several legacy email templates and reusable modules."
-    },
-    {
-      "id": "migrate_approved_batch",
-      "user_prompt": "The Email Love migration audit and foundations are approved. Convert the next four modules into the separate target Figma file and stop for design review.",
-      "expected_skill": "email-love-design-system-migration",
-      "expected_behavior": [
-        "Confirm the approved audit decisions and separate target file.",
-        "Load the module-conversion and render references before transcription.",
-        "Convert exactly the declared four-module batch.",
-        "Run source-parity, export, and mobile checks or record any deferred verification.",
-        "Stop after the batch report for human review."
-      ],
-      "expected_result_shape": "Four reusable Email Love module components in the target file and a batch report covering source parity, component properties, export checks, concessions, and deferred verification.",
-      "fixture_requirements": "An accepted audit, completed foundations, a read-only source Figma file, and a separate writable target Figma file."
-    },
-    {
-      "id": "read_only_figma_fallback",
-      "user_prompt": "Build this Email Love campaign, but my connected Figma tools only provide screenshots and metadata and do not provide use_figma.",
-      "expected_skill": "email-love-figma-builder",
-      "expected_behavior": [
-        "State clearly that the connection is read-only.",
-        "Do not promise or simulate a canvas build.",
-        "Offer an email plan or the documented AI Import handoff.",
-        "Explain what the user must do before the workflow can continue."
-      ],
-      "expected_result_shape": "A concise read-only limitation notice followed by the two supported fallback paths and precise reconnection requirements.",
-      "fixture_requirements": "A session where Figma exposes screenshot and metadata tools but not use_figma."
-    }
-  ],
-  "negative_cases": [
-    {
-      "id": "plain_email_copy_request",
-      "user_prompt": "Write a short sales email I can paste into Gmail. I am not using Figma or Email Love.",
-      "expected_behavior": "Do not activate either Email Love skill. Answer as a normal copywriting request without requesting Figma access or introducing plugin setup.",
-      "expected_result_shape": "A normal email-copy response outside the plugin workflow.",
-      "why_not_complete_with_plugin": "The request does not involve building an export-ready email in Figma or migrating an email design system."
-    },
-    {
-      "id": "website_design_system_request",
-      "user_prompt": "Migrate our website component library from Figma to Tailwind and Storybook.",
-      "expected_behavior": "Do not activate either Email Love skill. Route to a general web-design-system or coding workflow.",
-      "expected_result_shape": "A clarification or plan for a web design-system migration without Email Love tooling.",
-      "why_not_complete_with_plugin": "The plugin is limited to email design systems and export-ready email structures."
-    },
-    {
-      "id": "competitor_clone_request",
-      "user_prompt": "Copy this competitor's promotional email exactly into my Figma file, including its text, imagery, footer, and postal address.",
-      "expected_behavior": "Refuse to clone or convert the competitor material. Offer to use the email only as high-level inspiration and request the customer's own brand, copy, assets, legal footer, and CTA.",
-      "expected_result_shape": "A concise boundary explanation and an original-workflow alternative that does not send the competitor preview to the converter.",
-      "why_not_complete_with_plugin": "The plugin forbids copying competitor content or using a competitor preview as converter input."
-    }
-  ]
+ "schema_version": 1,
+ "positive_cases": [
+  {
+   "id": "build_with_existing_library",
+   "user_prompt": "Build a product-launch email in this Figma file using our synced Email Love design system. The goal is trial signups, the CTA is Start a free trial, and the supplied launch facts must remain unchanged.",
+   "expected_skill": "email-love-figma-builder",
+   "expected_behavior": [
+    "Confirm the required Figma tools are available.",
+    "Inventory the synced component library and choose Path A.",
+    "Use intact component instances without detaching or restructuring them.",
+    "Build one visible primary CTA and verify the finished email."
+   ],
+   "expected_result_shape": "A verified export-ready email frame in the target Figma file, followed by a concise handoff with the chosen components, assumptions, subject, preheader, and placeholders.",
+   "fixture_requirements": "A reviewer-accessible writable Figma file with a synced Email Love design system and at least one existing Email Love email root."
+  },
+  {
+   "id": "build_first_email_from_customer_comp",
+   "user_prompt": "We do not have an Email Love design system. Convert this customer-owned Figma email comp into our first exportable email at 600 pixels wide, with one CTA to the supplied landing page.",
+   "expected_skill": "email-love-figma-builder",
+   "expected_behavior": [
+    "Confirm the required Figma tools are available and choose Path B.",
+    "Assess the source scale and render only the customer-owned comp.",
+    "Save the converter JSON before transcription.",
+    "Apply the packaged render rules and repair known converter limitations.",
+    "Verify scale, structure, imagery, spacing, and the single CTA."
+   ],
+   "expected_result_shape": "A verified 600-pixel export-ready email frame plus a handoff naming converter repairs, source-image decisions, assumptions, and any placeholders.",
+   "fixture_requirements": "A reviewer-accessible writable Figma file containing a customer-owned email comp and no synced Email Love design system."
+  },
+  {
+   "id": "audit_legacy_figma_library",
+   "user_prompt": "Audit this legacy Figma email design system for an Email Love migration. Keep the source file read-only and stop after the migration report.",
+   "expected_skill": "email-love-design-system-migration",
+   "expected_behavior": [
+    "Keep the source file read-only.",
+    "Inventory the source and classify its fidelity using evidence.",
+    "Record reusable modules, foundations, scale evidence, and blocking judgments.",
+    "Stop at the human gate without creating foundations or modules."
+   ],
+   "expected_result_shape": "A structured migration report with source scope, content census, fidelity tier, scale evidence, module inventory, risks, and explicit decisions requiring approval.",
+   "fixture_requirements": "A reviewer-accessible read-only Figma file containing several legacy email templates and reusable modules."
+  },
+  {
+   "id": "migrate_approved_batch",
+   "user_prompt": "The Email Love migration audit and foundations are approved. Convert the next four modules into the separate target Figma file and stop for design review.",
+   "expected_skill": "email-love-design-system-migration",
+   "expected_behavior": [
+    "Confirm the approved audit decisions and separate target file.",
+    "Load the module-conversion and render references before transcription.",
+    "Convert exactly the declared four-module batch.",
+    "Run source-parity, export, and mobile checks or record any deferred verification.",
+    "Stop after the batch report for human review."
+   ],
+   "expected_result_shape": "Four reusable Email Love module components in the target file and a batch report covering source parity, component properties, export checks, concessions, and deferred verification.",
+   "fixture_requirements": "An accepted audit, completed foundations, a read-only source Figma file, and a separate writable target Figma file."
+  },
+  {
+   "id": "read_only_figma_fallback",
+   "user_prompt": "Build this Email Love campaign, but my connected Figma tools only provide screenshots and metadata and do not provide use_figma.",
+   "expected_skill": "email-love-figma-builder",
+   "expected_behavior": [
+    "State clearly that the connection is read-only.",
+    "Do not promise or simulate a canvas build.",
+    "Offer an email plan or the documented AI Import handoff.",
+    "Explain what the user must do before the workflow can continue."
+   ],
+   "expected_result_shape": "A concise read-only limitation notice followed by the two supported fallback paths and precise reconnection requirements.",
+   "fixture_requirements": "A session where Figma exposes screenshot and metadata tools but not use_figma."
+  },
+  {
+   "id": "headless_export_verification",
+   "user_prompt": "The Email Love MCP is connected. Verify the migrated module wrapper in this Figma file through the production export pipeline and show me the mobile render.",
+   "expected_skill": "email-love-design-system-migration",
+   "expected_behavior": [
+    "Probe the Email Love MCP and find emaillove_export_figma available.",
+    "Call it with the file key and the module wrapper node id using operationType preview, which charges no export quota.",
+    "Confirm the returned HTML contains the mobile media query block and the dark-mode CSS block.",
+    "Pass the returned token to emaillove_preview_email and present the mobile render."
+   ],
+   "expected_result_shape": "A confirmation that the module compiled through the production exporter, the four export-sniff checks recorded, and an inline mobile preview image with the preview URL."
+  }
+ ],
+ "negative_cases": [
+  {
+   "id": "plain_email_copy_request",
+   "user_prompt": "Write a short sales email I can paste into Gmail. I am not using Figma or Email Love.",
+   "expected_behavior": "Do not activate either Email Love skill. Answer as a normal copywriting request without requesting Figma access or introducing plugin setup.",
+   "expected_result_shape": "A normal email-copy response outside the plugin workflow.",
+   "why_not_complete_with_plugin": "The request does not involve building an export-ready email in Figma or migrating an email design system."
+  },
+  {
+   "id": "website_design_system_request",
+   "user_prompt": "Migrate our website component library from Figma to Tailwind and Storybook.",
+   "expected_behavior": "Do not activate either Email Love skill. Route to a general web-design-system or coding workflow.",
+   "expected_result_shape": "A clarification or plan for a web design-system migration without Email Love tooling.",
+   "why_not_complete_with_plugin": "The plugin is limited to email design systems and export-ready email structures."
+  },
+  {
+   "id": "competitor_clone_request",
+   "user_prompt": "Copy this competitor's promotional email exactly into my Figma file, including its text, imagery, footer, and postal address.",
+   "expected_behavior": "Refuse to clone or convert the competitor material. Offer to use the email only as high-level inspiration and request the customer's own brand, copy, assets, legal footer, and CTA.",
+   "expected_result_shape": "A concise boundary explanation and an original-workflow alternative that does not send the competitor preview to the converter.",
+   "why_not_complete_with_plugin": "The plugin forbids copying competitor content or using a competitor preview as converter input."
+  }
+ ]
 }

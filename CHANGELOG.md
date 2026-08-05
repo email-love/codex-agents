@@ -1,5 +1,22 @@
 # Changelog
 
+## 4.6.0 - 2026-08-05
+
+Bundles the Email Love MCP connection and makes the exporter path self-explanatory.
+
+- The plugin manifest now declares the Email Love MCP (`emaillove`,
+  `https://mcp.emaillove.com/mcp`) via `mcpServers`, so installing the plugin registers the
+  connection and one `codex mcp login emaillove` authorizes it. No more unexplained manual
+  server-add step.
+- The migration skill's batch-check gate now treats absent exporter tools as an unauthorized
+  connection rather than a missing capability: it hands the user the one-time login step,
+  names the sign-in flow (Email Love's normal account screen, shared with the Figma plugin),
+  and distinguishes this server from the Email Love inspiration MCP. Ports claude-skills
+  converter 1.43.1 (commit 000502d).
+- README, SUBMISSION.md, and the reviewer test cases updated for the bundled-MCP submission
+  type; adds a sixth positive reviewer case covering headless export verification.
+- No workflow or check behavior changed otherwise.
+
 ## 4.5.0 - 2026-08-05
 
 Ports claude-skills batch 12 from `eb2cc3a`: source-content parity, typography fidelity,
@@ -23,7 +40,7 @@ binding and contrast checks, asset identity, and mandatory per-module screenshot
 - Requires one fresh desktop screenshot per module and opens every batch report with the Group 0
   source/build parity table.
 
-Pins upstream provenance to `eb2cc3ad59d8f0551f652d753a1e647a9f9af975`, migration tag
+Pins upstream provenance to `000502dec6215da200995a2367539bf8cc0d93b5`, migration tag
 `emaillove-migration-audit-v1.23.0`, converter tag
 `emaillove-eds-converter-v1.43.0`, and unchanged builder tag
 `emaillove-figma-builder-v2.9.2`.

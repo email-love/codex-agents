@@ -165,9 +165,16 @@ Read the module-conversion reference and all render references.
 1. Before the first module, establish how the batch checks will run. Probe the Email Love MCP
    for `emaillove_export_figma`. When present, use it with `operationType: "preview"` for a
    quota-free headless export and use its token with `emaillove_preview_email`; no plugin click
-   is needed for covered core tags. If the tool is absent or raises a CoverageError for
-   `mj-hero`, `mj-social`, `mj-navbar`, or `mj-table`, ask a human to run the paid-seat plugin
-   Export and maintain the Deferred verification list when no human is available.
+   is needed for covered core tags. This plugin bundles the Email Love MCP connection under the
+   server name `emaillove`. When the tools are absent, the connection has not been authorized
+   yet, not removed from the product: tell the user to run `codex mcp login emaillove` (a
+   developer Git install may first need `codex mcp add emaillove --url
+   https://mcp.emaillove.com/mcp`), explain that the sign-in screen is Email Love's normal
+   account flow, the same sign-in the Figma plugin uses, and start a fresh task afterwards so
+   the tools appear. Do not confuse this server with the Email Love inspiration/library MCP;
+   the two are not interchangeable. If the tool raises a CoverageError for `mj-hero`,
+   `mj-social`, `mj-navbar`, or `mj-table`, ask a human to run the paid-seat plugin Export and
+   maintain the Deferred verification list when no human is available.
 2. A library of eight or fewer modules may run as one batch. Above that, use batches of
    roughly five modules so the first review can stop a repeated defect early.
 3. Before the first write, name the batch and its module count and give a rough estimate.
