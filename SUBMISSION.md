@@ -27,10 +27,13 @@ canvas builds, and the Email Love plugin installed in Figma.
   standard account flow, shared with the Figma plugin.
 - **Tool annotations:** declared by the server per tool (`readOnlyHint`, `destructiveHint`,
   `idempotentHint`, `openWorldHint` on every tool definition).
-- **What it adds:** design-system access (brands, components, templates), email composition,
-  and the headless exporter: `emaillove_export_figma` compiles a Figma template or module to
-  production HTML with no plugin click (`operationType: "preview"` charges no export quota),
-  and its token feeds `emaillove_preview_email` for desktop and mobile renders.
+- **What it adds:** the agent-only QA connection for migration work: design-system access
+  (brands, components, templates) and the headless exporter. `emaillove_export_figma`
+  compiles a Figma template or module to production HTML with no plugin click
+  (`operationType: "preview"` charges no export quota), and its token feeds
+  `emaillove_preview_email` for desktop and mobile renders. It is not a customer surface
+  for creating, previewing, or exporting emails; those happen in the Email Love Figma
+  plugin.
 
 ## Listing details
 
