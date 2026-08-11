@@ -109,6 +109,16 @@ sizes, paddings, nesting, crop transforms, container clipping, zero-height text,
 stacked under images. Use the worker for unstructured sources, flattened mockups, and every
 non-Figma adapter. Record the path and why in the batch report.
 
+**When the supplied source includes HTML (any ESP adapter, or a customer-supplied file),
+that HTML is the authoritative structure for BOTH breakpoints.** Before building, inventory
+the desktop structure from the DOM and the mobile structure from its media queries as two
+separate lists (text runs, images with their own hrefs and dimensions, per-breakpoint
+composition), and build to that inventory. A screenshot never overrides the HTML, and a
+canvas that disagrees with the supplied HTML is the thing to fix, not the evidence.
+Measured: a footer was patched repeatedly from its screenshot while the supplied HTML held
+the real desktop grid, the real mobile recomposition, and the individual logo assets the
+whole time.
+
 On the direct-tree path, recursively inspect the audited module boundary and translate its
 semantic hierarchy into the mapped Email Love primitives in step 2. Preserve exact measured
 values after the audit's scale and foundation rules. Existing `mj-*` names are hints only;
@@ -382,8 +392,10 @@ This is the ONE mobile checkpoint every module gets, twin or no twin.
 
 **Part A: for every multi-column section, record the stacking decision.**
 
-Read each section in the module you just built. If it has more than one column, ask: does this
-stay side by side on mobile, or does it stack? Apply the lockup tells from step 2 (unequal
+Read each section in the module you just built. If it has more than one column, ask which
+of THREE mobile behaviors the source calls for: it stays side by side (`mj-group`), it
+stacks (loose columns), or the source uses a genuinely different mobile COMPOSITION that no
+stacking of the desktop structure can produce. Apply the lockup tells from step 2 (unequal
 columns with one small and fixed, columns sharing a continuous background, header or footer
 strips are lockups by default). Then write the decision and the reason in the module's report
 line, per section, in this format:
@@ -391,6 +403,17 @@ line, per section, in this format:
 - `header row: mj-group (lockup: logo + headline sharing the dark bar)`
 - `product cards row: loose columns (two equal content blocks, stack expected)`
 - `footer top row: mj-group (lockup: logo + H6 headline in one strip)`
+- `brand logo row: recomposed (mobile shows the primary mark on its own row, siblings beneath)`
+
+**The third option builds paired sections**: a desktop-only section carrying
+`mobileStylesHideInMobileDevice` and a mobile-only sibling carrying
+`mobileStylesHideInDesktopDevice`, each composed for its breakpoint (the same observed
+visibility keys the band-decoration pattern uses). There is no observed mobile-alignment
+key and the never-write-unobserved-keys rule stands, so when mobile alignment or
+arrangement differs from desktop, recomposition IS the sanctioned route. Headers and
+footers get an explicit desktop-versus-mobile comparison before their decision is
+recorded: they are where sources most often recompose rather than stack, and a stacked
+desktop footer that should have been recomposed reads as broken, not as adapted.
 
 A section with more than one column and no recorded decision is not done. Step 5's mobile
 verification fails a module where any multi-column section lacks a decision.
@@ -700,13 +723,32 @@ before review. These checks inspect exporter output and do not replace step 5.
 click, or because a CoverageError module has no human available, do not mark it skipped. Accumulate
 a Deferred verification list across all batches, one line per module naming the exact behavior a
 human must confirm, such as a group staying unstacked, a button going full width, or an image
-staying fluid. Hand over the combined list in step 7.
+staying fluid. Hand over the combined list in step 7. The deferral must stay loud, and every report
+writes a deferred exporter check as a STATE (`exporter: deferred`), never folded into a pass.
+
+**Repair discipline, when any check or render fails.** Measure the failure first (which
+node, which breakpoint, which mechanism) before changing structure; a fix applied to an
+unmeasured symptom is a guess. A change the rendered output has disproven is not tried
+again somewhere else. After two local patches on the same module, stop patching and
+reconstruct the module from its source inventory: patch accumulation is how a module
+drifts from the source and the spec at once, and a full reconstruction from a good
+inventory is usually cheaper than the third patch. Repairs preserve what already works:
+re-read `componentPropertyReferences` after any structural repair and compare the property
+count against the pre-repair count, because a rebuild that silently drops bindings passes
+every geometry check. Keep the batch's resumable record current throughout (node ids,
+outstanding checks, last verified state per module), so an interrupted session resumes
+instead of re-verifying or, worse, re-trusting.
 
 ### 7. Batch report and gate
 
 One report per batch. **Open with the Group 0 parity table:** for every module, show the source
 `T/I` census beside the built counts and leave the delta column blank when they agree. Any
-unexplained row fails the gate regardless of the remaining groups. Then report, per module and
+unexplained row fails the gate regardless of the remaining groups. **Every module row then
+carries three verification states, reported separately: canvas (screenshot matches intent),
+structure (read-back groups pass), and exporter (desktop and mobile renders pass).** A
+module is complete only at three for three; `exporter: deferred` is a state, never a pass,
+and "fixed" for a change no render has seen is the completion-inflation failure this line
+exists to stop. Then report, per module and
 keyed by its Module inventory row name, what was rebuilt, the
 design you converted it from, verdict honored or changed (with reason), any concession and whether
 it was accepted and by whom (and for a bleed concession, the two column widths you landed on, so a

@@ -529,6 +529,17 @@ defensible. Pick against the design system's own established patterns, and recor
 and why in the batch report so the next module makes the same call. What this must never be is an
 accident of arithmetic.
 
+### R4.2.2 Combined raster inverse rule
+
+**The inverse rule: never CREATE a combined raster.** When assets are independently linked
+or independently positioned in the source (brand logos, social icons, nav items), build one
+`mj-image` per asset at its intended display dimensions and natural aspect ratio. Combining
+them into one strip costs the per-item hrefs, softens every mark (an enlarged composite
+shrunk responsively is resampled twice), and forecloses mobile recomposition, which is
+exactly where logo rows change arrangement. The existing fused-asset recovery instructions
+are for slicing strips a SOURCE already fused; a build that fuses clean source assets
+manufactures that problem.
+
 ### R4.3 mj-button: `mj-button-Frame` wrapping FRAME `mj-button` whose DIRECT child is a TEXT node
 
 Three levels. The TEXT node MUST be a direct child of the `mj-button` frame:

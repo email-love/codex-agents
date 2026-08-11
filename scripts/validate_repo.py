@@ -84,8 +84,8 @@ def validate_manifest() -> None:
     manifest = load_json(MANIFEST)
     if manifest.get("name") != "email-love":
         fail("plugin manifest name must be 'email-love'")
-    if manifest.get("version") != "4.6.1":
-        fail("plugin manifest version must be 4.6.1 for this migration contract")
+    if manifest.get("version") != "4.7.0":
+        fail("plugin manifest version must be 4.7.0 for this migration contract")
     if not re.fullmatch(r"\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?", manifest.get("version", "")):
         fail("plugin manifest version must be strict semver")
     if manifest.get("skills") != "./skills/":
@@ -290,6 +290,8 @@ def validate_skills() -> None:
             "module's main component",
             "Every text style's NAME matches its read-back VALUE",
             "dominant body weight",
+            "a two-column nav carried `stackColumns`",
+            "render is the arbiter, never the key",
         ],
         migration / "references" / "module-conversion.md": [
             "render each whole design once at 1:1",
@@ -329,6 +331,16 @@ def validate_skills() -> None:
             "placedOnNodeId",
             "one desktop screenshot per module",
             "Open with the Group 0 parity table",
+            "authoritative structure for BOTH breakpoints",
+            "genuinely different mobile COMPOSITION",
+            "mobileStylesHideInMobileDevice",
+            "mobileStylesHideInDesktopDevice",
+            "brand logo row: recomposed",
+            "Repair discipline, when any check or render fails",
+            "three verification states",
+            "exporter: deferred",
+            "completion-inflation",
+            "componentPropertyReferences",
         ],
         migration / "references" / "render-nodes.md": [
             "R3.3.2 Group columns shrink on mobile",
@@ -345,9 +357,13 @@ def validate_skills() -> None:
             "source geometry as a mask",
             "spacer is itself a colored band",
             "filled card that needs a gutter",
+            "never CREATE a combined raster",
+            "per-item hrefs",
+            "resampled twice",
+            "forecloses mobile recomposition",
         ],
         migration / "references" / "render-geometry.md": [
-            "000502dec6215da200995a2367539bf8cc0d93b5",
+            "fb96b26aa346394ae83f63c1d6ebe6b734029c5b",
             "inter-module gap has one fixed owner",
             "dark mode flattens module fills",
         ],
@@ -367,7 +383,7 @@ def validate_skills() -> None:
         text = path.read_text(encoding="utf-8")
         for required_string in required_strings:
             if required_string not in text:
-                fail(f"{path.relative_to(ROOT)}: missing v4.6.1 contract text {required_string!r}")
+                fail(f"{path.relative_to(ROOT)}: missing v4.7.0 contract text {required_string!r}")
 
     audit_text = (migration / "references" / "audit.md").read_text(encoding="utf-8")
     palette = audit_text.find("## Palette")
@@ -396,6 +412,13 @@ def validate_skills() -> None:
     naming = module_text.find("- Naming:")
     if min(content_width, gutter_check, naming) < 0 or not content_width < gutter_check < naming:
         fail("module gutter check must remain between Content width and Naming")
+    repair_discipline = module_text.find("**Repair discipline, when any check or render fails.**")
+    batch_report = module_text.find("### 7. Batch report and gate")
+    tri_state = module_text.find("three verification states")
+    if min(repair_discipline, batch_report, tri_state) < 0 or not (
+        repair_discipline < batch_report < tri_state
+    ):
+        fail("repair discipline must precede the batch report and its tri-state status contract")
 
     builder = SKILLS / "email-love-figma-builder"
     required_builder_contract = {
@@ -441,7 +464,7 @@ def validate_skills() -> None:
         text = path.read_text(encoding="utf-8")
         for required_string in required_strings:
             if required_string not in text:
-                fail(f"{path.relative_to(ROOT)}: missing v4.6.1 contract text {required_string!r}")
+                fail(f"{path.relative_to(ROOT)}: missing v4.7.0 contract text {required_string!r}")
 
 
 def validate_provenance() -> None:
@@ -451,14 +474,14 @@ def validate_provenance() -> None:
     if not re.fullmatch(r"[0-9a-f]{40}", commit):
         fail("sources.json upstream commit must be a full Git SHA")
     expected_upstream = {
-        "commit": "000502dec6215da200995a2367539bf8cc0d93b5",
+        "commit": "fb96b26aa346394ae83f63c1d6ebe6b734029c5b",
         "builder_tag": "emaillove-figma-builder-v2.9.2",
-        "render_tag": "emaillove-eds-converter-v1.43.1",
+        "render_tag": "emaillove-eds-converter-v1.44.0",
         "migration_tag": "emaillove-migration-audit-v1.23.0",
     }
     for key, expected in expected_upstream.items():
         if upstream.get(key) != expected:
-            fail(f"sources.json upstream.{key} must be {expected!r} for v4.6.1")
+            fail(f"sources.json upstream.{key} must be {expected!r} for v4.7.0")
     for snapshot in sources.get("legacy_snapshots", []):
         relative = snapshot.get("path", "")
         expected = snapshot.get("sha256", "")

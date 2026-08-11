@@ -110,7 +110,11 @@ objects back onto nodes does not work. Treat any key not in this table as unveri
 plugin has been observed writing it.
 
 **Read-back is necessary but not sufficient.** Your own write always reads back. The only
-end-to-end verification is a render: export or preview, and measure the mobile output.
+end-to-end verification is a render: export or preview, and measure the mobile output. Measured
+again on a later build: a two-column nav carried `stackColumns` and read it back cleanly, and the
+export still rendered alternating full-width rows; only the exporter render showed it. Whether
+the plugin consults private state the shared key does not reflect is unconfirmed; either way the
+render is the arbiter, never the key.
 
 **Start by reading the audit's Source fidelity tier, and say which tier you are building under
 before you create a node.** It decides where every number below comes from, so it is not something

@@ -11,7 +11,7 @@ This is part 1 of the packaged migration transcription specification. Read it to
 
 This is the operative migration-specific subset of `render-spec.md` and `structure.md` from
 the Claude skills at immutable upstream commit
-[`eb2cc3a`](https://github.com/email-love/claude-skills/tree/000502dec6215da200995a2367539bf8cc0d93b5),
+[`fb96b26`](https://github.com/email-love/claude-skills/tree/fb96b26aa346394ae83f63c1d6ebe6b734029c5b),
 derived from the plugin source (`email-love/Figma-plugin`), not from inference. Do not
 reconstruct these rules from memory: that is rebuilding by eye under another name.
 

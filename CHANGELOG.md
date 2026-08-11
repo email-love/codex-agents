@@ -1,5 +1,20 @@
 # Changelog
 
+## 4.7.0 - 2026-08-10
+
+Port from claude-skills fb96b26 (batch 13): exporter-first discipline from a design-system
+build postmortem. Batch reports carry three verification states per module (canvas, structure,
+exporter); deferred is a state, never a pass. New repair discipline: measure before restructuring,
+never retry a render-disproven change, reconstruct after two local patches, compare property counts
+across repairs, and keep a resumable record. Supplied source HTML is authoritative for both
+breakpoints (DOM plus media-query inventory before building). The stacking decision is three-way:
+group, stack, or recomposed as paired sections under the observed visibility keys, with a mandatory
+desktop-versus-mobile comparison for headers and footers. Never create a combined raster from
+independently linked assets. `stackColumns` reading back cleanly while the render is wrong joins
+read-back-is-not-sufficient.
+
+Minor bump: additive conventions and discipline; nothing removed.
+
 ## 4.6.1 - 2026-08-05
 
 Corrects the public submission package before the MCP-backed portal upload.

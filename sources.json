@@ -1,9 +1,9 @@
 {
   "upstream": {
     "repository": "https://github.com/email-love/claude-skills",
-    "commit": "000502dec6215da200995a2367539bf8cc0d93b5",
+    "commit": "fb96b26aa346394ae83f63c1d6ebe6b734029c5b",
     "builder_tag": "emaillove-figma-builder-v2.9.2",
-    "render_tag": "emaillove-eds-converter-v1.43.1",
+    "render_tag": "emaillove-eds-converter-v1.44.0",
     "migration_tag": "emaillove-migration-audit-v1.23.0"
   },
   "legacy_snapshots": [
