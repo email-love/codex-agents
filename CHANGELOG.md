@@ -1,5 +1,26 @@
 # Changelog
 
+## 4.8.0 - 2026-08-22
+
+Adds `email-love-template-repair`, a focused third skill for diagnosing and repairing existing
+Email Love email templates, reusable modules, and component instances.
+
+- Reproduces the failure across the canvas, plugin Preview, production exporter, mobile render,
+  and supplied inbox evidence before making changes.
+- Preserves campaign originals by default and requires an explicit impact choice before changing
+  a library source component that can update many instances.
+- Uses a symptom-to-cause matrix, complete ancestor-chain inspection, and one measured repair at a
+  time. A disproven render is reverted, and two failed local patches trigger authoritative section
+  reconstruction instead of indefinite tweaking.
+- Protects root shape, component attachment, content counts, component properties, tokens, pages,
+  and deliberate dark-mode overrides.
+- Reports canvas, structure, and exporter states separately. The word `fixed` is reserved for a
+  repair where all three states pass on desktop and mobile.
+- Adds repair routing and regression fixtures, public submission coverage, repository validation,
+  and a Claude handoff specification.
+
+Minor bump: this is a new additive skill. Builder and migration behavior remain unchanged.
+
 ## 4.7.0 - 2026-08-10
 
 Port from claude-skills fb96b26 (batch 13): exporter-first discipline from a design-system

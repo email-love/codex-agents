@@ -1,7 +1,7 @@
 {
   "name": "email-love",
-  "version": "4.7.0",
-  "description": "Build export-ready emails and migrate legacy email design systems in Figma with Email Love",
+  "version": "4.8.0",
+  "description": "Build, repair, and migrate export-ready emails and email design systems in Figma with Email Love",
   "author": {
     "name": "Email Love",
     "email": "hello@emaillove.com",
@@ -21,8 +21,8 @@
   "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "Email Love",
-    "shortDescription": "Build export-ready emails and migrate email design systems.",
-    "longDescription": "Build production-ready emails in Figma from Email Love components or convert legacy email design systems into reusable Email Love libraries. Bundles the Email Love MCP connection for headless HTML export, deliverability validation, and desktop and mobile previews; sign in with your Email Love account when prompted.",
+    "shortDescription": "Build, repair, and migrate export-ready emails in Figma.",
+    "longDescription": "Build production-ready emails in Figma from Email Love components, diagnose and repair broken Email Love templates and modules, or convert legacy email design systems into reusable Email Love libraries. Bundles the Email Love MCP connection for headless HTML export, deliverability validation, and desktop and mobile previews; sign in with your Email Love account when prompted.",
     "developerName": "Email Love",
     "category": "Creativity",
     "capabilities": [
@@ -34,8 +34,8 @@
     "termsOfServiceURL": "https://emaillove.com/terms",
     "defaultPrompt": [
       "Build an export-ready email in my Figma file.",
-      "Audit this legacy email design system.",
-      "Convert the next migration batch in Figma."
+      "Repair this broken Email Love template in Figma.",
+      "Audit and migrate this legacy email design system."
     ],
     "brandColor": "#EE2461",
     "composerIcon": "./assets/email-love-logo.png",

@@ -56,30 +56,31 @@
    "fixture_requirements": "An accepted audit, completed foundations, a read-only source Figma file, and a separate writable target Figma file."
   },
   {
-   "id": "headless_export_verification",
-   "user_prompt": "The Email Love MCP is connected. Verify the migrated module wrapper in this Figma file through the production export pipeline and show me the mobile render.",
-   "expected_skill": "email-love-design-system-migration",
+   "id": "repair_flattened_template",
+   "user_prompt": "This existing Email Love campaign looks correct in Figma, but the second section exports as one image and its button is not clickable. Diagnose and repair it without changing the original.",
+   "expected_skill": "email-love-template-repair",
    "expected_behavior": [
-    "Probe the Email Love MCP and find emaillove_export_figma available.",
-    "Call it with the file key and the module wrapper node id using operationType preview, which charges no export quota.",
-    "Confirm the returned HTML contains the mobile media query block and the dark-mode CSS block.",
-    "Pass the returned token to emaillove_preview_email and present the mobile render."
+    "Confirm the target is an existing Email Love email and capture canvas and exporter baselines.",
+    "Duplicate the campaign root before writing and inspect the full ancestor chain around the flattened section.",
+    "Apply one measured repair without detaching instances or inventing exporter structure.",
+    "Verify the repaired copy through canvas, structure, desktop export, and mobile export checks."
    ],
-   "expected_result_shape": "A confirmation that the module compiled through the production exporter, the four export-sniff checks recorded, and an inline mobile preview image with the preview URL."
+   "expected_result_shape": "A preserved original, a repaired working copy when the evidence supports a fix, and a report naming the proven cause, changed node ids, before and after evidence, and separate canvas, structure, and exporter states.",
+   "fixture_requirements": "A reviewer-accessible writable Figma file containing an existing Email Love campaign with a deliberately unrecognized helper frame around a live-text section."
   }
  ],
  "negative_cases": [
   {
    "id": "plain_email_copy_request",
    "user_prompt": "Write a short sales email I can paste into Gmail. I am not using Figma or Email Love.",
-   "expected_behavior": "Do not activate either Email Love skill. Answer as a normal copywriting request without requesting Figma access or introducing plugin setup.",
+   "expected_behavior": "Do not activate any Email Love skill. Answer as a normal copywriting request without requesting Figma access or introducing plugin setup.",
    "expected_result_shape": "A normal email-copy response outside the plugin workflow.",
    "why_not_complete_with_plugin": "The request does not involve building an export-ready email in Figma or migrating an email design system."
   },
   {
    "id": "website_design_system_request",
    "user_prompt": "Migrate our website component library from Figma to Tailwind and Storybook.",
-   "expected_behavior": "Do not activate either Email Love skill. Route to a general web-design-system or coding workflow.",
+   "expected_behavior": "Do not activate any Email Love skill. Route to a general web-design-system or coding workflow.",
    "expected_result_shape": "A clarification or plan for a web design-system migration without Email Love tooling.",
    "why_not_complete_with_plugin": "The plugin is limited to email design systems and export-ready email structures."
   },

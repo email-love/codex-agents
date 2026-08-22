@@ -7,11 +7,11 @@ This is the portal-ready submission brief for the `email-love` skills-and-MCP pl
 - **Type:** MCP server with skills
 - **Plugin name:** Email Love
 - **Publisher:** Email Love
-- **Version:** 4.6.1
+- **Version:** 4.8.0
 - **Category:** Creativity
 - **Repository:** https://github.com/email-love/codex-agents
 
-The package bundles the Email Love MCP (server name `emaillove`) and two skills. Its
+The package bundles the Email Love MCP (server name `emaillove`) and three skills. Its
 workflows additionally require the official remote Figma MCP as an external prerequisite for
 canvas builds, and the Email Love plugin installed in Figma.
 
@@ -37,11 +37,12 @@ canvas builds, and the Email Love plugin installed in Figma.
 
 ## Listing details
 
-- **Short description:** Build export-ready emails and migrate email design systems.
+- **Short description:** Build, repair, and migrate export-ready emails in Figma.
 - **Long description:** Build production-ready marketing and lifecycle emails in Figma from
-  existing Email Love components or a converter-assisted first-email workflow. Audit and
-  migrate legacy email libraries into reusable Email Love design systems through staged,
-  reviewable batches that keep the source read-only.
+  existing Email Love components or a converter-assisted first-email workflow. Diagnose and
+  repair broken Email Love templates and modules with canvas, structure, and exporter evidence.
+  Audit and migrate legacy email libraries into reusable Email Love design systems through
+  staged, reviewable batches that keep the source read-only.
 - **Website:** https://emaillove.com
 - **Support:** https://help.emaillove.com/plugin/getting-started/overview
 - **Privacy policy:** https://emaillove.com/privacy-policy
@@ -52,15 +53,18 @@ canvas builds, and the Email Love plugin installed in Figma.
 ## Starter prompts
 
 1. Build an export-ready email in my Figma file.
-2. Audit this legacy email design system.
-3. Convert the next migration batch in Figma.
+2. Repair this broken Email Love template in Figma.
+3. Audit and migrate this legacy email design system.
 
 ## Capabilities and prerequisites
 
-The plugin contains two skills:
+The plugin contains three skills:
 
 - `email-love-figma-builder` builds one campaign email or sequence through an existing
   Email Love design system or the converter-assisted first-email path.
+- `email-love-template-repair` diagnoses and repairs an existing Email Love email or reusable
+  module. It preserves the original by default, protects component and foundation integrity,
+  and calls a repair fixed only after canvas, structure, desktop export, and mobile export pass.
 - `email-love-design-system-migration` audits and migrates a legacy email library in staged
   batches while keeping the source read-only.
 
@@ -96,20 +100,20 @@ The required cases (five positive, three negative) are in
 the cases that require Figma files. Keep those links out of the public repository if they
 grant write access.
 
-## Release notes for 4.6.1
+## Release notes for 4.8.0
 
-Email Love now bundles its MCP connection. Installing the plugin registers the Email Love
-MCP (`emaillove`), so one clearly labelled sign-in replaces the manual server-add step that
-previously confused users, and the migration skill's headless export verification
-(`emaillove_export_figma` plus `emaillove_preview_email`) works out of the box after
-authorization. Skill guidance updated to match: absent exporter tools now mean an
-unauthorized connection, and the skill hands the user the one-time login step instead of
-falling back silently. This patch also corrects the package and portal wording for the
-skills-and-MCP submission type. No workflow or check behavior changed otherwise.
+Email Love adds a third skill for repairing existing Email Love templates and reusable modules.
+The repair workflow reproduces the failure first, preserves campaign originals, requires an
+explicit impact choice before changing shared source components, and applies one measured repair
+at a time. It includes a symptom-to-cause matrix for invalid roots, flattened content, Outlook
+clipping, double padding, mobile stacking, buttons, images, dark mode, links, and component
+properties. A repair is reported as fixed only when the canvas, structure, desktop exporter, and
+mobile exporter all pass; unavailable exporter or inbox checks are named as deferred rather than
+silently counted as success. Builder and migration behavior are unchanged.
 
 ## Initial release notes (4.5.0, for the record)
 
-Initial public submission of Email Love for ChatGPT and Codex. The plugin packages two
+Initial public submission of Email Love for ChatGPT and Codex. The plugin packaged two
 skills for building export-ready emails in Figma and migrating legacy email design systems.
 It enforces source-safe migration, staged human review, exporter-aware structure, mobile and
 dark-mode checks, and explicit fallback behavior when required write tools are unavailable.

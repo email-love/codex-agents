@@ -205,6 +205,86 @@
         "accept unexplained invented or dropped content",
         "silently change brand colors to repair contrast"
       ]
+    },
+    {
+      "id": "repair_invalid_template_root",
+      "prompt": "Email Love says this finished campaign is not a valid template. Diagnose it and repair it without damaging the original.",
+      "expected_skill": "email-love-template-repair",
+      "expected_route": "root-shape-repair",
+      "must_do": [
+        "prove the selected node is intended to be a whole Email Love email",
+        "capture the failing selection and root contract",
+        "duplicate the campaign root before writing",
+        "verify canvas, structure, desktop export, and mobile export"
+      ],
+      "must_not_do": [
+        "add mainFrame to a reusable module",
+        "edit the original campaign by default"
+      ]
+    },
+    {
+      "id": "repair_flattened_content",
+      "prompt": "This Email Love section contains live text in Figma but exports as one image. Please fix it.",
+      "expected_skill": "email-love-template-repair",
+      "expected_route": "exporter-structure-repair",
+      "must_do": [
+        "identify the first surface where flattening appears",
+        "inspect the complete ancestor chain and shared tags",
+        "make one measured repair on a working copy",
+        "prove the live content survives the production exporter"
+      ],
+      "must_not_do": [
+        "accept a canvas screenshot as proof",
+        "rebuild unknown structure from memory"
+      ]
+    },
+    {
+      "id": "repair_mobile_stacking",
+      "prompt": "The desktop Email Love header is right, but its logo and links wrap and reorder incorrectly on mobile Preview.",
+      "expected_skill": "email-love-template-repair",
+      "expected_route": "mobile-layout-repair",
+      "must_do": [
+        "capture desktop and mobile baselines",
+        "decide from evidence whether the row should group, stack, or recompose",
+        "treat production mobile render as the arbiter",
+        "report mobile exporter verification separately"
+      ],
+      "must_not_do": [
+        "trust stackColumns read-back when the render is wrong",
+        "flatten the header into one image"
+      ]
+    },
+    {
+      "id": "repair_library_component_scope",
+      "prompt": "Our reusable Email Love footer is broken across several campaigns. Repair the footer component.",
+      "expected_skill": "email-love-template-repair",
+      "expected_route": "shared-component-impact-gate",
+      "must_do": [
+        "identify the source module and affected instances",
+        "ask whether to change the source in place or create a replacement",
+        "record component properties and bindings before writing",
+        "verify an exported instance after the chosen repair"
+      ],
+      "must_not_do": [
+        "silently change every instance",
+        "detach the footer instance"
+      ]
+    },
+    {
+      "id": "repair_exporter_unavailable",
+      "prompt": "Diagnose why this Email Love button is not clickable. Figma write tools are connected, but the Email Love exporter is not authorized.",
+      "expected_skill": "email-love-template-repair",
+      "expected_route": "repair-with-deferred-exporter",
+      "must_do": [
+        "probe for the bundled Email Love exporter tools",
+        "give the one-time authorization instruction",
+        "verify canvas and structure if a repair is applied",
+        "report exporter as deferred with the exact remaining check"
+      ],
+      "must_not_do": [
+        "call the repair fixed",
+        "treat missing exporter authorization as a passing export check"
+      ]
     }
   ]
 }

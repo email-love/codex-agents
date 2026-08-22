@@ -1,13 +1,16 @@
 # Email Love for OpenAI Codex
 
-Build real, export-ready emails in Figma and migrate legacy email design systems into Email
-Love with progressively loaded Codex skills.
+Build, repair, and migrate real, export-ready emails and email design systems in Figma with
+progressively loaded Codex skills.
 
 This repository is the source for the public Email Love plugin and a Git-backed Codex plugin
-marketplace. It packages two focused skills:
+marketplace. It packages three focused skills:
 
 - **Email Love Figma Builder:** build one email or campaign using an existing Email Love
   design system, or create a first email through the design-converter workflow.
+- **Email Love Template Repair:** diagnose and repair an existing Email Love email or reusable
+  module when the canvas, plugin Preview, production exporter, mobile layout, or inbox result
+  disagrees.
 - **Email Love Design System Migration:** audit a legacy library from Figma, files, cloud
   storage, or a supported ESP and convert it into an Email Love design system in staged,
   reviewable batches.
@@ -20,7 +23,7 @@ workflows therefore protect Email Love's structural conventions, not just canvas
 ### 1. Install the public plugin
 
 [Install Email Love from the Plugins Directory](https://chatgpt.com/plugins/plugins_6a739f43c3b48191b1281a9b2d48b409),
-then start a new Codex task so the two skills are loaded.
+then start a new Codex task so the three skills are loaded.
 
 The public listing is the recommended customer install. It is a reviewed, published snapshot,
 not a live checkout of this repository.
@@ -31,12 +34,12 @@ For development or testing an exact repository release, add this marketplace and
 plugin:
 
 ```bash
-codex plugin marketplace add email-love/codex-agents --ref v4.6.1
+codex plugin marketplace add email-love/codex-agents --ref v4.8.0
 codex plugin add email-love@email-love
 ```
 
 You can also open `/plugins` in Codex CLI, select the **Email Love** marketplace, and install
-the Git-backed plugin there. Replace `v4.6.1` with `main` only when testing unreleased work.
+the Git-backed plugin there. Replace `v4.8.0` with `main` only when testing unreleased work.
 
 The public and Git-backed installs are separate distribution paths. A GitHub push or marketplace
 refresh does not update the reviewed public plugin.
@@ -44,7 +47,7 @@ refresh does not update the reviewed public plugin.
 ### 2. Connect Figma
 
 The skills require the official remote Figma MCP as an external prerequisite. The Email Love
-plugin does not bundle or declare the Figma integration. Connect it before using either workflow:
+plugin does not bundle or declare the Figma integration. Connect it before using any workflow:
 
 ```bash
 codex mcp add figma --url https://mcp.figma.com/mcp
@@ -119,6 +122,19 @@ You can also say:
 Build a three-email welcome sequence in this Figma file.
 ```
 
+### Repair a broken template
+
+```text
+Use $email-love-template-repair to diagnose and repair this Email Love template.
+The canvas looks correct, but the second section exports as one image on mobile.
+```
+
+The repair skill first proves whether the target is an Email Love email, reusable module, or
+library instance. It preserves the original campaign by default, changes one measured cause at a
+time, and reports canvas, structure, and exporter verification separately. A repair is called
+fixed only when all three pass. If a private plugin value or a named inbox test cannot be changed
+from Codex, the handoff names the exact remaining user action.
+
 ### Migrate a design system
 
 ```text
@@ -161,7 +177,7 @@ Skills use progressive disclosure:
 
 1. Codex initially sees only each skill's name and trigger description.
 2. It loads the compact `SKILL.md` when a matching task begins.
-3. It reads the Path A, Path B, audit, migration, or render references only when that phase
+3. It reads the Path A, Path B, repair, audit, migration, or render references only when that phase
    requires them.
 
 The complete pre-plugin instructions remain frozen under [`legacy/`](legacy/) for provenance,
@@ -206,6 +222,7 @@ plugins/email-love/
 ├── .codex-plugin/plugin.json
 └── skills/
     ├── email-love-figma-builder/
+    ├── email-love-template-repair/
     └── email-love-design-system-migration/
 ```
 
@@ -222,7 +239,8 @@ provenance snapshots, and representative routing fixtures.
 
 The source Email Love workflows for Claude live at
 [email-love/claude-skills](https://github.com/email-love/claude-skills). This repository
-packages and tests only the Codex version.
+packages and tests only the Codex version. The implementation handoff for porting the Repair skill
+is in [CLAUDE-HANDOFF-TEMPLATE-REPAIR-SKILL.md](CLAUDE-HANDOFF-TEMPLATE-REPAIR-SKILL.md).
 
 ## Documentation and support
 

@@ -84,8 +84,8 @@ def validate_manifest() -> None:
     manifest = load_json(MANIFEST)
     if manifest.get("name") != "email-love":
         fail("plugin manifest name must be 'email-love'")
-    if manifest.get("version") != "4.7.0":
-        fail("plugin manifest version must be 4.7.0 for this migration contract")
+    if manifest.get("version") != "4.8.0":
+        fail("plugin manifest version must be 4.8.0 for this plugin contract")
     if not re.fullmatch(r"\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?", manifest.get("version", "")):
         fail("plugin manifest version must be strict semver")
     if manifest.get("skills") != "./skills/":
@@ -164,9 +164,13 @@ def validate_links(path: Path, text: str) -> None:
 
 def validate_skills() -> None:
     skill_dirs = sorted(path for path in SKILLS.iterdir() if path.is_dir())
-    expected = {"email-love-figma-builder", "email-love-design-system-migration"}
+    expected = {
+        "email-love-figma-builder",
+        "email-love-template-repair",
+        "email-love-design-system-migration",
+    }
     if {path.name for path in skill_dirs} != expected:
-        fail("plugin must contain exactly the builder and migration skills")
+        fail("plugin must contain exactly the builder, repair, and migration skills")
 
     for skill_dir in skill_dirs:
         skill_file = skill_dir / "SKILL.md"
@@ -218,12 +222,16 @@ def validate_skills() -> None:
             validate_links(reference, ref_text)
             if reference.name.startswith("render-"):
                 combined_render += "\n" + ref_text
-        missing_tags = sorted(tag for tag in REQUIRED_TAGS if tag not in combined_render)
-        if missing_tags:
-            fail(f"{skill_dir.relative_to(ROOT)}: render references missing tags: {missing_tags}")
-        for rule in range(10):
-            if f"R{rule}." not in combined_render:
-                fail(f"{skill_dir.relative_to(ROOT)}: render references missing R{rule}")
+        if skill_dir.name in {
+            "email-love-figma-builder",
+            "email-love-design-system-migration",
+        }:
+            missing_tags = sorted(tag for tag in REQUIRED_TAGS if tag not in combined_render)
+            if missing_tags:
+                fail(f"{skill_dir.relative_to(ROOT)}: render references missing tags: {missing_tags}")
+            for rule in range(10):
+                if f"R{rule}." not in combined_render:
+                    fail(f"{skill_dir.relative_to(ROOT)}: render references missing R{rule}")
 
     migration = SKILLS / "email-love-design-system-migration"
     source_dir = migration / "references" / "sources"
@@ -383,7 +391,7 @@ def validate_skills() -> None:
         text = path.read_text(encoding="utf-8")
         for required_string in required_strings:
             if required_string not in text:
-                fail(f"{path.relative_to(ROOT)}: missing v4.7.0 contract text {required_string!r}")
+                fail(f"{path.relative_to(ROOT)}: missing v4.8.0 contract text {required_string!r}")
 
     audit_text = (migration / "references" / "audit.md").read_text(encoding="utf-8")
     palette = audit_text.find("## Palette")
@@ -464,7 +472,49 @@ def validate_skills() -> None:
         text = path.read_text(encoding="utf-8")
         for required_string in required_strings:
             if required_string not in text:
-                fail(f"{path.relative_to(ROOT)}: missing v4.7.0 contract text {required_string!r}")
+                fail(f"{path.relative_to(ROOT)}: missing v4.8.0 contract text {required_string!r}")
+
+    repair = SKILLS / "email-love-template-repair"
+    required_repair_contract = {
+        repair / "SKILL.md": [
+            "Preserve the original.",
+            "A reusable module is a COMPONENT tagged `mj-wrapper`",
+            "emaillove_export_figma",
+            "After two failed local patches",
+            "A repair is complete only when all three are `pass`",
+            "../email-love-figma-builder/references/render-geometry.md",
+        ],
+        repair / "references" / "diagnostic-workflow.md": [
+            "First failing surface:",
+            "Record the full ancestor chain",
+            "Make one change, read it back, then render.",
+            "Stop after two failed local patches",
+        ],
+        repair / "references" / "symptom-cause-matrix.md": [
+            "exports as an image",
+            "Text clips in Outlook",
+            "Columns stack when they should stay together",
+            "Link change appears to succeed",
+        ],
+        repair / "references" / "repair-verification.md": [
+            "Report each state separately as",
+            "`pass`, `fail`, or",
+            "`deferred`.",
+            "set `exporter: deferred`",
+            "Use `fixed` only when canvas, structure, and exporter are all `pass`",
+            "Working-copy or replacement node id:",
+        ],
+        repair / "agents" / "openai.yaml": [
+            "Email Love Template Repair",
+            "$email-love-template-repair",
+            "https://mcp.figma.com/mcp",
+        ],
+    }
+    for path, required_strings in required_repair_contract.items():
+        text = path.read_text(encoding="utf-8")
+        for required_string in required_strings:
+            if required_string not in text:
+                fail(f"{path.relative_to(ROOT)}: missing v4.8.0 repair text {required_string!r}")
 
 
 def validate_provenance() -> None:
@@ -481,7 +531,7 @@ def validate_provenance() -> None:
     }
     for key, expected in expected_upstream.items():
         if upstream.get(key) != expected:
-            fail(f"sources.json upstream.{key} must be {expected!r} for v4.7.0")
+            fail(f"sources.json upstream.{key} must be {expected!r} for v4.8.0")
     for snapshot in sources.get("legacy_snapshots", []):
         relative = snapshot.get("path", "")
         expected = snapshot.get("sha256", "")
@@ -497,8 +547,8 @@ def validate_provenance() -> None:
 def validate_evals() -> None:
     payload = load_json(EVALS)
     cases = payload.get("cases", [])
-    if len(cases) < 13:
-        fail("tests/evals.json must contain at least thirteen representative cases")
+    if len(cases) < 18:
+        fail("tests/evals.json must contain at least eighteen representative cases")
     seen: set[str] = set()
     required = {"id", "prompt", "expected_skill", "expected_route", "must_do", "must_not_do"}
     for index, case in enumerate(cases):
@@ -512,6 +562,7 @@ def validate_evals() -> None:
         seen.add(case_id)
         if case["expected_skill"] not in {
             "email-love-figma-builder",
+            "email-love-template-repair",
             "email-love-design-system-migration",
         }:
             fail(f"{case_id}: unknown expected skill")
@@ -525,7 +576,7 @@ def validate_repository_guidance() -> None:
         fail("root AGENTS.md must stay below the default 32 KiB instruction budget")
     compatibility_files = (agents, MIGRATION_COMPATIBILITY)
     required_compatibility_text = {
-        "codex plugin marketplace add email-love/codex-agents --ref v4.6.1",
+        "codex plugin marketplace add email-love/codex-agents --ref v4.8.0",
         "codex plugin add email-love@email-love",
     }
     for compatibility_file in compatibility_files:
@@ -578,6 +629,9 @@ def validate_publication_guidance() -> None:
         fail("tests/submission-cases.json must contain exactly five positive cases")
     if len(negative) != 3:
         fail("tests/submission-cases.json must contain exactly three negative cases")
+    positive_ids = {case.get("id") for case in positive}
+    if "repair_flattened_template" not in positive_ids:
+        fail("tests/submission-cases.json must include the repair_flattened_template case")
 
 
 def main() -> int:

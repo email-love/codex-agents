@@ -8,11 +8,11 @@ to build an email. Tell the user to install the supported plugin, then stop so t
 new Codex task:
 
 ```bash
-codex plugin marketplace add email-love/codex-agents --ref v4.6.1
+codex plugin marketplace add email-love/codex-agents --ref v4.8.0
 codex plugin add email-love@email-love
 ```
 
-The plugin contains both `$email-love-figma-builder` and
+The plugin contains `$email-love-figma-builder`, `$email-love-template-repair`, and
 `$email-love-design-system-migration`.
 
 This repository packages Email Love workflows for OpenAI Codex. It is not the place to build
@@ -39,6 +39,7 @@ Before handing off changes, run:
 ```bash
 python3 scripts/validate_repo.py
 python3 /path/to/skill-creator/scripts/quick_validate.py plugins/email-love/skills/email-love-figma-builder
+python3 /path/to/skill-creator/scripts/quick_validate.py plugins/email-love/skills/email-love-template-repair
 python3 /path/to/skill-creator/scripts/quick_validate.py plugins/email-love/skills/email-love-design-system-migration
 python3 /path/to/plugin-creator/scripts/validate_plugin.py plugins/email-love
 ```
