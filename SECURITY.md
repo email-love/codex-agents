@@ -23,7 +23,7 @@ not the recommended way to use this plugin.
 Path B and migration conversion send a rendered PNG of customer-provided design material to:
 
 ```text
-https://design-converter.andy-30d.workers.dev
+https://convert.emaillove.com
 ```
 
 The converter request contains the screenshot and may contain pinned design metadata such as

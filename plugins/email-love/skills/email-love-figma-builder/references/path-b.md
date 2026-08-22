@@ -127,7 +127,7 @@ the customer has no design system to restyle it into, so a clone stays a clone.
 
 ## B3: Send it to the design-converter worker
 
-POST to `https://design-converter.andy-30d.workers.dev`:
+POST to `https://convert.emaillove.com`:
 
 - **Headers:** `Content-Type: application/json`, `Authorization: Bearer` with an **empty**
   token, and `X-Auth-Provider: gumroad`. That combination is an anonymous Free user, which is
@@ -163,7 +163,7 @@ curl -sS --max-time 120 -D /tmp/headers.txt \
   -H 'Authorization: Bearer' \
   -H 'X-Auth-Provider: gumroad' \
   --data-binary @/tmp/body.json \
-  'https://design-converter.andy-30d.workers.dev' > /tmp/mjml.json
+  'https://convert.emaillove.com' > /tmp/mjml.json
 ```
 
 The `Authorization` value is the literal word `Bearer` with nothing after it. On Linux

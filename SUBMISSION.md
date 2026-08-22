@@ -80,7 +80,7 @@ authorized or a module is outside the exporter's core-tag coverage.
 ## Data handling disclosure
 
 Path B and migration conversion send a rendered PNG of customer-provided design material to
-`https://design-converter.andy-30d.workers.dev`. Requests may include pinned text, font,
+`https://convert.emaillove.com`. Requests may include pinned text, font,
 color, dimension, and frame-structure metadata. The documented default result cache is 24
 hours and `nocache=1` bypasses that cache. The skills instruct users to confirm permission,
 remove credentials and unnecessary personal data, and avoid sensitive or regulated content

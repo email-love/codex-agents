@@ -158,7 +158,7 @@ worker, transcribe the returned MJML JSON into the target file, then verify.
    resize locally after the export rather than trusting an export scale:
    `sips --resampleWidth 600 module-01.png` on macOS, or
    `convert module-01.png -resize 600x module-01.png` where ImageMagick is available.
-2. **POST to the worker** at `https://design-converter.andy-30d.workers.dev`:
+2. **POST to the worker** at `https://convert.emaillove.com`:
    - Headers: `Content-Type: application/json`, `Authorization: Bearer` with an EMPTY token,
      and `X-Auth-Provider: gumroad`. The worker treats empty Bearer plus gumroad as an
      anonymous Free user, which is allowed; no license key is needed for this path.
@@ -193,7 +193,7 @@ worker, transcribe the returned MJML JSON into the target file, then verify.
      -H 'Authorization: Bearer' \
      -H 'X-Auth-Provider: gumroad' \
      --data-binary @body.json \
-     'https://design-converter.andy-30d.workers.dev' > module-01.json
+     'https://convert.emaillove.com' > module-01.json
    ```
 
    The `Authorization` value is the literal word `Bearer` with nothing after it. On Linux
