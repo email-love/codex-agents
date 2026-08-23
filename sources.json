@@ -17,5 +17,23 @@
       "path": "legacy/migration-AGENTS-1.19.0.md",
       "sha256": "c0aa5110a5b2c559f1b2e23f560e08d4962db6190702b4167960d0800c7f9147"
     }
-  ]
+  ],
+  "espSkills": {
+    "repository": "https://github.com/email-love/esp-skills",
+    "commit": "5caf8b9dcaa2cc797e1b097a761e9c27ca7b2289",
+    "version": "1.4.2-candidate",
+    "skills": [
+      "braze-liquid",
+      "customerio-liquid",
+      "hubspot-hubl",
+      "iterable-handlebars",
+      "klaviyo-django",
+      "marketo-velocity",
+      "moengage-jinja",
+      "sailthru-zephyr",
+      "sfmc-ampscript",
+      "zeta-zml"
+    ],
+    "distribution": "BUILD-TIME ONLY: these ten skills are staged into the OpenAI portal skills-only artifact by scripts/build_plugin.sh from an esp-skills checkout verified at the pinned commit. They are deliberately NOT committed into this repository and NOT part of the full Git-backed plugin artifact - esp-skills stays the single canonical home (owner decision, 2026-08-23). Runtime subset only: SKILL.md, references/*.md, agents/openai.yaml; no evals, workspaces, or build tooling."
+  }
 }

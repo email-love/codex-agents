@@ -562,11 +562,12 @@ def validate_evals() -> None:
         if case_id in seen:
             fail(f"duplicate eval id: {case_id}")
         seen.add(case_id)
+        esp_names = set(load_json(ROOT / "sources.json").get("espSkills", {}).get("skills", []))
         if case["expected_skill"] not in {
             "email-love-figma-builder",
             "email-love-template-repair",
             "email-love-design-system-migration",
-        }:
+        } | esp_names:
             fail(f"{case_id}: unknown expected skill")
         if not case["must_do"] or not case["must_not_do"]:
             fail(f"{case_id}: must_do and must_not_do must both be non-empty")

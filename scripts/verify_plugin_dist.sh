@@ -12,8 +12,17 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 PLUGIN="plugins/email-love"
 VERSION="$(python3 -c "import json; print(json.load(open('$PLUGIN/.codex-plugin/plugin.json'))['version'])")"
-FULL="dist/email-love-codex-plugin-full-$VERSION.zip"
-SKILLS_ONLY="dist/email-love-codex-plugin-skills-only-$VERSION.zip"
+FULL="$PWD/dist/email-love-codex-plugin-full-$VERSION.zip"
+SKILLS_ONLY="$PWD/dist/email-love-codex-plugin-skills-only-$VERSION.zip"
+ESP_LIST="$(python3 -c "import json; print(' '.join(json.load(open('sources.json'))['espSkills']['skills']))")"
+
+is_esp_path() { # $1 = archive entry
+  local e
+  for e in $ESP_LIST; do
+    case "$1" in email-love/skills/$e/*) return 0 ;; esac
+  done
+  return 1
+}
 
 for a in "$FULL" "$SKILLS_ONLY"; do
   [ -f "$a" ] || { echo "missing artifact: $a" >&2; exit 1; }
@@ -44,10 +53,14 @@ for a in "$FULL" "$SKILLS_ONLY"; do
       echo "$a is missing source file $rel" >&2; exit 1; }
   done < <(find "$PLUGIN/skills" -type f \( -name '*.md' -o -name '*.yaml' \) -print0)
   # Reverse parity: no archive skill file without a source counterpart.
+  # ESP paths are exempt here: their counterpart is the pinned esp-skills
+  # checkout, byte-compared below.
   while IFS= read -r entry; do
     case "$entry" in
       */) continue ;;
-      email-love/skills/*) [ -f "$PLUGIN/${entry#email-love/}" ] || {
+      email-love/skills/*)
+        if is_esp_path "$entry"; then continue; fi
+        [ -f "$PLUGIN/${entry#email-love/}" ] || {
         echo "$a contains $entry with no source counterpart" >&2; exit 1; } ;;
     esac
   done <<<"$listing"
@@ -62,6 +75,42 @@ if grep -qxF "email-love/.mcp.json" <<<"$skills_listing"; then
   exit 1
 fi
 echo "ok artifact split: full carries .mcp.json, skills-only does not"
+
+# ESP split: the portal artifact carries the ten pinned ESP skills (thirteen
+# total); the Git-backed artifact mirrors the repository (three skills, no
+# ESP directories). ESP files must be byte-identical to the pinned checkout.
+ESP_PIN="$(python3 -c "import json; print(json.load(open('sources.json'))['espSkills']['commit'])")"
+ESP_LIST="$(python3 -c "import json; print(' '.join(json.load(open('sources.json'))['espSkills']['skills']))")"
+for esp in $ESP_LIST; do
+  grep -qxF "email-love/skills/$esp/SKILL.md" <<<"$skills_listing" || {
+    echo "$SKILLS_ONLY is missing ESP skill $esp" >&2; exit 1; }
+  if grep -q "^email-love/skills/$esp/" <<<"$full_listing"; then
+    echo "$FULL must not contain ESP skill $esp (repo-faithful artifact)" >&2; exit 1
+  fi
+done
+skill_count="$(grep -cE '^email-love/skills/[^/]+/SKILL.md$' <<<"$skills_listing")"
+[ "$skill_count" -eq 13 ] || {
+  echo "$SKILLS_ONLY has $skill_count skills, expected 13" >&2; exit 1; }
+full_count="$(grep -cE '^email-love/skills/[^/]+/SKILL.md$' <<<"$full_listing")"
+[ "$full_count" -eq 3 ] || {
+  echo "$FULL has $full_count skills, expected 3" >&2; exit 1; }
+if [ -n "${ESP_SKILLS_DIR:-}" ] && [ -d "$ESP_SKILLS_DIR" ]; then
+  tmpe="$(mktemp -d)"
+  for esp in $ESP_LIST; do
+    ( cd "$tmpe" && unzip -qo "$SKILLS_ONLY" "email-love/skills/$esp/*" )
+    while IFS= read -r -d '' f; do
+      rel="${f#"$tmpe/email-love/skills/"}"
+      cmp -s "$f" "$ESP_SKILLS_DIR/skills/$rel" || {
+        echo "$SKILLS_ONLY: skills/$rel differs from pinned esp-skills source" >&2; exit 1; }
+    done < <(find "$tmpe/email-love/skills/$esp" -type f -print0)
+    rm -rf "$tmpe/email-love"
+  done
+  rm -rf "$tmpe"
+  echo "ok ESP byte-equality against pinned checkout ($ESP_PIN)"
+else
+  echo "note: ESP_SKILLS_DIR not set; byte-equality against the pinned checkout skipped"
+fi
+echo "ok ESP split: portal artifact 13 skills, Git artifact 3"
 
 if command -v sha256sum >/dev/null 2>&1; then SHACMD="sha256sum"; else SHACMD="shasum -a 256"; fi
 ( cd dist && $SHACMD -c SHA256SUMS >/dev/null ) || {

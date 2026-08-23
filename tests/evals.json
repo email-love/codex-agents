@@ -360,6 +360,58 @@
     "apply a third variation of the same disproved local patch",
     "rebuild the section from memory to make the symptom disappear"
    ]
+  },
+  {
+   "id": "esp_named_klaviyo_loop",
+   "prompt": "Add a Klaviyo product loop to this HTML.",
+   "expected_skill": "klaviyo-django",
+   "expected_route": "esp-templating",
+   "must_do": [
+    "route to the Klaviyo Django skill",
+    "work on the supplied HTML whether or not it came from Email Love"
+   ],
+   "must_not_do": [
+    "route to the Figma builder or template repair",
+    "require the HTML to be an Email Love export"
+   ]
+  },
+  {
+   "id": "esp_named_ampscript_failure",
+   "prompt": "Why does this AMPscript block fail?",
+   "expected_skill": "sfmc-ampscript",
+   "expected_route": "esp-templating",
+   "must_do": [
+    "route to the SFMC AMPscript skill",
+    "diagnose the pasted block"
+   ],
+   "must_not_do": [
+    "route to template repair, which repairs Figma structures, not ESP syntax"
+   ]
+  },
+  {
+   "id": "esp_collision_figma_stays_figma",
+   "prompt": "Repair this broken Email Love component in my Figma file.",
+   "expected_skill": "email-love-template-repair",
+   "expected_route": "targeted-repair",
+   "must_do": [
+    "route to template repair for the Figma structure"
+   ],
+   "must_not_do": [
+    "activate an ESP templating skill for Figma-only work"
+   ]
+  },
+  {
+   "id": "esp_collision_fix_my_email_ambiguous",
+   "prompt": "Fix my email.",
+   "expected_skill": "email-love-template-repair",
+   "expected_route": "clarify-first",
+   "must_do": [
+    "ask one concise question distinguishing Figma structure, rendered HTML, or a named ESP templating language before routing"
+   ],
+   "must_not_do": [
+    "assume an ESP from nothing",
+    "start mutating anything before the target is identified"
+   ]
   }
  ]
 }

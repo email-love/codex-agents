@@ -36,8 +36,22 @@ emaillove` guidance, namespaced skill names, and progress language are unchanged
   distribution verification. `scripts/check_shared_drift.py` asserts 25 shared rule sentences
   exist in both repositories.
 
-Minor bump: shared behavioral additions to two skills plus new packaging; no breaking changes.
-Any packaged-byte change requires a version newer than 4.8.0, and 4.8.0 is never rebuilt.
+- **ESP skill family in the official ChatGPT plugin (owner decision, 2026-08-23):** the OpenAI
+  portal skills-only artifact now bundles the ten release-ready ESP templating skills (Braze
+  Liquid, Customer.io Liquid, HubSpot HubL, Iterable Handlebars, Klaviyo Django, Marketo
+  Velocity, MoEngage Jinja, Sailthru Zephyr, SFMC AMPscript, Zeta ZML) for thirteen skills
+  total. They are staged at BUILD TIME from an email-love/esp-skills checkout verified at the
+  commit pinned in sources.json (espSkills lane) and byte-compared by the verifier; they are
+  deliberately not committed into this repository, and the full Git-backed artifact stays
+  repo-faithful at three skills. esp-skills remains the single canonical home. Every ESP
+  description states it works with any email HTML, not only Email Love exports. Manifest
+  description, keywords, and starter prompts updated; four routing/collision eval cases added
+  (named ESP tasks route to ESP skills, Figma work stays with Builder/Repair, "fix my email"
+  asks one clarifying question).
+
+Minor bump: shared behavioral additions to two skills, the ESP capability expansion in the
+portal artifact, and new packaging; no breaking changes. Any packaged-byte change requires a
+version newer than 4.8.0, and 4.8.0 is never rebuilt.
 
 ## 4.8.0 - 2026-08-22
 

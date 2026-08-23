@@ -1,7 +1,7 @@
 {
   "name": "email-love",
   "version": "4.9.0",
-  "description": "Build, repair, and migrate export-ready emails and email design systems in Figma with Email Love",
+  "description": "Build, repair, and migrate export-ready emails in Figma with Email Love, and add any major ESP's templating language to any email HTML",
   "author": {
     "name": "Email Love",
     "email": "hello@emaillove.com",
@@ -15,14 +15,26 @@
     "figma",
     "email-design-system",
     "mjml",
-    "email-love"
+    "email-love",
+    "esp",
+    "liquid",
+    "ampscript",
+    "handlebars",
+    "jinja",
+    "velocity",
+    "hubl",
+    "zephyr",
+    "klaviyo",
+    "braze",
+    "iterable",
+    "sfmc"
   ],
   "skills": "./skills/",
   "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "Email Love",
-    "shortDescription": "Build, repair, and migrate export-ready emails in Figma.",
-    "longDescription": "Build production-ready emails in Figma from Email Love components, diagnose and repair broken Email Love templates and modules, or convert legacy email design systems into reusable Email Love libraries. Bundles the Email Love MCP connection for headless HTML export, deliverability validation, and desktop and mobile previews; sign in with your Email Love account when prompted.",
+    "shortDescription": "Build, repair, and migrate emails in Figma; add ESP templating to any email HTML.",
+    "longDescription": "Build production-ready emails in Figma from Email Love components, diagnose and repair broken Email Love templates and modules, or convert legacy email design systems into reusable Email Love libraries. The ChatGPT directory version also bundles ten focused ESP templating skills - Braze Liquid, Customer.io Liquid, HubSpot HubL, Iterable Handlebars, Klaviyo Django, Marketo Velocity, MoEngage Jinja, Sailthru Zephyr, Salesforce Marketing Cloud AMPscript, and Zeta ZML - that write, review, and debug personalization code in any email HTML, whether or not it came from Email Love. Bundles the Email Love MCP connection for headless HTML export, deliverability validation, and desktop and mobile previews; sign in with your Email Love account when prompted.",
     "developerName": "Email Love",
     "category": "Creativity",
     "capabilities": [
@@ -35,7 +47,10 @@
     "defaultPrompt": [
       "Build an export-ready email in my Figma file.",
       "Repair this broken Email Love template in Figma.",
-      "Audit and migrate this legacy email design system."
+      "Audit and migrate this legacy email design system.",
+      "Add Klaviyo templating to this email HTML.",
+      "Troubleshoot this AMPscript personalization block.",
+      "Convert this product section to Braze Liquid."
     ],
     "brandColor": "#EE2461",
     "composerIcon": "./assets/email-love-logo.png",
