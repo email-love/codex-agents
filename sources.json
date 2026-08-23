@@ -20,7 +20,7 @@
   ],
   "espSkills": {
     "repository": "https://github.com/email-love/esp-skills",
-    "commit": "5caf8b9dcaa2cc797e1b097a761e9c27ca7b2289",
+    "commit": "f1be804f810e9a8629ef29a0af8f4196a32f2afe",
     "version": "1.4.2-candidate",
     "skills": [
       "braze-liquid",
