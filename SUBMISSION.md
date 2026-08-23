@@ -7,11 +7,11 @@ This is the portal-ready submission brief for the `email-love` skills-and-MCP pl
 - **Type:** MCP server with skills
 - **Plugin name:** Email Love
 - **Publisher:** Email Love
-- **Version:** 4.8.0
+- **Version:** 4.9.0
 - **Category:** Creativity
 - **Repository:** https://github.com/email-love/codex-agents
 
-The package bundles the Email Love MCP (server name `emaillove`) and three skills. Its
+The package bundles the Email Love MCP (server name `emaillove`) and thirteen skills: the three Figma/Email Love workflows (Builder, Template Repair, Design System Migration) plus ten ESP templating skills (Braze Liquid, Customer.io Liquid, HubSpot HubL, Iterable Handlebars, Klaviyo Django, Marketo Velocity, MoEngage Jinja, Sailthru Zephyr, SFMC AMPscript, Zeta ZML) that work on any email HTML. The ESP skills are staged into the upload at build time from email-love/esp-skills at the commit pinned in sources.json. Its
 workflows additionally require the official remote Figma MCP as an external prerequisite for
 canvas builds, and the Email Love plugin installed in Figma.
 
