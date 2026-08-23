@@ -1,5 +1,44 @@
 # Changelog
 
+## 4.9.0 - 2026-08-23
+
+Ports the quality-gate behavior validated in claude-skills (see sources.json for the canonical
+commit) and adds verifiable distribution builds. Codex-specific tool names, `codex mcp login
+emaillove` guidance, namespaced skill names, and progress language are unchanged.
+
+- **Template repair:** source fidelity is a boundary (a defect screenshot is symptom evidence;
+  visual and structural authority are named separately, and intended geometry never comes from
+  the broken canvas when a source exists). A pre-write mutation barrier freezes a compact,
+  proportional Repair Contract in three classes - `property_patch`, `instance_replacement`,
+  `section_reconstruction` - with escalations re-frozen and explicitly authorized after two
+  disproved patches. The diagnostic record separates observations, derivations, and inferences.
+  Verification reports five states (canvas desktop, canvas mobile only when a mobile source
+  exists, structure, exporter desktop, exporter mobile); an untested viewport is `deferred`,
+  never `pass`. New notch/crescent/stepped-seam symptom row compares resolved outer bounds and
+  is forward-test-gated.
+- **Design-system migration:** a compact batch Fact Pack is frozen before each batch's first
+  write (contradictory evidence stops the batch); batch verification is a component-by-breakpoint
+  acceptance matrix where `deferred` (consciously postponed, with a reason) is distinct from
+  `missing` (never covered - fails the gate); approvals are conversational and scoped to the
+  batch; the audit report's Source fidelity section opens with the evidence-authority order
+  conversion inherits. One-tree responsive, continuous-surface, and
+  no-silent-desktop-simplification are recorded as forward-test-gated preferences with the
+  paired-section escape hatch intact.
+- **Evals:** five new repair fixtures (wrong-target mapping, late-arriving source evidence,
+  binding preservation, missing mobile exporter proof, permitted reconstruction after two
+  disproofs); repository validation contract text updated to the new rules.
+- **Distribution:** deterministic builds of two clearly separated artifacts - the full
+  Git-backed plugin ZIP (includes `.mcp.json`) and the OpenAI portal skills-only ZIP (no
+  `.mcp.json`, and no claim of MCP configuration) - with allowlist staging, symlink/traversal/
+  executable rejection, two-way source parity, SHA256SUMS, and a byte-identical-rebuild check.
+- **CI:** actions pinned to SHAs, `contents: read`, `persist-credentials: false`; adds the
+  cross-repository shared-rule drift check against the canonical claude-skills commit and full
+  distribution verification. `scripts/check_shared_drift.py` asserts 25 shared rule sentences
+  exist in both repositories.
+
+Minor bump: shared behavioral additions to two skills plus new packaging; no breaking changes.
+Any packaged-byte change requires a version newer than 4.8.0, and 4.8.0 is never rebuilt.
+
 ## 4.8.0 - 2026-08-22
 
 Adds `email-love-template-repair`, a focused third skill for diagnosing and repairing existing

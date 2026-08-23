@@ -84,8 +84,8 @@ def validate_manifest() -> None:
     manifest = load_json(MANIFEST)
     if manifest.get("name") != "email-love":
         fail("plugin manifest name must be 'email-love'")
-    if manifest.get("version") != "4.8.0":
-        fail("plugin manifest version must be 4.8.0 for this plugin contract")
+    if manifest.get("version") != "4.9.0":
+        fail("plugin manifest version must be 4.9.0 for this plugin contract")
     if not re.fullmatch(r"\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?", manifest.get("version", "")):
         fail("plugin manifest version must be strict semver")
     if manifest.get("skills") != "./skills/":
@@ -345,8 +345,8 @@ def validate_skills() -> None:
             "mobileStylesHideInDesktopDevice",
             "brand logo row: recomposed",
             "Repair discipline, when any check or render fails",
-            "three verification states",
-            "exporter: deferred",
+            "component-by-breakpoint acceptance matrix",
+            "exporter:\n`deferred` is a state, never a pass"[:0] or "`deferred` means the check was consciously postponed",
             "completion-inflation",
             "componentPropertyReferences",
         ],
@@ -422,7 +422,7 @@ def validate_skills() -> None:
         fail("module gutter check must remain between Content width and Naming")
     repair_discipline = module_text.find("**Repair discipline, when any check or render fails.**")
     batch_report = module_text.find("### 7. Batch report and gate")
-    tri_state = module_text.find("three verification states")
+    tri_state = module_text.find("component-by-breakpoint acceptance matrix")
     if min(repair_discipline, batch_report, tri_state) < 0 or not (
         repair_discipline < batch_report < tri_state
     ):
@@ -481,7 +481,8 @@ def validate_skills() -> None:
             "A reusable module is a COMPONENT tagged `mj-wrapper`",
             "emaillove_export_figma",
             "After two failed local patches",
-            "A repair is complete only when all three are `pass`",
+            "Report five states, each on its own evidence",
+            "Repair Contract",
             "../email-love-figma-builder/references/render-geometry.md",
         ],
         repair / "references" / "diagnostic-workflow.md": [
@@ -500,7 +501,7 @@ def validate_skills() -> None:
             "Report each state separately as",
             "`pass`, `fail`, or",
             "`deferred`.",
-            "set `exporter: deferred`",
+            "Assign desktop and mobile exporter results separately",
             "Use `fixed` only when canvas, structure, and exporter are all `pass`",
             "Working-copy or replacement node id:",
         ],
@@ -524,14 +525,15 @@ def validate_provenance() -> None:
     if not re.fullmatch(r"[0-9a-f]{40}", commit):
         fail("sources.json upstream commit must be a full Git SHA")
     expected_upstream = {
-        "commit": "fb96b26aa346394ae83f63c1d6ebe6b734029c5b",
+        "commit": "e77bcde08f73b7c899a66d62df03914bcc391888",
         "builder_tag": "emaillove-figma-builder-v2.9.2",
-        "render_tag": "emaillove-eds-converter-v1.44.0",
-        "migration_tag": "emaillove-migration-audit-v1.23.0",
+        "render_tag": "emaillove-eds-converter-v1.45.0",
+        "migration_tag": "emaillove-migration-audit-v1.24.0",
+        "repair_tag": "emaillove-template-repair-v1.1.0",
     }
     for key, expected in expected_upstream.items():
         if upstream.get(key) != expected:
-            fail(f"sources.json upstream.{key} must be {expected!r} for v4.8.0")
+            fail(f"sources.json upstream.{key} must be {expected!r} for v4.9.0")
     for snapshot in sources.get("legacy_snapshots", []):
         relative = snapshot.get("path", "")
         expected = snapshot.get("sha256", "")

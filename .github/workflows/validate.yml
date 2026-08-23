@@ -1,5 +1,9 @@
 name: Validate Codex plugin
 
+# Validation, drift check, and packaging for pull requests and the default
+# branch. This workflow can never publish: its token is read-only and checkout
+# credentials are not persisted. Portal publication and live reviewed-directory
+# tests are owner actions, outside ordinary PR CI.
 on:
   pull_request:
   push:
@@ -12,10 +16,42 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
+
       - name: Validate plugin, skills, references, and eval fixtures
         run: python3 scripts/validate_repo.py
+
+      - name: Check shared-rule drift against canonical claude-skills
+        run: |
+          COMMIT="$(python3 -c 'import json; print(json.load(open("sources.json"))["upstream"]["commit"])')"
+          git clone --quiet https://github.com/email-love/claude-skills /tmp/claude-skills
+          if ! git -C /tmp/claude-skills checkout --quiet "$COMMIT"; then
+            echo "sources.json commit $COMMIT is not on claude-skills yet (pre-push state);"
+            echo "falling back to claude-skills main for the drift comparison."
+            git -C /tmp/claude-skills checkout --quiet main
+          fi
+          python3 scripts/check_shared_drift.py --claude-skills /tmp/claude-skills
+
+      - name: Build plugin distributions
+        run: bash scripts/build_plugin.sh
+
+      - name: Verify distributions (integrity, split, parity, checksums, determinism)
+        run: bash scripts/verify_plugin_dist.sh
+
+      - name: Upload artifacts for inspection
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: plugin-distributions
+          path: |
+            dist/*.zip
+            dist/SHA256SUMS
+          if-no-files-found: error

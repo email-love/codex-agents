@@ -451,6 +451,22 @@ key written in the module's report line.
 derived ramp for that module, noting which. Ignore differences caused only by the narrower frame.
 Send inexpressible differences, such as different copy or image crop, to the designer in the report.
 
+**Provisional rules, forward-test-gated.** Three patterns are strong recommendations but are
+NOT yet exporter-proven hard rules; treat them as preferences with the escape hatch intact
+until a production desktop AND mobile Preview forward-test confirms each:
+
+- Prefer ONE responsive content tree when supported controls (stacking, mobile keys, visibility)
+  can express both breakpoints - but the documented paired-section escape hatch stays available
+  where recomposition genuinely differs.
+- Treat adjacent filled rows that visually form one card as one continuous perimeter (one
+  resolved outer bound, radii on the outer perimeter only) - verify the seam in both production
+  renders before promising it is gone.
+- Reject silent desktop simplification as the price of a mobile repair - a mobile fix that
+  regresses desktop fails, it does not ship quietly.
+
+When one of these is forward-tested and holds, record the evidence in the batch report; until
+then do not present them as guaranteed exporter behavior.
+
 ### 4. Confirm the component shape, add properties, and pick its category
 
 The module was built as a COMPONENT in step 2, because the `mj-wrapper` IS the component. Do
@@ -744,11 +760,15 @@ instead of re-verifying or, worse, re-trusting.
 One report per batch. **Open with the Group 0 parity table:** for every module, show the source
 `T/I` census beside the built counts and leave the delta column blank when they agree. Any
 unexplained row fails the gate regardless of the remaining groups. **Every module row then
-carries three verification states, reported separately: canvas (screenshot matches intent),
-structure (read-back groups pass), and exporter (desktop and mobile renders pass).** A
-module is complete only at three for three; `exporter: deferred` is a state, never a pass,
-and "fixed" for a change no render has seen is the completion-inflation failure this line
-exists to stop. Then report, per module and
+carries its verification as a component-by-breakpoint acceptance matrix**: one keyed row per
+module x breakpoint (desktop, mobile) x check (canvas, structure, exporter), each `pass`,
+`fail`, `deferred`, or `missing` - `deferred` means the check was consciously postponed and
+names what postpones it; `missing` means the batch never covered it, and a matrix with a
+`missing` row does not pass the gate. Duplicate rows for the same module+breakpoint+check are a
+report defect. A module is complete only when every required row is `pass`; `exporter:
+deferred` is a state, never a pass, and "fixed" for a change no render has seen is the
+completion-inflation failure this matrix exists to stop. A component or breakpoint absent from
+the supplied renders is NOT tested - write `deferred` or `missing`, never infer a pass. Then report, per module and
 keyed by its Module inventory row name, what was rebuilt, the
 design you converted it from, verdict honored or changed (with reason), any concession and whether
 it was accepted and by whom (and for a bleed concession, the two column widths you landed on, so a

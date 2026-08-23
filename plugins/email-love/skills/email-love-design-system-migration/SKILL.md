@@ -177,7 +177,17 @@ Read the module-conversion reference and all render references.
    maintain the Deferred verification list when no human is available.
 2. A library of eight or fewer modules may run as one batch. Above that, use batches of
    roughly five modules so the first review can stop a repeated defect early.
-3. Before the first write, name the batch and its module count and give a rough estimate.
+3. Before the first write, name the batch and its module count and give a rough estimate, and
+   freeze a compact batch Fact Pack carrying only what this batch can be wrong about: the
+   structural authority (source node tree, or supplied/ESP HTML, per the audit), the visual
+   authority (approved comps or source renders; defect screenshots are symptoms), the tier /
+   email width / content width / scale factor from the audit, one line per module mapping its
+   inventory row to the source ref actually converted from, and an `Unknown or pending` list.
+   Do not start writing while that list holds anything that can change what you build; evidence
+   arriving mid-batch that contradicts the Fact Pack stops the batch until it is re-frozen.
+   Approvals stay conversational and scoped to the batch: the design-review gate after each
+   batch is one approval for one batch, and a user request that already clearly authorizes
+   exactly this batch is that approval.
 4. For each module:
    - read its audit row and build constraints;
    - fetch or screenshot the source item at the target email width using its adapter;

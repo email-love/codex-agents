@@ -1,10 +1,12 @@
 {
   "upstream": {
     "repository": "https://github.com/email-love/claude-skills",
-    "commit": "fb96b26aa346394ae83f63c1d6ebe6b734029c5b",
+    "commit": "e77bcde08f73b7c899a66d62df03914bcc391888",
     "builder_tag": "emaillove-figma-builder-v2.9.2",
-    "render_tag": "emaillove-eds-converter-v1.44.0",
-    "migration_tag": "emaillove-migration-audit-v1.23.0"
+    "render_tag": "emaillove-eds-converter-v1.45.0",
+    "migration_tag": "emaillove-migration-audit-v1.24.0",
+    "repair_tag": "emaillove-template-repair-v1.1.0",
+    "note": "Tags name the canonical skill versions this port tracks; the commit is the claude-skills revision the shared behavior was actually compared against and ported from (quality gates: source authority, mutation barrier, repair contract classes, five-state verification, acceptance matrix, forward-test-gated responsive rules). Tags are created at release time and may not exist yet at this commit."
   },
   "legacy_snapshots": [
     {

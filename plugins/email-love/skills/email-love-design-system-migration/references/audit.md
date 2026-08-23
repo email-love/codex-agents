@@ -654,7 +654,11 @@ needing design judgment. State the source fidelity tier here, because it reframe
 below it. If the source is not at email scale, say so here; it is the finding
 that changes the most work.]
 ## Source fidelity
-[REQUIRED. The tier: AUTHORITATIVE, PARTIAL, or REFERENCE ONLY. Then the signals you saw, the ones
+[REQUIRED. Open with the evidence-authority order this audit used, so conversion inherits it
+instead of re-deriving it: **Structural authority:** <the source node tree, or supplied/ESP HTML
+where one exists - HTML is authoritative for the structure it contains>. **Visual authority:**
+<the approved comps or source renders>. A screenshot supplied to show a defect is symptom
+evidence, not the intended design. Then the tier: AUTHORITATIVE, PARTIAL, or REFERENCE ONLY. Then the signals you saw, the ones
 for and the ones against: standard email width or not, equivalent margins identical or varying (with
 the insets you measured), text styles, paint styles, variables, components, auto layout, mobile
 variants. Then what the tier means for the build, in one short paragraph: preserve the source's
