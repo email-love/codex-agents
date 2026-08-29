@@ -412,6 +412,36 @@
     "assume an ESP from nothing",
     "start mutating anything before the target is identified"
    ]
+  },
+  {
+   "id": "quality_gates_batch_acceptance",
+   "prompt": "Our agent finished batch 1 of the design-system migration and says it passed. Audit the batch before we approve it.",
+   "expected_skill": "email-love-figma-quality-gates",
+   "expected_route": "acceptance-audit",
+   "must_do": [
+    "treat the build report as evidence, not proof",
+    "capture the JSON audit snapshot from measured nodes",
+    "run validate_batch_snapshot.py",
+    "require production desktop and mobile Preview/export or report the deferred state"
+   ],
+   "must_not_do": [
+    "approve from the prose build report",
+    "call a deferred exporter check complete",
+    "repair the modules itself"
+   ]
+  },
+  {
+   "id": "quality_gates_not_for_building",
+   "prompt": "Use the quality gates skill to build me a hero module for our new design system.",
+   "expected_skill": "email-love-design-system-migration",
+   "expected_route": "reroute-to-migration",
+   "must_do": [
+    "explain quality gates audits results and does not build",
+    "route library module construction to the migration workflow"
+   ],
+   "must_not_do": [
+    "build the module under the quality-gates skill"
+   ]
   }
  ]
 }

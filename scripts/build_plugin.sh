@@ -70,15 +70,15 @@ stage_common() { # $1 = staging root
     local short; short="$(basename "$dir")"
     mkdir -p "$root/skills/$short"
     install -m 0644 "$dir/SKILL.md" "$root/skills/$short/SKILL.md"
-    for sub in references agents; do
+    for sub in references agents scripts; do
       [ -d "$dir/$sub" ] || continue
-      ( cd "$dir" && find "$sub" -type f \( -name '*.md' -o -name '*.yaml' \) -print0 ) \
+      ( cd "$dir" && find "$sub" -type f \( -name '*.md' -o -name '*.yaml' -o -name '*.py' \) -print0 ) \
         | while IFS= read -r -d '' f; do
             mkdir -p "$root/skills/$short/$(dirname "$f")"
             install -m 0644 "$dir/$f" "$root/skills/$short/$f"
           done
       local unshipped
-      unshipped="$(cd "$dir" && find "$sub" -type f ! -name '*.md' ! -name '*.yaml' 2>/dev/null || true)"
+      unshipped="$(cd "$dir" && find "$sub" -type f ! -name '*.md' ! -name '*.yaml' ! -name '*.py' 2>/dev/null || true)"
       if [ -n "$unshipped" ]; then
         echo "refusing to build: files the allowlist would drop in $short/$sub:" >&2
         echo "$unshipped" >&2
@@ -112,9 +112,9 @@ for esp in $ESP_LIST; do
   dest="$SKILLS_STAGE/email-love/skills/$esp"
   mkdir -p "$dest"
   install -m 0644 "$src/SKILL.md" "$dest/SKILL.md"
-  for sub in references agents; do
+  for sub in references agents scripts; do
     [ -d "$src/$sub" ] || continue
-    ( cd "$src" && find "$sub" -type f \( -name '*.md' -o -name '*.yaml' \) -print0 ) \
+    ( cd "$src" && find "$sub" -type f \( -name '*.md' -o -name '*.yaml' -o -name '*.py' \) -print0 ) \
       | while IFS= read -r -d '' f; do
           mkdir -p "$dest/$(dirname "$f")"
           install -m 0644 "$src/$f" "$dest/$f"
@@ -123,7 +123,7 @@ for esp in $ESP_LIST; do
 done
 zip_deterministic "$SKILLS_STAGE" "$PWD/dist/email-love-codex-plugin-skills-only-$VERSION.zip"
 rm -rf "$SKILLS_STAGE"
-echo "built dist/email-love-codex-plugin-skills-only-$VERSION.zip (13 skills: 3 repo + 10 ESP @ ${ESP_PIN:0:12})"
+echo "built dist/email-love-codex-plugin-skills-only-$VERSION.zip (14 skills: 4 repo + 10 ESP @ ${ESP_PIN:0:12})"
 
 if command -v sha256sum >/dev/null 2>&1; then
   ( cd dist && sha256sum ./*.zip > SHA256SUMS )

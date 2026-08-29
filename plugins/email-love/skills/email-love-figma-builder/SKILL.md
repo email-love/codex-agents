@@ -132,6 +132,14 @@ and offer to continue using general best practice.
    - no design system exists: Path B;
    - partial library: Path A for matching sections and Path B only for confirmed gaps.
 
+**Scope escalation is a reroute, not a bigger build.** If the request expands into a whole
+library, foundations, variables, tokens, or multiple component categories, stop the builder
+workflow and route to `email-love-design-system-migration`. Do not continue one module at a
+time under this skill; a library approached as iterative email building skips the audit, the
+proof batch, and the batch gates that exist precisely for library-scale work. When reusable
+modules were created or repaired during a build and the `email-love-figma-quality-gates`
+skill is installed, offer it as an independent acceptance pass at hand-off.
+
 Tell the user the chosen path and why before the first canvas write.
 
 ## Step 4: Establish the section plan and estimate

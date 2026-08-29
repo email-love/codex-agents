@@ -1,5 +1,33 @@
 # Changelog
 
+## 4.10.0 - 2026-08-29
+
+Adds `email-love-figma-quality-gates`, an independent acceptance skill distilled from a real
+customer design-system migration run where the documented rules existed but were not enforced
+as stop gates, and patches the three existing workflows to hand off to it.
+
+- **New skill:** routes work first (builder vs migration vs repair vs acceptance), then audits
+  a batch through ten gates: source authority, proof batch (at most four modules covering
+  photo-crop, grouped icon-and-text, multi-column property, and footer/social risks before any
+  normal batch), Email Love structure, image and icon assets, a mobile geometry ledger at 320,
+  375, and 390px computed against the inner content box (section AND column padding
+  subtracted), component-property completeness, canvas QA, production Preview/export, and
+  end-user handoff. Reports exactly one of four completion states; a deferred production
+  render can never be called complete. Ships two Python validators (`validate_batch_snapshot.py`
+  for the JSON audit snapshot, `check_icon_perimeter.py` for clipped icon alpha) with
+  self-tests wired into CI.
+- **Design-system migration:** batch 1 is a proof batch; every `mj-group` decision records the
+  inner-box ledger; the batch gate names the acceptance skill as an independent pass.
+- **Builder:** scope escalation is a reroute (library work stops the builder and enters the
+  migration workflow), and reusable modules created mid-build get an acceptance offer.
+- **Template repair:** four new symptom rows (mobile-only group icon distortion, clipped
+  social icons, BOOLEAN false-state holes, color-block image fills); an unproven earlier fix
+  is a new repair attempt, never an inherited completion claim.
+- **Distribution:** portal skills-only artifact now carries 14 skills (4 repo + 10 ESP); the
+  Git-backed artifact carries 4. Upstream repinned to the canonical claude-skills commit;
+  shared-rule drift check extended to 43 sentences; two new routing eval cases; Git-backed
+  compatibility installs move to the v4.9.0 tag.
+
 ## 4.9.0 - 2026-08-23
 
 Ports the quality-gate behavior validated in claude-skills (see sources.json for the canonical

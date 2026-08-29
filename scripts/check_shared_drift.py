@@ -79,6 +79,36 @@ SHARED_RULES = [
             "completion-inflation",
             "Provisional rules, forward-test-gated.",
             "paired-section escape hatch",
+            "Do not release later modules until every proof module passes production desktop and mobile Preview/export.",
+            "Canvas evidence cannot waive this gate.",
+            "Use the inner content box. Comparing the asset to the total column while ignoring column padding is a false pass.",
+        ],
+    ),
+    (
+        "plugins/email-love/skills/email-love-figma-quality-gates/SKILL.md",
+        "plugins/email-love/skills/figma-quality-gates/SKILL.md",
+        [
+            "The builder's report is evidence to inspect, not proof that a module is ready.",
+            "Do not release later modules until every proof module passes production desktop and mobile Preview/export.",
+            "The exporter render is the arbiter. A clean canvas proves only the canvas.",
+            "Never shorten a deferred state to `complete`, `fixed`, or `verified`.",
+        ],
+    ),
+    (
+        "plugins/email-love/skills/email-love-figma-quality-gates/references/quality-gates.md",
+        "plugins/email-love/skills/figma-quality-gates/references/quality-gates.md",
+        [
+            "Missing authority fails the audit. Compare screenshots, not recollection.",
+            "Use the inner content box. Comparing the asset to the total column while ignoring column padding is a false pass.",
+            "If the production renderer is unavailable, the only allowed state is `deferred`.",
+        ],
+    ),
+    (
+        "plugins/email-love/skills/email-love-template-repair/references/symptom-cause-matrix.md",
+        "plugins/email-love/skills/template-repair/references/symptom-cause-matrix.md",
+        [
+            "math done against the outer column is a false pass",
+            "Do not inherit the previous report's completion claim.",
         ],
     ),
 ]

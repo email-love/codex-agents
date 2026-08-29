@@ -51,7 +51,7 @@ for a in "$FULL" "$SKILLS_ONLY"; do
     rel="${f#"$PLUGIN/"}"
     grep -qxF "email-love/$rel" <<<"$listing" || {
       echo "$a is missing source file $rel" >&2; exit 1; }
-  done < <(find "$PLUGIN/skills" -type f \( -name '*.md' -o -name '*.yaml' \) -print0)
+  done < <(find "$PLUGIN/skills" -type f \( -name '*.md' -o -name '*.yaml' -o -name '*.py' \) -print0)
   # Reverse parity: no archive skill file without a source counterpart.
   # ESP paths are exempt here: their counterpart is the pinned esp-skills
   # checkout, byte-compared below.
@@ -89,11 +89,11 @@ for esp in $ESP_LIST; do
   fi
 done
 skill_count="$(grep -cE '^email-love/skills/[^/]+/SKILL.md$' <<<"$skills_listing")"
-[ "$skill_count" -eq 13 ] || {
-  echo "$SKILLS_ONLY has $skill_count skills, expected 13" >&2; exit 1; }
+[ "$skill_count" -eq 14 ] || {
+  echo "$SKILLS_ONLY has $skill_count skills, expected 14" >&2; exit 1; }
 full_count="$(grep -cE '^email-love/skills/[^/]+/SKILL.md$' <<<"$full_listing")"
-[ "$full_count" -eq 3 ] || {
-  echo "$FULL has $full_count skills, expected 3" >&2; exit 1; }
+[ "$full_count" -eq 4 ] || {
+  echo "$FULL has $full_count skills, expected 4" >&2; exit 1; }
 if [ -n "${ESP_SKILLS_DIR:-}" ] && [ -d "$ESP_SKILLS_DIR" ]; then
   tmpe="$(mktemp -d)"
   for esp in $ESP_LIST; do
@@ -110,7 +110,7 @@ if [ -n "${ESP_SKILLS_DIR:-}" ] && [ -d "$ESP_SKILLS_DIR" ]; then
 else
   echo "note: ESP_SKILLS_DIR not set; byte-equality against the pinned checkout skipped"
 fi
-echo "ok ESP split: portal artifact 13 skills, Git artifact 3"
+echo "ok ESP split: portal artifact 14 skills, Git artifact 4"
 
 if command -v sha256sum >/dev/null 2>&1; then SHACMD="sha256sum"; else SHACMD="shasum -a 256"; fi
 ( cd dist && $SHACMD -c SHA256SUMS >/dev/null ) || {

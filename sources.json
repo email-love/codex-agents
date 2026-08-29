@@ -1,39 +1,40 @@
 {
-  "upstream": {
-    "repository": "https://github.com/email-love/claude-skills",
-    "commit": "e77bcde08f73b7c899a66d62df03914bcc391888",
-    "builder_tag": "emaillove-figma-builder-v2.9.2",
-    "render_tag": "emaillove-eds-converter-v1.45.0",
-    "migration_tag": "emaillove-migration-audit-v1.24.0",
-    "repair_tag": "emaillove-template-repair-v1.1.0",
-    "note": "Tags name the canonical skill versions this port tracks; the commit is the claude-skills revision the shared behavior was actually compared against and ported from (quality gates: source authority, mutation barrier, repair contract classes, five-state verification, acceptance matrix, forward-test-gated responsive rules). Tags are created at release time and may not exist yet at this commit."
-  },
-  "legacy_snapshots": [
-    {
-      "path": "legacy/AGENTS-2.9.0.md",
-      "sha256": "6a46f462dc2f084df672619b054539840bf2dc0bf773025b49badf36e39629e3"
+    "upstream": {
+        "repository": "https://github.com/email-love/claude-skills",
+        "commit": "23ee967358f242bd29efabc4404e00f61e44ee28",
+        "builder_tag": "emaillove-figma-builder-v2.11.0",
+        "render_tag": "emaillove-eds-converter-v1.46.0",
+        "migration_tag": "emaillove-migration-audit-v1.24.0",
+        "repair_tag": "emaillove-template-repair-v1.2.0",
+        "note": "Tags name the canonical skill versions this port tracks; the commit is the claude-skills revision the shared behavior was actually compared against and ported from (quality gates: source authority, mutation barrier, repair contract classes, five-state verification, acceptance matrix, forward-test-gated responsive rules). Tags are created at release time and may not exist yet at this commit.",
+        "quality_tag": "emaillove-figma-quality-gates-v1.0.0"
     },
-    {
-      "path": "legacy/migration-AGENTS-1.19.0.md",
-      "sha256": "c0aa5110a5b2c559f1b2e23f560e08d4962db6190702b4167960d0800c7f9147"
-    }
-  ],
-  "espSkills": {
-    "repository": "https://github.com/email-love/esp-skills",
-    "commit": "f1be804f810e9a8629ef29a0af8f4196a32f2afe",
-    "version": "1.4.2-candidate",
-    "skills": [
-      "braze-liquid",
-      "customerio-liquid",
-      "hubspot-hubl",
-      "iterable-handlebars",
-      "klaviyo-django",
-      "marketo-velocity",
-      "moengage-jinja",
-      "sailthru-zephyr",
-      "sfmc-ampscript",
-      "zeta-zml"
+    "legacy_snapshots": [
+        {
+            "path": "legacy/AGENTS-2.9.0.md",
+            "sha256": "6a46f462dc2f084df672619b054539840bf2dc0bf773025b49badf36e39629e3"
+        },
+        {
+            "path": "legacy/migration-AGENTS-1.19.0.md",
+            "sha256": "c0aa5110a5b2c559f1b2e23f560e08d4962db6190702b4167960d0800c7f9147"
+        }
     ],
-    "distribution": "BUILD-TIME ONLY: these ten skills are staged into the OpenAI portal skills-only artifact by scripts/build_plugin.sh from an esp-skills checkout verified at the pinned commit. They are deliberately NOT committed into this repository and NOT part of the full Git-backed plugin artifact - esp-skills stays the single canonical home (owner decision, 2026-08-23). Runtime subset only: SKILL.md, references/*.md, agents/openai.yaml; no evals, workspaces, or build tooling."
-  }
+    "espSkills": {
+        "repository": "https://github.com/email-love/esp-skills",
+        "commit": "f1be804f810e9a8629ef29a0af8f4196a32f2afe",
+        "version": "1.4.2-candidate",
+        "skills": [
+            "braze-liquid",
+            "customerio-liquid",
+            "hubspot-hubl",
+            "iterable-handlebars",
+            "klaviyo-django",
+            "marketo-velocity",
+            "moengage-jinja",
+            "sailthru-zephyr",
+            "sfmc-ampscript",
+            "zeta-zml"
+        ],
+        "distribution": "BUILD-TIME ONLY: these ten skills are staged into the OpenAI portal skills-only artifact by scripts/build_plugin.sh from an esp-skills checkout verified at the pinned commit. They are deliberately NOT committed into this repository and NOT part of the full Git-backed plugin artifact - esp-skills stays the single canonical home (owner decision, 2026-08-23). Runtime subset only: SKILL.md, references/*.md, agents/openai.yaml; no evals, workspaces, or build tooling."
+    }
 }

@@ -84,8 +84,8 @@ def validate_manifest() -> None:
     manifest = load_json(MANIFEST)
     if manifest.get("name") != "email-love":
         fail("plugin manifest name must be 'email-love'")
-    if manifest.get("version") != "4.9.0":
-        fail("plugin manifest version must be 4.9.0 for this plugin contract")
+    if manifest.get("version") != "4.10.0":
+        fail("plugin manifest version must be 4.10.0 for this plugin contract")
     if not re.fullmatch(r"\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?", manifest.get("version", "")):
         fail("plugin manifest version must be strict semver")
     if manifest.get("skills") != "./skills/":
@@ -168,9 +168,10 @@ def validate_skills() -> None:
         "email-love-figma-builder",
         "email-love-template-repair",
         "email-love-design-system-migration",
+        "email-love-figma-quality-gates",
     }
     if {path.name for path in skill_dirs} != expected:
-        fail("plugin must contain exactly the builder, repair, and migration skills")
+        fail("plugin must contain exactly the builder, repair, migration, and quality-gates skills")
 
     for skill_dir in skill_dirs:
         skill_file = skill_dir / "SKILL.md"
@@ -525,15 +526,16 @@ def validate_provenance() -> None:
     if not re.fullmatch(r"[0-9a-f]{40}", commit):
         fail("sources.json upstream commit must be a full Git SHA")
     expected_upstream = {
-        "commit": "e77bcde08f73b7c899a66d62df03914bcc391888",
-        "builder_tag": "emaillove-figma-builder-v2.9.2",
-        "render_tag": "emaillove-eds-converter-v1.45.0",
+        "commit": "23ee967358f242bd29efabc4404e00f61e44ee28",
+        "builder_tag": "emaillove-figma-builder-v2.11.0",
+        "render_tag": "emaillove-eds-converter-v1.46.0",
         "migration_tag": "emaillove-migration-audit-v1.24.0",
-        "repair_tag": "emaillove-template-repair-v1.1.0",
+        "repair_tag": "emaillove-template-repair-v1.2.0",
+        "quality_tag": "emaillove-figma-quality-gates-v1.0.0",
     }
     for key, expected in expected_upstream.items():
         if upstream.get(key) != expected:
-            fail(f"sources.json upstream.{key} must be {expected!r} for v4.9.0")
+            fail(f"sources.json upstream.{key} must be {expected!r} for v4.10.0")
     for snapshot in sources.get("legacy_snapshots", []):
         relative = snapshot.get("path", "")
         expected = snapshot.get("sha256", "")
@@ -567,6 +569,7 @@ def validate_evals() -> None:
             "email-love-figma-builder",
             "email-love-template-repair",
             "email-love-design-system-migration",
+            "email-love-figma-quality-gates",
         } | esp_names:
             fail(f"{case_id}: unknown expected skill")
         if not case["must_do"] or not case["must_not_do"]:
@@ -579,7 +582,7 @@ def validate_repository_guidance() -> None:
         fail("root AGENTS.md must stay below the default 32 KiB instruction budget")
     compatibility_files = (agents, MIGRATION_COMPATIBILITY)
     required_compatibility_text = {
-        "codex plugin marketplace add email-love/codex-agents --ref v4.8.0",
+        "codex plugin marketplace add email-love/codex-agents --ref v4.9.0",
         "codex plugin add email-love@email-love",
     }
     for compatibility_file in compatibility_files:

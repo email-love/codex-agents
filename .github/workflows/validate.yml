@@ -30,6 +30,11 @@ jobs:
       - name: Validate plugin, skills, references, and eval fixtures
         run: python3 scripts/validate_repo.py
 
+      - name: Quality-gates script self-tests
+        run: |
+          python3 plugins/email-love/skills/email-love-figma-quality-gates/scripts/validate_batch_snapshot.py --self-test
+          python3 plugins/email-love/skills/email-love-figma-quality-gates/scripts/check_icon_perimeter.py --self-test
+
       - name: Check shared-rule drift against canonical claude-skills
         run: |
           COMMIT="$(python3 -c 'import json; print(json.load(open("sources.json"))["upstream"]["commit"])')"

@@ -7,11 +7,11 @@ This is the portal-ready submission brief for the `email-love` skills-and-MCP pl
 - **Type:** MCP server with skills
 - **Plugin name:** Email Love
 - **Publisher:** Email Love
-- **Version:** 4.9.0
+- **Version:** 4.10.0
 - **Category:** Creativity
 - **Repository:** https://github.com/email-love/codex-agents
 
-The package bundles the Email Love MCP (server name `emaillove`) and thirteen skills: the three Figma/Email Love workflows (Builder, Template Repair, Design System Migration) plus ten ESP templating skills (Braze Liquid, Customer.io Liquid, HubSpot HubL, Iterable Handlebars, Klaviyo Django, Marketo Velocity, MoEngage Jinja, Sailthru Zephyr, SFMC AMPscript, Zeta ZML) that work on any email HTML. The ESP skills are staged into the upload at build time from email-love/esp-skills at the commit pinned in sources.json. Its
+The package bundles the Email Love MCP (server name `emaillove`) and fourteen skills: the four Figma/Email Love workflows (Builder, Template Repair, Design System Migration, Figma Quality Gates) plus ten ESP templating skills (Braze Liquid, Customer.io Liquid, HubSpot HubL, Iterable Handlebars, Klaviyo Django, Marketo Velocity, MoEngage Jinja, Sailthru Zephyr, SFMC AMPscript, Zeta ZML) that work on any email HTML. The ESP skills are staged into the upload at build time from email-love/esp-skills at the commit pinned in sources.json. Its
 workflows additionally require the official remote Figma MCP as an external prerequisite for
 canvas builds, and the Email Love plugin installed in Figma.
 
@@ -58,7 +58,7 @@ canvas builds, and the Email Love plugin installed in Figma.
 
 ## Capabilities and prerequisites
 
-The plugin contains three skills:
+The plugin contains four skills:
 
 - `email-love-figma-builder` builds one campaign email or sequence through an existing
   Email Love design system or the converter-assisted first-email path.
@@ -67,6 +67,10 @@ The plugin contains three skills:
   and calls a repair fixed only after canvas, structure, desktop export, and mobile export pass.
 - `email-love-design-system-migration` audits and migrates a legacy email library in staged
   batches while keeping the source read-only.
+- `email-love-figma-quality-gates` is the independent acceptance layer: it audits a migration
+  batch or reusable module against proof-batch, geometry, asset, property, and production
+  render gates before approval, using a machine-readable audit snapshot and two bundled
+  Python validators.
 
 Reviewer setup requires:
 

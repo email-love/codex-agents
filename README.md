@@ -23,7 +23,7 @@ workflows therefore protect Email Love's structural conventions, not just canvas
 ### 1. Install the public plugin
 
 [Install Email Love from the Plugins Directory](https://chatgpt.com/plugins/plugins_6a739f43c3b48191b1281a9b2d48b409),
-then start a new Codex task so the three skills are loaded.
+then start a new Codex task so the four skills are loaded.
 
 The public listing is the recommended customer install. It is a reviewed, published snapshot,
 not a live checkout of this repository.
@@ -34,7 +34,7 @@ For development or testing an exact repository release, add this marketplace and
 plugin:
 
 ```bash
-codex plugin marketplace add email-love/codex-agents --ref v4.8.0
+codex plugin marketplace add email-love/codex-agents --ref v4.9.0
 codex plugin add email-love@email-love
 ```
 
