@@ -46,10 +46,14 @@ Before promising a repair, confirm the Figma tool catalog includes `use_figma`, 
 `get_screenshot`. If `use_figma` is absent, perform read-only diagnosis and give the user an exact
 handoff; do not promise a canvas fix.
 
-Probe for `emaillove_export_figma` and `emaillove_preview_email` before deferring export checks. If
-the bundled Email Love MCP needs authorization, tell the user to run `codex mcp login emaillove`,
-then start a new task. A missing or unauthorized exporter makes the exporter state `deferred`, not
-`pass`.
+Probe for `emaillove_export_figma` and `emaillove_preview_email` before deferring export checks.
+The Email Love MCP may be connected separately from this skill's install (a portal skills-only
+install carries no MCP configuration; the Git-backed plugin bundles one), so when the tools are
+absent, distinguish an UNCONFIGURED server (add it with `codex mcp add emaillove --url
+https://mcp.emaillove.com/mcp`), a configured server needing AUTHORIZATION (`codex mcp login
+emaillove`, then start a new task), and a connected server whose tools are UNAVAILABLE. Do not
+send an unconfigured installation straight to login. Missing, unauthorized, or unavailable
+production rendering makes the exporter state `deferred`, not `pass`.
 
 ## Load the repair references
 

@@ -1,5 +1,21 @@
 # Changelog
 
+## 4.10.2 - 2026-08-30
+
+Final cleanup from the second review pass; wording and documentation consistency only.
+
+- **Truthful per-artifact MCP claims:** the skills-only manifest's description now says the
+  Email Love MCP is a separately configured connection (the bundled-connection sentence
+  stays only in the Git-backed artifact, where it is true), and the verifier asserts both
+  claims per artifact. Template repair no longer assumes a bundled server: it distinguishes
+  an unconfigured server, one needing authorization, and unavailable tools, and never sends
+  an unconfigured installation straight to login.
+- **Schema example regression:** the snapshot-schema example's census matches its own
+  property list, and the validator self-test parses the example from the Markdown and
+  validates it unchanged.
+- **Gate 3 prose:** bans UNDOCUMENTED unequal auto-layout axes and names the supported
+  `top-aligned-multi-column` exception, matching the validator and schema.
+
 ## 4.10.1 - 2026-08-30
 
 Hardens 4.10.0 against an external review's five findings; no new capability.

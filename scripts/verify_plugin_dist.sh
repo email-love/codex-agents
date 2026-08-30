@@ -88,11 +88,19 @@ mcp = manifest.get("mcpServers")
 if mcp != "./.mcp.json" or "email-love/.mcp.json" not in names:
     raise SystemExit(f"full manifest mcpServers {mcp!r} does not resolve inside the archive")
 PYEOF
-python3 - "$tmpm/skills-only/email-love/.codex-plugin/plugin.json" <<'PYEOF'
+python3 - "$tmpm/skills-only/email-love/.codex-plugin/plugin.json" "$tmpm/email-love/.codex-plugin/plugin.json" <<'PYEOF'
 import json, sys
-manifest = json.load(open(sys.argv[1]))
-if "mcpServers" in manifest:
+skills_only = json.load(open(sys.argv[1]))
+full = json.load(open(sys.argv[2]))
+if "mcpServers" in skills_only:
     raise SystemExit("skills-only manifest still declares mcpServers with no bundled .mcp.json")
+so_desc = skills_only.get("interface", {}).get("longDescription", "")
+if "Bundles the Email Love MCP" in so_desc:
+    raise SystemExit("skills-only manifest still claims a bundled MCP connection")
+if "separately configured Email Love MCP" not in so_desc:
+    raise SystemExit("skills-only manifest lacks the separate-connection wording")
+if "Bundles the Email Love MCP" not in full.get("interface", {}).get("longDescription", ""):
+    raise SystemExit("full manifest lost its (true) bundled-MCP description")
 PYEOF
 rm -rf "$tmpm"
 echo "ok artifact split: full carries .mcp.json + resolving manifest, skills-only claims no MCP"

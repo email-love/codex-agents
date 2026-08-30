@@ -114,6 +114,21 @@ import json, sys
 path = sys.argv[1]
 manifest = json.load(open(path))
 manifest.pop("mcpServers", None)
+# The bundled-connection sentence is true only for the Git-backed artifact;
+# the portal skills-only upload configures no server (2026-08-30 review, F1).
+BUNDLED = ("Bundles the Email Love MCP connection for headless HTML export, "
+           "deliverability validation, and desktop and mobile previews; sign in "
+           "with your Email Love account when prompted.")
+SEPARATE = ("Headless HTML export, deliverability validation, and desktop and "
+            "mobile previews require a separately configured Email Love MCP "
+            "connection. These skills do not configure that connection; "
+            "authorization is required after the server is connected.")
+interface = manifest.get("interface", {})
+long_description = interface.get("longDescription", "")
+if BUNDLED not in long_description:
+    raise SystemExit("skills-only manifest rewrite: bundled-MCP sentence not found; "
+                     "update BUNDLED in build_plugin.sh to match plugin.json")
+interface["longDescription"] = long_description.replace(BUNDLED, SEPARATE)
 with open(path, "w") as handle:
     json.dump(manifest, handle, indent=2)
     handle.write("\n")
