@@ -1,5 +1,27 @@
 # Changelog
 
+## 4.10.1 - 2026-08-30
+
+Hardens 4.10.0 against an external review's five findings; no new capability.
+
+- **Truthful distribution metadata (F1):** the skills-only portal manifest no longer declares
+  `mcpServers` (it ships no `.mcp.json`), the verifier asserts manifest paths resolve inside
+  each archive, and the migration skill distinguishes an UNCONFIGURED, UNAUTHORIZED, and
+  UNAVAILABLE Email Love MCP instead of assuming a bundled unauthorized connection.
+- **Fail-closed snapshot validation (F2):** non-empty module list required for acceptance
+  batches; images/groups/properties inventories required even when audited empty and
+  cross-checked against a measured node census; unknown or mistyped measurements are errors,
+  never silent zeros; malformed input returns a structured error, not a traceback.
+- **Documented exceptions honored (F3):** top-aligned multi-column axis pairs are declarable
+  via `axisExceptions` and bordered-group width headroom via `borderHeadroom` plus a stated
+  reason; undocumented mismatches and unexplained gaps still fail.
+- **Icon alpha as heuristic (F4):** four outcomes (pass, needs-review, not-applicable,
+  error); a fully opaque asset is not-applicable rather than a false fail; only pass is
+  automatic, and approved artwork is never altered to satisfy the heuristic.
+- **One proof-batch rule (F5):** the migration entrypoint's eight-module single-batch
+  allowance is replaced by the proof-batch gate; a user approval does not substitute for
+  missing render evidence.
+
 ## 4.10.0 - 2026-08-29
 
 Adds `email-love-figma-quality-gates`, an independent acceptance skill distilled from a real

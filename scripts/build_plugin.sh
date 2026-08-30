@@ -106,6 +106,19 @@ echo "built dist/email-love-codex-plugin-full-$VERSION.zip"
 # with the ten ESP skills staged from the pinned canonical checkout.
 SKILLS_STAGE="$(mktemp -d)"
 stage_common "$SKILLS_STAGE"
+# A manifest that declares mcpServers while the archive ships no .mcp.json is
+# a dangling reference (2026-08-30 review, F1). The skills-only manifest drops
+# the key so the artifact makes no bundled-connection claim.
+python3 - "$SKILLS_STAGE/email-love/.codex-plugin/plugin.json" <<'PYEOF'
+import json, sys
+path = sys.argv[1]
+manifest = json.load(open(path))
+manifest.pop("mcpServers", None)
+with open(path, "w") as handle:
+    json.dump(manifest, handle, indent=2)
+    handle.write("\n")
+PYEOF
+chmod 0644 "$SKILLS_STAGE/email-love/.codex-plugin/plugin.json"
 for esp in $ESP_LIST; do
   src="$ESP_SKILLS_DIR/skills/$esp"
   [ -f "$src/SKILL.md" ] || { echo "esp-skills is missing $esp" >&2; exit 1; }

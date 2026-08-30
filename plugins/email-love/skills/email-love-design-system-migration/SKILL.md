@@ -165,18 +165,25 @@ Read the module-conversion reference and all render references.
 1. Before the first module, establish how the batch checks will run. Probe the Email Love MCP
    for `emaillove_export_figma`. When present, use it with `operationType: "preview"` for a
    quota-free headless export and use its token with `emaillove_preview_email`; no plugin click
-   is needed for covered core tags. This plugin bundles the Email Love MCP connection under the
-   server name `emaillove`. When the tools are absent, the connection has not been authorized
-   yet, not removed from the product: tell the user to run `codex mcp login emaillove` (a
-   developer Git install may first need `codex mcp add emaillove --url
-   https://mcp.emaillove.com/mcp`), explain that the sign-in screen is Email Love's normal
-   account flow, the same sign-in the Figma plugin uses, and start a fresh task afterwards so
-   the tools appear. Do not confuse this server with the Email Love inspiration/library MCP;
+   is needed for covered core tags. The Email Love MCP (server name `emaillove`) may be
+   connected separately from this skill's install, so when its tools are absent, determine
+   which case applies before prescribing setup: the server may be UNCONFIGURED (a directory
+   or skills-only install carries no MCP configuration; add it with `codex mcp add emaillove
+   --url https://mcp.emaillove.com/mcp`), UNAUTHORIZED (configured but not signed in; run
+   `codex mcp login emaillove`, and explain that the sign-in screen is Email Love's normal
+   account flow, the same sign-in the Figma plugin uses), or UNAVAILABLE (configured and
+   authorized but not responding). Start a fresh task after any change so the tools appear.
+   An unavailable renderer means verification is deferred, not passed. Do not confuse this server with the Email Love inspiration/library MCP;
    the two are not interchangeable. If the tool raises a CoverageError for `mj-hero`,
    `mj-social`, `mj-navbar`, or `mj-table`, ask a human to run the paid-seat plugin Export and
    maintain the Deferred verification list when no human is available.
-2. A library of eight or fewer modules may run as one batch. Above that, use batches of
-   roughly five modules so the first review can stop a repeated defect early.
+2. Whatever the library size, start with a proof batch of at most four modules covering the
+   source's relevant risk classes. Do not start later batches until every proof module
+   passes production desktop and mobile checks and the user accepts the proof batch; if
+   production rendering is unavailable, stop after preparing the proof and report deferred
+   verification (a user approval does not substitute for missing render evidence). After
+   that gate, use batches of roughly five modules so a review can stop a repeated defect
+   early; a small library may finish in a single further batch.
 3. Before the first write, name the batch and its module count and give a rough estimate, and
    freeze a compact batch Fact Pack carrying only what this batch can be wrong about: the
    structural authority (source node tree, or supplied/ESP HTML, per the audit), the visual

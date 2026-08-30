@@ -62,8 +62,13 @@ python3 scripts/validate_batch_snapshot.py path/to/audit-snapshot.json
 ```
 
 Treat every reported error as a failed gate. Warnings need a written disposition. The
-validator is deliberately conservative about grouped icons: it subtracts both section and
-column padding before comparing the resolved mobile box to the asset's natural width.
+validator fails closed: missing inventories, an empty module list, a census mismatch, or a
+measurement that is not a finite number are all errors, never silent defaults. It is
+deliberately conservative about grouped icons: it subtracts both section and column padding
+before comparing the resolved mobile box to the asset's natural width. Documented
+render-contract exceptions (top-aligned multi-column axes, bordered-group headroom) are
+declared in the snapshot, not waived by the checker. A passing snapshot is snapshot
+validation only, never production acceptance.
 
 ### 5. Inspect icon and social assets
 
@@ -73,9 +78,12 @@ Export each icon node at 2x as a PNG, then run:
 python3 scripts/check_icon_perimeter.py path/to/icon.png path/to/social-icon.png
 ```
 
-An asset fails when visible alpha touches the file edge or lacks a safe transparent inset.
-Inspect one file per independently linked social icon. Do not approve an unverified sprite
-crop.
+The check is a heuristic with four outcomes: `pass`, `needs-review` (alpha touches an edge
+or the inset is thin: compare the source crop and production render before approving),
+`not-applicable` (a fully opaque asset, where alpha proves nothing about the crop and a
+visual source comparison is still required), and `error`. Only `pass` is automatic. Inspect
+one file per independently linked social icon, do not approve an unverified sprite crop,
+and never alter approved brand artwork merely to satisfy the heuristic.
 
 ### 6. Compare source and production renders
 

@@ -74,7 +74,28 @@ if grep -qxF "email-love/.mcp.json" <<<"$skills_listing"; then
   echo "$SKILLS_ONLY must NOT contain .mcp.json (a portal skills-only upload carries no MCP config)" >&2
   exit 1
 fi
-echo "ok artifact split: full carries .mcp.json, skills-only does not"
+# Manifest truthfulness: every path a packaged manifest declares must resolve
+# inside its own archive; the skills-only manifest must not declare an MCP
+# config it does not ship (2026-08-30 review, F1).
+tmpm="$(mktemp -d)"
+( cd "$tmpm" && unzip -qo "$FULL" "email-love/.codex-plugin/plugin.json" && \
+  mkdir -p skills-only && cd skills-only && unzip -qo "$SKILLS_ONLY" "email-love/.codex-plugin/plugin.json" )
+python3 - "$tmpm/email-love/.codex-plugin/plugin.json" "$FULL" <<'PYEOF'
+import json, sys, zipfile
+manifest = json.load(open(sys.argv[1]))
+names = set(zipfile.ZipFile(sys.argv[2]).namelist())
+mcp = manifest.get("mcpServers")
+if mcp != "./.mcp.json" or "email-love/.mcp.json" not in names:
+    raise SystemExit(f"full manifest mcpServers {mcp!r} does not resolve inside the archive")
+PYEOF
+python3 - "$tmpm/skills-only/email-love/.codex-plugin/plugin.json" <<'PYEOF'
+import json, sys
+manifest = json.load(open(sys.argv[1]))
+if "mcpServers" in manifest:
+    raise SystemExit("skills-only manifest still declares mcpServers with no bundled .mcp.json")
+PYEOF
+rm -rf "$tmpm"
+echo "ok artifact split: full carries .mcp.json + resolving manifest, skills-only claims no MCP"
 
 # ESP split: the portal artifact carries the ten pinned ESP skills (thirteen
 # total); the Git-backed artifact mirrors the repository (three skills, no
