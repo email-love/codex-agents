@@ -84,8 +84,8 @@ def validate_manifest() -> None:
     manifest = load_json(MANIFEST)
     if manifest.get("name") != "email-love":
         fail("plugin manifest name must be 'email-love'")
-    if manifest.get("version") != "4.10.2":
-        fail("plugin manifest version must be 4.10.2 for this plugin contract")
+    if manifest.get("version") != "4.11.0":
+        fail("plugin manifest version must be 4.11.0 for this plugin contract")
     if not re.fullmatch(r"\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?", manifest.get("version", "")):
         fail("plugin manifest version must be strict semver")
     if manifest.get("skills") != "./skills/":
@@ -97,11 +97,11 @@ def validate_manifest() -> None:
         fail(".mcp.json must use the mcpServers wrapper")
     servers = mcp_config.get("mcpServers", {})
     if set(servers) != {"emaillove"}:
-        fail(".mcp.json must declare exactly the emaillove server")
+        fail(".mcp.json must declare exactly the emaillove MCP server")
     elif servers["emaillove"].get("type") != "http":
         fail(".mcp.json emaillove server type must be http")
     elif servers["emaillove"].get("url") != "https://mcp.emaillove.com/mcp":
-        fail(".mcp.json emaillove server must use the production MCP URL")
+        fail(".mcp.json emaillove server must use the consolidated production MCP URL")
     author = manifest.get("author", {})
     if author.get("name") != "Email Love":
         fail("plugin manifest author.name must be 'Email Love'")
@@ -535,7 +535,7 @@ def validate_provenance() -> None:
     }
     for key, expected in expected_upstream.items():
         if upstream.get(key) != expected:
-            fail(f"sources.json upstream.{key} must be {expected!r} for v4.10.2")
+            fail(f"sources.json upstream.{key} must be {expected!r} for v4.11.0")
     for snapshot in sources.get("legacy_snapshots", []):
         relative = snapshot.get("path", "")
         expected = snapshot.get("sha256", "")

@@ -42,18 +42,17 @@
    "fixture_requirements": "A reviewer-accessible read-only Figma file containing several legacy email templates and reusable modules."
   },
   {
-   "id": "migrate_approved_batch",
-   "user_prompt": "The Email Love migration audit and foundations are approved. Convert the next four modules into the separate target Figma file and stop for design review.",
-   "expected_skill": "email-love-design-system-migration",
+   "id": "research_post_purchase_inspiration",
+   "user_prompt": "Find three post-purchase emails from DTC apparel brands. Compare their section order, subject-line approach, and placement of the next-purchase CTA. Use them as inspiration only; do not generate or export email HTML.",
+   "expected_skill": "Email Love Inspiration MCP tools",
    "expected_behavior": [
-    "Confirm the approved audit decisions and separate target file.",
-    "Load the module-conversion and render references before transcription.",
-    "Convert exactly the declared four-module batch.",
-    "Run source-parity, export, and mobile checks or record any deferred verification.",
-    "Stop after the batch report for human review."
+    "Use search_emails to find relevant post-purchase campaigns.",
+    "Use fetch_email when more detail is needed for the selected examples.",
+    "Identify reusable structural and messaging patterns without copying brand copy verbatim.",
+    "Do not call the design converter for this research-only prompt or claim the MCP can generate, preview, validate, or export the user's HTML without a Figma source or supplied screenshot."
    ],
-   "expected_result_shape": "Four reusable Email Love module components in the target file and a batch report covering source parity, component properties, export checks, concessions, and deferred verification.",
-   "fixture_requirements": "An accepted audit, completed foundations, a read-only source Figma file, and a separate writable target Figma file."
+   "expected_result_shape": "Three sourced campaign examples followed by a concise, original summary of patterns that can inform the user's own brief.",
+   "fixture_requirements": "A reviewer Email Love account authorized for https://mcp.emaillove.com/mcp."
   },
   {
    "id": "repair_flattened_template",

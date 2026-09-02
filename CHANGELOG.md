@@ -1,5 +1,21 @@
 # Changelog
 
+## 4.11.0 - 2026-09-02
+
+Adds campaign research and source-led Figma AI Import to the existing authenticated Email Love
+MCP.
+
+- **One MCP endpoint:** `emaillove` at `https://mcp.emaillove.com/mcp` now supplies campaign
+  search, individual email research, brand insights, lifecycle journeys, and the existing
+  design-system, headless export, and desktop/mobile preview tools through one connection.
+- **Source-led Figma AI Import:** `emaillove_convert_design` accepts a Figma `fileKey` and
+  `nodeId` or a screenshot URL, renders source nodes server-side, and returns conversion output
+  for agent transcription. Conversion is not a free-form HTML generator.
+- **Distribution:** keeps the existing four Email Love workflow skills unchanged and continues
+  to stage the ten pinned ESP templating skills into the OpenAI portal skill bundle.
+- **Reviewer coverage:** replaces one redundant migration reviewer case with an inspiration
+  search case that verifies the MCP returns research rather than generated output.
+
 ## 4.10.2 - 2026-08-30
 
 Final cleanup from the second review pass; wording and documentation consistency only.

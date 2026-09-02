@@ -4,7 +4,7 @@ Build, repair, and migrate real, export-ready emails and email design systems in
 progressively loaded Codex skills.
 
 This repository is the source for the public Email Love plugin and a Git-backed Codex plugin
-marketplace. It packages three focused skills:
+marketplace. It packages four focused Email Love skills:
 
 - **Email Love Figma Builder:** build one email or campaign using an existing Email Love
   design system, or create a first email through the design-converter workflow.
@@ -14,6 +14,8 @@ marketplace. It packages three focused skills:
 - **Email Love Design System Migration:** audit a legacy library from Figma, files, cloud
   storage, or a supported ESP and convert it into an Email Love design system in staged,
   reviewable batches.
+- **Email Love Figma Quality Gates:** independently verify migration batches and reusable
+  modules before approval.
 
 The underlying Figma frames export to production HTML through the Email Love plugin. These
 workflows therefore protect Email Love's structural conventions, not just canvas appearance.
@@ -23,7 +25,8 @@ workflows therefore protect Email Love's structural conventions, not just canvas
 ### 1. Install the public plugin
 
 [Install Email Love from the Plugins Directory](https://chatgpt.com/plugins/plugins_6a739f43c3b48191b1281a9b2d48b409),
-then start a new Codex task so the four skills are loaded.
+then start a new Codex task. The published version is a reviewed snapshot; 4.11 adds campaign
+research and Figma conversion through the consolidated Email Love MCP after review and publication.
 
 The public listing is the recommended customer install. It is a reviewed, published snapshot,
 not a live checkout of this repository.
@@ -34,12 +37,12 @@ For development or testing an exact repository release, add this marketplace and
 plugin:
 
 ```bash
-codex plugin marketplace add email-love/codex-agents --ref v4.9.0
+codex plugin marketplace add email-love/codex-agents --ref v4.11.0
 codex plugin add email-love@email-love
 ```
 
 You can also open `/plugins` in Codex CLI, select the **Email Love** marketplace, and install
-the Git-backed plugin there. Replace `v4.8.0` with `main` only when testing unreleased work.
+the Git-backed plugin there. Replace `v4.11.0` with `main` only when testing unreleased work.
 
 The public and Git-backed installs are separate distribution paths. A GitHub push or marketplace
 refresh does not update the reviewed public plugin.
@@ -68,28 +71,33 @@ export FIGMA_TOKEN=figd_...
 Create it in Figma Account Settings with Current user, File content, File metadata, and
 Library content scopes, then launch Codex from the same environment.
 
-For fully agent-run migration export and mobile QA, the plugin bundles the Email Love MCP
-(server name `emaillove`, `https://mcp.emaillove.com/mcp`) as of v4.6.0. On a public directory
-install, authorize it once:
+The plugin bundles one consolidated Email Love MCP connection:
+
+- `emaillove` at `https://mcp.emaillove.com/mcp` searches real campaigns, individual emails,
+  brands, and lifecycle journeys; accesses saved collections; converts a Figma design or
+  supplied screenshot through `emaillove_convert_design`; and gives migration and repair
+  workflows design-system access, headless export verification, and desktop/mobile previews.
+
+On a public directory install, authorize it once:
 
 ```bash
 codex mcp login emaillove
 ```
 
-The sign-in it opens is Email Love's normal account flow, the same sign-in the Figma plugin
-uses; completing it authorizes the MCP connection, not the plugin. Start a new task after
-connecting. On a developer Git install, or a public version before 4.6.0, add the server
-manually first:
+The sign-in screen uses Email Love's normal account flow. Completing it authorizes the MCP
+connection, not the Figma plugin. Start a new task after connecting. On a developer Git install,
+add the server manually if its bundled connection was not registered:
 
 ```bash
 codex mcp add emaillove --url https://mcp.emaillove.com/mcp
 codex mcp login emaillove
 ```
 
-When `emaillove_export_figma` is available, Codex can compile a bare module through Email
-Love's production export pipeline with no export quota and send the returned preview token to
-`emaillove_preview_email`. Without it, the migration skill falls back to a human-run plugin
-Export for the batch check.
+If the `emaillove` QA connection is unavailable or not authorized, migration and repair fall
+back to a human-run Email Love plugin Export for the production batch check.
+
+The MCP is source-led: conversion starts from a Figma node or supplied screenshot, and the QA
+tools verify existing Email Love Figma artifacts. It is not a free-form HTML generator for chat.
 
 ### 3. Install Email Love in Figma
 
@@ -188,7 +196,8 @@ not as the recommended installation path.
 Public plugin updates follow a release process:
 
 1. Validate and tag the GitHub release.
-2. Create a new plugin version in the OpenAI submission portal and upload the final skill bundle.
+2. Create a new skills-plus-MCP plugin version in the OpenAI submission portal, enter
+   `https://mcp.emaillove.com/mcp`, and upload the final skill bundle.
 3. Submit it for review, then publish the approved version.
 4. Verify the public listing and start a new task before testing it.
 

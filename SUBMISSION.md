@@ -7,42 +7,46 @@ This is the portal-ready submission brief for the `email-love` skills-and-MCP pl
 - **Type:** MCP server with skills
 - **Plugin name:** Email Love
 - **Publisher:** Email Love
-- **Version:** 4.10.2
+- **Version:** 4.11.0
 - **Category:** Creativity
 - **Repository:** https://github.com/email-love/codex-agents
 
-The package bundles the Email Love MCP (server name `emaillove`) and fourteen skills: the four Figma/Email Love workflows (Builder, Template Repair, Design System Migration, Figma Quality Gates) plus ten ESP templating skills (Braze Liquid, Customer.io Liquid, HubSpot HubL, Iterable Handlebars, Klaviyo Django, Marketo Velocity, MoEngage Jinja, Sailthru Zephyr, SFMC AMPscript, Zeta ZML) that work on any email HTML. The ESP skills are staged into the upload at build time from email-love/esp-skills at the commit pinned in sources.json. Its
-workflows additionally require the official remote Figma MCP as an external prerequisite for
-canvas builds, and the Email Love plugin installed in Figma.
+The public submission combines one consolidated Email Love MCP with fourteen skills: the four
+Figma/Email Love workflows (Builder, Template Repair, Design System Migration, Figma Quality
+Gates) plus ten ESP templating skills (Braze Liquid, Customer.io Liquid, HubSpot HubL,
+Iterable Handlebars, Klaviyo Django, Marketo Velocity, MoEngage Jinja, Sailthru Zephyr, SFMC
+AMPscript, Zeta ZML) that work on any email HTML. The ESP skills are staged into the skill
+upload at build time from email-love/esp-skills at the commit pinned in sources.json. Canvas
+workflows additionally require the official remote Figma MCP and the Email Love plugin in
+Figma.
 
 ## Bundled MCP server
 
 - **Server name:** `emaillove`
 - **URL:** `https://mcp.emaillove.com/mcp` (streamable HTTP)
-- **Domain:** `mcp.emaillove.com`, a subdomain of `emaillove.com` (same publisher; use for
-  domain verification)
-- **Authentication:** OAuth 2.1 with PKCE and dynamic client registration
-  (`/.well-known/oauth-authorization-server` on the same origin). The consent page also
-  accepts an Email Love license key for legacy accounts. The sign-in screen is Email Love's
-  standard account flow, shared with the Figma plugin.
-- **Tool annotations:** declared by the server per tool (`readOnlyHint`, `destructiveHint`,
-  `idempotentHint`, `openWorldHint` on every tool definition).
-- **What it adds:** the agent-only QA connection for migration work: design-system access
-  (brands, components, templates) and the headless exporter. `emaillove_export_figma`
-  compiles a Figma template or module to production HTML with no plugin click
-  (`operationType: "preview"` charges no export quota), and its token feeds
-  `emaillove_preview_email` for desktop and mobile renders. It is not a customer surface
-  for creating, previewing, or exporting emails; those happen in the Email Love Figma
-  plugin.
+- **Domain:** `mcp.emaillove.com`, a subdomain of `emaillove.com`
+- **Authentication:** OAuth 2.1 with PKCE and dynamic client registration through Email Love's
+  account flow.
+- **What it adds:** campaign and brand research (`search_emails`, `fetch_email`,
+  `search_brands`, `get_brand_insights`, `list_journeys`, and `get_journey`); authenticated
+  design-system access; `emaillove_convert_design` for source-led Figma AI Import; and
+  `emaillove_export_figma` plus `emaillove_preview_email` for production export and
+  desktop/mobile verification.
+- **Boundary:** `emaillove_convert_design` accepts a Figma `fileKey` and `nodeId`, or a
+  supplied screenshot URL, and returns measured conversion output for an agent to transcribe.
+  It is not a free-form HTML generator. The QA tools verify existing Email Love Figma artifacts
+  and do not replace the Email Love Figma plugin as the customer-facing build/export surface.
 
 ## Listing details
 
-- **Short description:** Build, repair, and migrate export-ready emails in Figma.
+- **Short description:** Build and repair emails in Figma, research inspiration, and add ESP templating.
 - **Long description:** Build production-ready marketing and lifecycle emails in Figma from
   existing Email Love components or a converter-assisted first-email workflow. Diagnose and
   repair broken Email Love templates and modules with canvas, structure, and exporter evidence.
   Audit and migrate legacy email libraries into reusable Email Love design systems through
-  staged, reviewable batches that keep the source read-only.
+  staged, reviewable batches that keep the source read-only. Research real campaigns, brand
+  patterns, and lifecycle journeys through the Email Love MCP. Add or troubleshoot
+  ten major ESP templating languages in any email HTML.
 - **Website:** https://emaillove.com
 - **Support:** https://help.emaillove.com/plugin/getting-started/overview
 - **Privacy policy:** https://emaillove.com/privacy-policy
@@ -55,6 +59,7 @@ canvas builds, and the Email Love plugin installed in Figma.
 1. Build an export-ready email in my Figma file.
 2. Repair this broken Email Love template in Figma.
 3. Audit and migrate this legacy email design system.
+4. Find three post-purchase emails to inspire this Figma build.
 
 ## Capabilities and prerequisites
 
@@ -80,10 +85,17 @@ Reviewer setup requires:
 - the latest Email Love Figma plugin;
 - normal approval prompts enabled for canvas writes.
 
-The bundled Email Love MCP adds quota-free preview export and mobile verification once the
-reviewer authorizes it (`codex mcp login emaillove`; any Email Love account works, including
-a free one). The skills include a human-run plugin Export fallback when the MCP is not
-authorized or a module is outside the exporter's core-tag coverage.
+The Email Love MCP adds campaign and journey research, source-led Figma conversion, and
+production export/mobile verification after `codex mcp login emaillove`. Any Email Love account,
+including a free one, can authorize the connection. A reviewer should request campaign
+inspiration, then run a migration/repair export check against an existing Figma artifact. The
+first should use research tools; the second should use QA tools. Neither should be described as
+free-form HTML generation in chat.
+
+The separate native-Figma connector at `https://mcp.emaillove.com/figma/mcp` is not part of this
+ChatGPT plugin submission. Its agent-specific build skill remains behind the live end-to-end Figma
+connector acceptance test, so the public listing must not claim that native connector workflow is
+released.
 
 ## Data handling disclosure
 
@@ -103,6 +115,17 @@ The required cases (five positive, three negative) are in
 `tests/submission-cases.json`. Provide reviewer-accessible fixture links in the portal for
 the cases that require Figma files. Keep those links out of the public repository if they
 grant write access.
+
+## Release notes for 4.11.0
+
+Email Love now adds campaign research, brand and lifecycle insights, and source-led Figma AI
+Import to the existing authenticated MCP. Users can research real campaigns, inspect individual
+emails, compare brands, study lifecycle journeys, and convert a specified Figma design through
+the converter pipeline without installing a second connector. Migration and repair keep
+design-system access, headless export verification, and desktop/mobile previews for existing
+Email Love Figma artifacts. Conversion requires a Figma source or supplied screenshot and is not
+presented as free-form HTML generation in chat. The four Email Love workflow skills and ten ESP
+templating skills remain in the plugin.
 
 ## Release notes for 4.8.0
 
@@ -131,9 +154,10 @@ For every public update:
 
 1. Port and validate the final Codex skill changes in this repository.
 2. Tag and push the GitHub release.
-3. Create a new plugin version in the OpenAI submission portal and upload the final bundle
-   (skills plus the bundled MCP declaration), logo, listing details, reviewer tests, and
-   release notes. Keep the MCP server details section current.
+3. Create a new plugin version in the OpenAI submission portal, configure
+   `https://mcp.emaillove.com/mcp`, and
+   upload the final skill bundle, logo, listing details, reviewer tests, and release notes.
+   Keep the MCP server details section current.
 4. Submit the version for review.
 5. Publish it after approval.
 6. Verify the public listing at
@@ -150,11 +174,12 @@ each submission.
 - Confirm the submitter has **Apps Management: Write** in the publishing organization.
 - Select the verified Email Love business identity.
 - Upload the final skill bundle and logo.
-- Add the three starter prompts above.
+- Add the four starter prompts above.
 - Add the five positive and three negative reviewer tests from
   `tests/submission-cases.json`.
-- Complete MCP domain verification for `mcp.emaillove.com` and enter the server URL and
-  OAuth details from the Bundled MCP server section above.
+- Complete MCP domain verification for `mcp.emaillove.com`, then enter that server URL and its
+  OAuth details. Confirm its tool scan includes the research, conversion, and QA tools listed
+  above.
 - Supply reviewer-accessible Figma fixtures without MFA, email confirmation, or private
   network requirements.
 - Confirm the public privacy policy covers the converter disclosure above.

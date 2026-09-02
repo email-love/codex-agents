@@ -125,7 +125,27 @@ padded with empty page invites the worker to invent spacers. On Linux substitute
 Never convert a competitor's email or an Email Love library preview. Same clone problem, and
 the customer has no design system to restyle it into, so a clone stays a clone.
 
-## B3: Send it to the design-converter worker
+## B3: Convert the source
+
+### Prefer the Email Love MCP for a Figma source
+
+When `emaillove_convert_design` is available and the customer supplied a Figma source, use it
+before the direct worker route. Pass the source file's `fileKey` and the selected frame's
+`nodeId`; the MCP renders the node server-side through Figma and forwards it to the converter.
+This preserves the source-specific conversion path without moving image bytes through the agent.
+
+- Follow the tool schema for `responseMode`. Use its `outline` or `section` response modes when
+  the full tree would be too large for one tool response, and preserve every returned part before
+  transcription.
+- Use `screenshotUrl` only when the customer owns the image and the source Figma node cannot be
+  identified. Do not use a competitor or Email Love library preview as either input.
+- The conversion is source-led. It is not a route for free-form HTML generation.
+
+Save the returned conversion output before transcription and continue with B4 through B6. If the
+MCP tool is unavailable, unauthorized, or cannot access the source file, use the direct worker
+route below.
+
+### Direct worker fallback
 
 POST to `https://convert.emaillove.com`:
 

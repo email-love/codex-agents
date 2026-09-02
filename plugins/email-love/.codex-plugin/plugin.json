@@ -1,7 +1,7 @@
 {
   "name": "email-love",
-  "version": "4.10.2",
-  "description": "Build, repair, and migrate export-ready emails in Figma with Email Love, and add any major ESP's templating language to any email HTML",
+  "version": "4.11.0",
+  "description": "Build, repair, and migrate export-ready emails in Figma with Email Love, research real email campaigns, and add any major ESP's templating language to any email HTML",
   "author": {
     "name": "Email Love",
     "email": "hello@emaillove.com",
@@ -33,8 +33,8 @@
   "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "Email Love",
-    "shortDescription": "Build, repair, and migrate emails in Figma; add ESP templating to any email HTML.",
-    "longDescription": "Build production-ready emails in Figma from Email Love components, diagnose and repair broken Email Love templates and modules, or convert legacy email design systems into reusable Email Love libraries. The ChatGPT directory version also bundles ten focused ESP templating skills - Braze Liquid, Customer.io Liquid, HubSpot HubL, Iterable Handlebars, Klaviyo Django, Marketo Velocity, MoEngage Jinja, Sailthru Zephyr, Salesforce Marketing Cloud AMPscript, and Zeta ZML - that write, review, and debug personalization code in any email HTML, whether or not it came from Email Love. Bundles the Email Love MCP connection for headless HTML export, deliverability validation, and desktop and mobile previews; sign in with your Email Love account when prompted.",
+    "shortDescription": "Build and repair emails in Figma, research inspiration, and add ESP templating.",
+    "longDescription": "Build production-ready emails in Figma from Email Love components, diagnose and repair broken Email Love templates and modules, or convert legacy email design systems into reusable Email Love libraries. The ChatGPT directory version also bundles ten focused ESP templating skills - Braze Liquid, Customer.io Liquid, HubSpot HubL, Iterable Handlebars, Klaviyo Django, Marketo Velocity, MoEngage Jinja, Sailthru Zephyr, Salesforce Marketing Cloud AMPscript, and Zeta ZML - that write, review, and debug personalization code in any email HTML, whether or not it came from Email Love. Bundles the Email Love MCP for real campaign research, lifecycle journeys, and brand insights, plus authenticated Figma conversion, design-system access, headless export verification, and desktop and mobile previews for migration and repair. Conversion begins with a Figma design or supplied screenshot; it is not a free-form HTML generator for chat. Sign in with your Email Love account when prompted.",
     "developerName": "Email Love",
     "category": "Creativity",
     "capabilities": [
@@ -48,6 +48,7 @@
       "Build an export-ready email in my Figma file.",
       "Repair this broken Email Love template in Figma.",
       "Audit and migrate this legacy email design system.",
+      "Find three post-purchase emails to inspire this Figma build.",
       "Add Klaviyo templating to this email HTML.",
       "Troubleshoot this AMPscript personalization block.",
       "Convert this product section to Braze Liquid."

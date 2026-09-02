@@ -16,8 +16,10 @@ Never invent Email Love structure from memory.
 Structure comes from exactly two places:
 
 - **Path A:** instances of published components from the customer's Email Love design system.
-- **Path B:** MJML JSON returned by the Email Love design-converter worker, transcribed
-  according to the packaged render references.
+- **Path B:** measured conversion output returned by `emaillove_convert_design` for a
+  customer-owned Figma source when that MCP tool is available, otherwise MJML JSON from the
+  Email Love design-converter worker. Transcribe either result according to the packaged render
+  references.
 
 The only structure created without either source is an empty email root and, when explicitly
 required, the narrowly defined `mj-raw` ESP token block. If neither path can produce a

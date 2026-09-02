@@ -7,15 +7,15 @@
 #       included.
 #
 #   email-love-codex-plugin-skills-only-<version>.zip
-#       The OpenAI portal upload: manifest, assets, and skills, WITHOUT
-#       .mcp.json. A portal skills-only upload does not carry MCP
-#       configuration, and this artifact makes no claim that it does.
+#       The OpenAI portal skill upload: manifest, assets, and skills, WITHOUT
+#       .mcp.json. The portal configures the MCP separately for a skills-plus-MCP
+#       submission, and this artifact makes no claim that it carries that config.
 #       This artifact ADDITIONALLY bundles the ten ESP templating skills,
 #       staged at build time from an email-love/esp-skills checkout verified
 #       at the commit pinned in sources.json (espSkills lane). The ESP skills
 #       are deliberately not committed into this repository - esp-skills is
-#       canonical - so the OFFICIAL ChatGPT plugin carries thirteen skills
-#       while the Git-backed artifact mirrors this repository's three.
+#       canonical - so the OFFICIAL ChatGPT plugin carries fourteen skills
+#       while the Git-backed artifact mirrors this repository's four.
 #       Point ESP_SKILLS_DIR at a local esp-skills checkout; the build
 #       refuses to run if that checkout is not at the pinned commit.
 #
@@ -116,13 +116,18 @@ manifest = json.load(open(path))
 manifest.pop("mcpServers", None)
 # The bundled-connection sentence is true only for the Git-backed artifact;
 # the portal skills-only upload configures no server (2026-08-30 review, F1).
-BUNDLED = ("Bundles the Email Love MCP connection for headless HTML export, "
-           "deliverability validation, and desktop and mobile previews; sign in "
-           "with your Email Love account when prompted.")
-SEPARATE = ("Headless HTML export, deliverability validation, and desktop and "
-            "mobile previews require a separately configured Email Love MCP "
-            "connection. These skills do not configure that connection; "
-            "authorization is required after the server is connected.")
+BUNDLED = ("Bundles the Email Love MCP for real campaign research, lifecycle journeys, "
+           "and brand insights, plus authenticated Figma conversion, design-system "
+           "access, headless export verification, and desktop and mobile previews for "
+           "migration and repair. Conversion begins with a Figma design or supplied "
+           "screenshot; it is not a free-form HTML generator for chat. Sign in with "
+           "your Email Love account when prompted.")
+SEPARATE = ("Email Love campaign research, Figma conversion, and migration and repair "
+            "export verification require a separately configured Email Love MCP "
+            "connection. These skills do not configure that connection; authorization "
+            "is required after the server is connected. Conversion begins with a Figma "
+            "design or supplied screenshot; it is not a free-form HTML generator for "
+            "chat.")
 interface = manifest.get("interface", {})
 long_description = interface.get("longDescription", "")
 if BUNDLED not in long_description:

@@ -95,18 +95,21 @@ full = json.load(open(sys.argv[2]))
 if "mcpServers" in skills_only:
     raise SystemExit("skills-only manifest still declares mcpServers with no bundled .mcp.json")
 so_desc = skills_only.get("interface", {}).get("longDescription", "")
-if "Bundles the Email Love MCP" in so_desc:
+if "Bundles the Email Love MCP for real campaign research" in so_desc:
     raise SystemExit("skills-only manifest still claims a bundled MCP connection")
 if "separately configured Email Love MCP" not in so_desc:
     raise SystemExit("skills-only manifest lacks the separate-connection wording")
-if "Bundles the Email Love MCP" not in full.get("interface", {}).get("longDescription", ""):
+full_desc = full.get("interface", {}).get("longDescription", "")
+if "Bundles the Email Love MCP for real campaign research" not in full_desc:
     raise SystemExit("full manifest lost its (true) bundled-MCP description")
+if "Conversion begins with a Figma design or supplied screenshot" not in full_desc:
+    raise SystemExit("full manifest lost the QA capability boundary")
 PYEOF
 rm -rf "$tmpm"
 echo "ok artifact split: full carries .mcp.json + resolving manifest, skills-only claims no MCP"
 
-# ESP split: the portal artifact carries the ten pinned ESP skills (thirteen
-# total); the Git-backed artifact mirrors the repository (three skills, no
+# ESP split: the portal artifact carries the ten pinned ESP skills (fourteen
+# total); the Git-backed artifact mirrors the repository (four skills, no
 # ESP directories). ESP files must be byte-identical to the pinned checkout.
 ESP_PIN="$(python3 -c "import json; print(json.load(open('sources.json'))['espSkills']['commit'])")"
 ESP_LIST="$(python3 -c "import json; print(' '.join(json.load(open('sources.json'))['espSkills']['skills']))")"
