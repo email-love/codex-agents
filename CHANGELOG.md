@@ -1,5 +1,17 @@
 # Changelog
 
+## 4.11.3 - 2026-09-05
+
+Server-enforced MCP tool boundary (2026-09-05 review, R3; owner-approved).
+
+- The plugin's `emaillove` connection now points at
+  `https://mcp.emaillove.com/plugin/mcp`, a trimmed endpoint serving exactly the twelve
+  research, conversion, and verification tools (campaign/brand/journey research plus the
+  ChatGPT search/fetch aliases, `emaillove_convert_design`, `emaillove_export_figma`,
+  `emaillove_preview_email`, `emaillove_validate_email`). No free-form generation tools are
+  exposed there; "not a free-form HTML generator" is now enforced by the server's
+  tool catalog, not by skill prose. The full `/mcp` endpoint is unchanged for direct users.
+
 ## 4.11.2 - 2026-09-05
 
 Codex's own repository review (CLAUDE-HANDOFF-CODEX-IMPROVEMENTS-2026-09-05), applied.

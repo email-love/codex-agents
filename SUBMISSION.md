@@ -7,7 +7,7 @@ This is the portal-ready submission brief for the `email-love` skills-and-MCP pl
 - **Type:** MCP server with skills
 - **Plugin name:** Email Love
 - **Publisher:** Email Love
-- **Version:** 4.11.2
+- **Version:** 4.11.3
 - **Category:** Creativity
 - **Repository:** https://github.com/email-love/codex-agents
 
@@ -24,7 +24,7 @@ Figma.
 
 - **Server name:** `emaillove`
 - **URL:** `https://mcp.emaillove.com/mcp` (streamable HTTP)
-- **Domain:** `mcp.emaillove.com`, a subdomain of `emaillove.com`
+- **Domain:** `mcp.emaillove.com`, a subdomain of `emaillove.com`; the plugin connects to the `/plugin/mcp` endpoint, which serves only the research, conversion, and verification tools (the tool boundary is server-enforced; no free-form generation tools are exposed)
 - **Authentication:** OAuth 2.1 with PKCE and dynamic client registration through Email Love's
   account flow.
 - **What it adds:** campaign and brand research (`search_emails`, `fetch_email`,

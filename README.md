@@ -37,12 +37,12 @@ For development or testing an exact repository release, add this marketplace and
 plugin:
 
 ```bash
-codex plugin marketplace add email-love/codex-agents --ref v4.11.2
+codex plugin marketplace add email-love/codex-agents --ref v4.11.3
 codex plugin add email-love@email-love
 ```
 
 You can also open `/plugins` in Codex CLI, select the **Email Love** marketplace, and install
-the Git-backed plugin there. Replace `v4.11.2` with `main` only when testing unreleased work.
+the Git-backed plugin there. Replace `v4.11.3` with `main` only when testing unreleased work.
 
 The public and Git-backed installs are separate distribution paths. A GitHub push or marketplace
 refresh does not update the reviewed public plugin.
@@ -71,7 +71,7 @@ export FIGMA_TOKEN=figd_...
 Create it in Figma Account Settings with Current user, File content, File metadata, and
 Library content scopes, then launch Codex from the same environment.
 
-The consolidated Email Love MCP (`emaillove` at `https://mcp.emaillove.com/mcp`) searches real
+The consolidated Email Love MCP (`emaillove` at `https://mcp.emaillove.com/plugin/mcp`) searches real
 campaigns, individual emails, brands, and lifecycle journeys; accesses saved collections;
 converts a Figma design or supplied screenshot through `emaillove_convert_design`; and gives
 migration and repair workflows design-system access, headless export verification, and
@@ -92,7 +92,7 @@ fix:
   and authorize it once:
 
   ```bash
-  codex mcp add emaillove --url https://mcp.emaillove.com/mcp
+  codex mcp add emaillove --url https://mcp.emaillove.com/plugin/mcp
   codex mcp login emaillove
   ```
 
@@ -108,7 +108,9 @@ If the `emaillove` QA connection is unavailable or not authorized, migration and
 back to a human-run Email Love plugin Export for the production batch check.
 
 The MCP is source-led: conversion starts from a Figma node or supplied screenshot, and the QA
-tools verify existing Email Love Figma artifacts. It is not a free-form HTML generator for chat.
+tools verify existing Email Love Figma artifacts. It is not a free-form HTML generator for
+chat, and on this endpoint that boundary is SERVER-ENFORCED: `/plugin/mcp` serves only the
+research, conversion, and verification tools, with no generation tools exposed.
 
 ### 3. Install Email Love in Figma
 
