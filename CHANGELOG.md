@@ -1,5 +1,23 @@
 # Changelog
 
+## 4.11.1 - 2026-09-05
+
+Mirror of the claude-skills 1.7.0 usability and consistency pass; safeguards unchanged.
+
+- **Repair routing by measured provenance:** a template whose root marker is missing, wrong,
+  or misplaced stays in Repair when any Email Love provenance survives (tags in the subtree,
+  wrapper-shaped ancestry, display names, a data-bearing sibling or main component, or a
+  history of exporting); only frames with no provenance reroute to Builder, and ambiguity
+  gets one focused question before any mutation.
+- **Alignment consistency:** the builder's Path B checklist carries the documented
+  multi-column top-align exception instead of contradicting the render rules.
+- **Migration Phase 0:** the source question is asked only when the source is missing or
+  genuinely ambiguous; a named or linked source is confirmed in one line, no menu.
+- **SECURITY.md:** documents the optional authenticated Email Love MCP routes (server-side
+  conversion, headless export with CDN-hosted images and preview tokens, preview renders,
+  research queries) with retention explicitly unknown where undocumented.
+- Upstream repinned to the canonical claude-skills 1.7.0 commit.
+
 ## 4.11.0 - 2026-09-02
 
 Adds campaign research and source-led Figma AI Import to the existing authenticated Email Love

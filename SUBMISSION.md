@@ -7,7 +7,7 @@ This is the portal-ready submission brief for the `email-love` skills-and-MCP pl
 - **Type:** MCP server with skills
 - **Plugin name:** Email Love
 - **Publisher:** Email Love
-- **Version:** 4.11.0
+- **Version:** 4.11.1
 - **Category:** Creativity
 - **Repository:** https://github.com/email-love/codex-agents
 

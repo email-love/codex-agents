@@ -38,6 +38,25 @@ regulated, confidential, or personally identifiable material:
 3. Use `nocache=1` when retention through the normal cache is inappropriate.
 4. Store returned MJML JSON only in an approved location.
 
+## Email Love MCP (optional, authenticated)
+
+If the `emaillove` MCP connection is configured (`https://mcp.emaillove.com/mcp`), its tools run
+under the customer's Email Love account. What each sends:
+
+- `emaillove_convert_design` performs the same conversion as the direct route above, but
+  authenticated and server-side: it receives a Figma file key and node id, renders the node
+  through the Figma API on the server, and forwards the render to the converter.
+- `emaillove_export_figma` reads the selected template's nodes over the Figma REST API
+  server-side, compiles them through the production export pipeline, and hosts extracted images
+  on Email Love's CDN so the exported HTML can reference them; compiled HTML is stored briefly
+  under a preview token.
+- `emaillove_preview_email` renders compiled HTML to desktop and mobile screenshots server-side.
+- The research tools (`search_emails`, `fetch_email`, brand and journey tools) query the public
+  emaillove.com library; they send search terms, not designs.
+
+Retention, logging, and deletion policies for these services are the operator's; where they are
+not documented here they are unknown, and no guarantee is implied.
+
 Do not send competitor previews or Email Love inspiration-library previews to the converter.
 
 ## Reporting a vulnerability

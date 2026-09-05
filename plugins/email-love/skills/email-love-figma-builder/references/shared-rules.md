@@ -212,7 +212,8 @@ consistent with the file's real campaigns. Then check structure:
 - **Path B:** the R9 post-build checklist in
   [render-components-validation.md](render-components-validation.md) passes: every node tagged, every leaf a
   complete pair, every `mj-button` with a direct TEXT child, both alignment axes equal on
-  every auto-layout frame, all nodes visible, and column widths summing to the email's one
+  every auto-layout frame (except the deliberate multi-column top-align case: primary MIN with
+  counter on the content's horizontal alignment), all nodes visible, and column widths summing to the email's one
   content width rather than to the side margin the worker returned per screenshot (R0.3.1). Plus
   the five B5 repairs done, and any tag the spec does not map rebuilt from mapped primitives
   per B4. If the source had an overlapping or bleeding photo, that band is a two column row

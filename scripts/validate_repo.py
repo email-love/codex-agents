@@ -84,8 +84,8 @@ def validate_manifest() -> None:
     manifest = load_json(MANIFEST)
     if manifest.get("name") != "email-love":
         fail("plugin manifest name must be 'email-love'")
-    if manifest.get("version") != "4.11.0":
-        fail("plugin manifest version must be 4.11.0 for this plugin contract")
+    if manifest.get("version") != "4.11.1":
+        fail("plugin manifest version must be 4.11.1 for this plugin contract")
     if not re.fullmatch(r"\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?", manifest.get("version", "")):
         fail("plugin manifest version must be strict semver")
     if manifest.get("skills") != "./skills/":
@@ -526,16 +526,16 @@ def validate_provenance() -> None:
     if not re.fullmatch(r"[0-9a-f]{40}", commit):
         fail("sources.json upstream commit must be a full Git SHA")
     expected_upstream = {
-        "commit": "c3229cce224704a545f246aa6ca527e2d3c160d7",
-        "builder_tag": "emaillove-figma-builder-v2.11.0",
-        "render_tag": "emaillove-eds-converter-v1.46.1",
-        "migration_tag": "emaillove-migration-audit-v1.24.0",
-        "repair_tag": "emaillove-template-repair-v1.2.0",
+        "commit": "1a5cfb451990a82744f0815f00594023cb194769",
+        "builder_tag": "emaillove-figma-builder-v2.12.0",
+        "render_tag": "emaillove-eds-converter-v1.47.0",
+        "migration_tag": "emaillove-migration-audit-v1.25.0",
+        "repair_tag": "emaillove-template-repair-v1.3.0",
         "quality_tag": "emaillove-figma-quality-gates-v1.1.1",
     }
     for key, expected in expected_upstream.items():
         if upstream.get(key) != expected:
-            fail(f"sources.json upstream.{key} must be {expected!r} for v4.11.0")
+            fail(f"sources.json upstream.{key} must be {expected!r} for v4.11.1")
     for snapshot in sources.get("legacy_snapshots", []):
         relative = snapshot.get("path", "")
         expected = snapshot.get("sha256", "")

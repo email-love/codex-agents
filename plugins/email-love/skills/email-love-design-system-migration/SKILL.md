@@ -33,7 +33,7 @@ afterward against an already-verified design system, where a faster model is usu
 
 ## Before doing anything
 
-1. Ask where the source emails live and select the source adapter in Phase 0.
+1. Identify where the source emails live and select the source adapter in Phase 0 (ask only when the request has not already named or linked the source).
 2. For a Figma source, confirm the official remote Figma MCP exposes `get_metadata` and
    `get_screenshot`. For conversion, also confirm it exposes `use_figma`.
 3. Before calling `use_figma`, read the Figma MCP's current `figma-use` skill or equivalent
@@ -74,7 +74,10 @@ module transcription in a run.
 
 ## Phase 0: Pick the source
 
-Ask this once before scoping the audit:
+Ask only when the source is missing or genuinely ambiguous. When the request already names or
+links the source - a pasted Figma link, a folder path, "our Klaviyo templates" - that IS the
+answer: confirm it in one line and select its adapter without presenting the menu. Otherwise
+ask this once before scoping the audit:
 
 > Where are the emails you want to migrate?
 > (a) Figma, (b) local folder, (c) Klaviyo, (d) Marketo, (e) Customer.io,
