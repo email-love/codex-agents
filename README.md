@@ -37,12 +37,12 @@ For development or testing an exact repository release, add this marketplace and
 plugin:
 
 ```bash
-codex plugin marketplace add email-love/codex-agents --ref v4.11.0
+codex plugin marketplace add email-love/codex-agents --ref v4.11.2
 codex plugin add email-love@email-love
 ```
 
 You can also open `/plugins` in Codex CLI, select the **Email Love** marketplace, and install
-the Git-backed plugin there. Replace `v4.11.0` with `main` only when testing unreleased work.
+the Git-backed plugin there. Replace `v4.11.2` with `main` only when testing unreleased work.
 
 The public and Git-backed installs are separate distribution paths. A GitHub push or marketplace
 refresh does not update the reviewed public plugin.
@@ -71,27 +71,38 @@ export FIGMA_TOKEN=figd_...
 Create it in Figma Account Settings with Current user, File content, File metadata, and
 Library content scopes, then launch Codex from the same environment.
 
-The plugin bundles one consolidated Email Love MCP connection:
+The consolidated Email Love MCP (`emaillove` at `https://mcp.emaillove.com/mcp`) searches real
+campaigns, individual emails, brands, and lifecycle journeys; accesses saved collections;
+converts a Figma design or supplied screenshot through `emaillove_convert_design`; and gives
+migration and repair workflows design-system access, headless export verification, and
+desktop/mobile previews.
 
-- `emaillove` at `https://mcp.emaillove.com/mcp` searches real campaigns, individual emails,
-  brands, and lifecycle journeys; accesses saved collections; converts a Figma design or
-  supplied screenshot through `emaillove_convert_design`; and gives migration and repair
-  workflows design-system access, headless export verification, and desktop/mobile previews.
+How you get that connection depends on which install you have. Check which case applies
+before prescribing or following a remedy; a missing tool can mean an unconfigured server, a
+configured server awaiting authorization, or an unavailable service, and each has a different
+fix:
 
-On a public directory install, authorize it once:
+- **ChatGPT app (public directory install):** whether the connection exists depends on the
+  published listing's own integration configuration, not on the skill upload. If the listing
+  offers an Email Love connection, authorize it in ChatGPT's connector UI when prompted (the
+  sign-in screen is Email Love's normal account flow); there is no shell to run. If the
+  listing carries no integration, the research and verification tools are simply unavailable
+  there, and the workflows fall back as documented below.
+- **Codex CLI, public directory install:** the skill upload itself registers no server. Add
+  and authorize it once:
 
-```bash
-codex mcp login emaillove
-```
+  ```bash
+  codex mcp add emaillove --url https://mcp.emaillove.com/mcp
+  codex mcp login emaillove
+  ```
 
-The sign-in screen uses Email Love's normal account flow. Completing it authorizes the MCP
-connection, not the Figma plugin. Start a new task after connecting. On a developer Git install,
-add the server manually if its bundled connection was not registered:
+- **Codex CLI, developer Git install:** the Git-backed plugin bundles the server declaration
+  in `.mcp.json`, so it is already registered; authorize it with `codex mcp login emaillove`.
+  If the tools are missing after login, start a new task; if they are still missing, the
+  server is unavailable rather than unauthorized.
 
-```bash
-codex mcp add emaillove --url https://mcp.emaillove.com/mcp
-codex mcp login emaillove
-```
+Completing the sign-in authorizes the MCP connection, not the Figma plugin. Start a new task
+after connecting.
 
 If the `emaillove` QA connection is unavailable or not authorized, migration and repair fall
 back to a human-run Email Love plugin Export for the production batch check.

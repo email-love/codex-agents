@@ -104,6 +104,16 @@ if "Bundles the Email Love MCP for real campaign research" not in full_desc:
     raise SystemExit("full manifest lost its (true) bundled-MCP description")
 if "Conversion begins with a Figma design or supplied screenshot" not in full_desc:
     raise SystemExit("full manifest lost the QA capability boundary")
+# Distribution-true starter prompts (2026-09-05 review, R2): the Git artifact
+# carries no ESP skills, so its prompts must not advertise them; the portal
+# artifact carries all ten, so its prompts must.
+ESP_MARKERS = ("Klaviyo", "AMPscript", "Braze", "Liquid", "Handlebars", "Jinja", "Zephyr", "ZML", "HubL", "Velocity")
+full_prompts = full.get("interface", {}).get("defaultPrompt", [])
+if any(any(m in p for m in ESP_MARKERS) for p in full_prompts):
+    raise SystemExit("full manifest still advertises ESP prompts its archive does not contain")
+so_prompts = skills_only.get("interface", {}).get("defaultPrompt", [])
+if not any(any(m in p for m in ESP_MARKERS) for p in so_prompts):
+    raise SystemExit("skills-only manifest lost its ESP starter prompts")
 PYEOF
 rm -rf "$tmpm"
 echo "ok artifact split: full carries .mcp.json + resolving manifest, skills-only claims no MCP"
@@ -126,7 +136,15 @@ skill_count="$(grep -cE '^email-love/skills/[^/]+/SKILL.md$' <<<"$skills_listing
 full_count="$(grep -cE '^email-love/skills/[^/]+/SKILL.md$' <<<"$full_listing")"
 [ "$full_count" -eq 4 ] || {
   echo "$FULL has $full_count skills, expected 4" >&2; exit 1; }
-if [ -n "${ESP_SKILLS_DIR:-}" ] && [ -d "$ESP_SKILLS_DIR" ]; then
+# ESP byte-equality is REQUIRED, not best-effort (2026-09-05 review, R7):
+# without a supplied checkout, clone the pin into a temporary directory.
+if [ -z "${ESP_SKILLS_DIR:-}" ] || [ ! -d "${ESP_SKILLS_DIR:-}" ]; then
+  ESP_SKILLS_DIR="$(mktemp -d)/esp-skills"
+  git clone --quiet https://github.com/email-love/esp-skills "$ESP_SKILLS_DIR"
+  git -C "$ESP_SKILLS_DIR" checkout --quiet "$ESP_PIN" || {
+    echo "cannot verify: pinned esp-skills commit $ESP_PIN not found upstream" >&2; exit 1; }
+fi
+if true; then
   tmpe="$(mktemp -d)"
   for esp in $ESP_LIST; do
     ( cd "$tmpe" && unzip -qo "$SKILLS_ONLY" "email-love/skills/$esp/*" )
@@ -139,8 +157,6 @@ if [ -n "${ESP_SKILLS_DIR:-}" ] && [ -d "$ESP_SKILLS_DIR" ]; then
   done
   rm -rf "$tmpe"
   echo "ok ESP byte-equality against pinned checkout ($ESP_PIN)"
-else
-  echo "note: ESP_SKILLS_DIR not set; byte-equality against the pinned checkout skipped"
 fi
 echo "ok ESP split: portal artifact 14 skills, Git artifact 4"
 

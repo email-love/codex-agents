@@ -40,18 +40,23 @@ jobs:
         run: |
           COMMIT="$(python3 -c 'import json; print(json.load(open("sources.json"))["upstream"]["commit"])')"
           git clone --quiet https://github.com/email-love/claude-skills /tmp/claude-skills
-          if ! git -C /tmp/claude-skills checkout --quiet "$COMMIT"; then
-            echo "sources.json commit $COMMIT is not on claude-skills yet (pre-push state);"
-            echo "falling back to claude-skills main for the drift comparison."
-            git -C /tmp/claude-skills checkout --quiet main
-          fi
+          # The pin must exist: push claude-skills first, then this repo. A
+          # fallback to main would validate against unpinned content and mark
+          # a release as synchronized when it is not (2026-09-05 review, R7).
+          git -C /tmp/claude-skills checkout --quiet "$COMMIT"
           python3 scripts/check_shared_drift.py --claude-skills /tmp/claude-skills
 
-      - name: Build plugin distributions
-        run: bash scripts/build_plugin.sh
+      - name: Check out the pinned ESP skills source
+        run: |
+          ESP_PIN="$(python3 -c 'import json; print(json.load(open("sources.json"))["espSkills"]["commit"])')"
+          git clone --quiet https://github.com/email-love/esp-skills /tmp/esp-skills
+          git -C /tmp/esp-skills checkout --quiet "$ESP_PIN"
 
-      - name: Verify distributions (integrity, split, parity, checksums, determinism)
-        run: bash scripts/verify_plugin_dist.sh
+      - name: Build plugin distributions
+        run: ESP_SKILLS_DIR=/tmp/esp-skills bash scripts/build_plugin.sh
+
+      - name: Verify distributions (integrity, split, parity, ESP byte-equality, checksums, determinism)
+        run: ESP_SKILLS_DIR=/tmp/esp-skills bash scripts/verify_plugin_dist.sh
 
       - name: Upload artifacts for inspection
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

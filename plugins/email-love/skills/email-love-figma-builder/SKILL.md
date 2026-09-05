@@ -54,7 +54,13 @@ is visible the moment you look at it.
      and runs AI Import in the Email Love plugin.
 4. Confirm the Email Love plugin is installed. Path A also requires a synced Email Love
    design system.
-5. Treat a request to audit or migrate a whole legacy library as a different job. Use
+5. Check whether the Email Love MCP tools (`emaillove_convert_design`,
+   `emaillove_export_figma`, `emaillove_preview_email`) are available, and tell the user in
+   one line which of Figma writing, conversion, and export verification this session
+   actually has. When they are absent, distinguish an unconfigured server, one awaiting
+   authorization, and unavailable tools before prescribing a remedy; a skills-only install
+   carries no MCP configuration, so never send it straight to a login command.
+6. Treat a request to audit or migrate a whole legacy library as a different job. Use
    `$email-love-design-system-migration`.
 
 Do not ask the user to disable the sandbox or bypass all approvals. Work through normal
@@ -200,7 +206,8 @@ Always verify:
 - every Path B node is tagged and every leaf pair is complete;
 - every frame created is vertically HUG except an intentional `mj-spacer`;
 - fixed widths occur only in documented load-bearing cases;
-- both auto-layout alignment axes match;
+- both auto-layout alignment axes match, except the documented multi-column top-align
+  case (primary MIN with counter on the content's horizontal alignment);
 - pinned text widths include font fallback slack;
 - all vertical gaps are padding paid by one side only;
 - source images use rendered crops with preserved aspect ratios;
@@ -213,6 +220,21 @@ Take a fresh screenshot of every email and inspect for clipped text, overlaps, i
 spacing, missing content, incorrect color, and alignment flips. Fix failures before handoff.
 
 ## Step 7: Hand off
+
+Verify through the production exporter first when you can. Probe for
+`emaillove_export_figma` and `emaillove_preview_email` before delegating verification to the
+user: when connected, run the desktop preview export on the root, run the mobile preview,
+fix anything either render disproves, and include the preview link in the report. End every
+build with exactly one completion state:
+
+- `desktop and mobile export verified`: both production renders exist and pass; desktop
+  success never substitutes for untested mobile output.
+- `built in Figma, export verification pending`: canvas and structure checks passed but no
+  production render has been seen.
+- `blocked`: plus the exact action needed to continue.
+
+Reserve `export-ready`, `fixed`, and `verified` for the evidence those words imply; a named
+inbox-client test is a separate claim from a production Preview pass.
 
 Report:
 

@@ -84,8 +84,8 @@ def validate_manifest() -> None:
     manifest = load_json(MANIFEST)
     if manifest.get("name") != "email-love":
         fail("plugin manifest name must be 'email-love'")
-    if manifest.get("version") != "4.11.1":
-        fail("plugin manifest version must be 4.11.1 for this plugin contract")
+    if manifest.get("version") != "4.11.2":
+        fail("plugin manifest version must be 4.11.2 for this plugin contract")
     if not re.fullmatch(r"\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?", manifest.get("version", "")):
         fail("plugin manifest version must be strict semver")
     if manifest.get("skills") != "./skills/":
@@ -535,7 +535,7 @@ def validate_provenance() -> None:
     }
     for key, expected in expected_upstream.items():
         if upstream.get(key) != expected:
-            fail(f"sources.json upstream.{key} must be {expected!r} for v4.11.1")
+            fail(f"sources.json upstream.{key} must be {expected!r} for v4.11.2")
     for snapshot in sources.get("legacy_snapshots", []):
         relative = snapshot.get("path", "")
         expected = snapshot.get("sha256", "")
@@ -581,8 +581,11 @@ def validate_repository_guidance() -> None:
     if len(agents.read_bytes()) >= 32 * 1024:
         fail("root AGENTS.md must stay below the default 32 KiB instruction budget")
     compatibility_files = (agents, MIGRATION_COMPATIBILITY)
+    git_release = load_json(SOURCES).get("gitRelease", "")
+    if not re.fullmatch(r"v\d+\.\d+\.\d+", git_release):
+        fail("sources.json gitRelease must name the supported Git install tag (vX.Y.Z)")
     required_compatibility_text = {
-        "codex plugin marketplace add email-love/codex-agents --ref v4.9.0",
+        f"codex plugin marketplace add email-love/codex-agents --ref {git_release}",
         "codex plugin add email-love@email-love",
     }
     for compatibility_file in compatibility_files:

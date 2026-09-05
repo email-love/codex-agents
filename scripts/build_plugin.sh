@@ -37,20 +37,25 @@ ESP_PIN="$(python3 -c "import json; print(json.load(open('sources.json'))['espSk
 ESP_LIST="$(python3 -c "import json; print(' '.join(json.load(open('sources.json'))['espSkills']['skills']))")"
 ESP_SKILLS_DIR="${ESP_SKILLS_DIR:-}"
 if [ -z "$ESP_SKILLS_DIR" ]; then
+  # Self-managed temporary clone: the ONLY checkout this script may move.
   ESP_SKILLS_DIR="$(mktemp -d)/esp-skills"
   git clone --quiet https://github.com/email-love/esp-skills "$ESP_SKILLS_DIR"
-fi
-ESP_HEAD="$(git -C "$ESP_SKILLS_DIR" rev-parse HEAD 2>/dev/null || echo none)"
-if [ "$ESP_HEAD" != "$ESP_PIN" ]; then
-  if ! git -C "$ESP_SKILLS_DIR" checkout --quiet "$ESP_PIN" 2>/dev/null; then
-    echo "refusing to build: esp-skills checkout is at $ESP_HEAD, pinned commit is $ESP_PIN" >&2
-    echo "fetch the pinned commit in $ESP_SKILLS_DIR or update sources.json deliberately" >&2
+  git -C "$ESP_SKILLS_DIR" checkout --quiet "$ESP_PIN" || {
+    echo "refusing to build: pinned esp-skills commit $ESP_PIN not found upstream" >&2; exit 1; }
+else
+  # A user-supplied checkout is validated, never mutated: building a package
+  # must not switch the caller's branch or working tree as a side effect.
+  ESP_HEAD="$(git -C "$ESP_SKILLS_DIR" rev-parse HEAD 2>/dev/null || echo none)"
+  if [ "$ESP_HEAD" != "$ESP_PIN" ]; then
+    echo "refusing to build: esp-skills checkout at $ESP_SKILLS_DIR is at $ESP_HEAD," >&2
+    echo "pinned commit is $ESP_PIN. Check out that commit yourself (or unset" >&2
+    echo "ESP_SKILLS_DIR to let the build use its own temporary clone)." >&2
     exit 1
   fi
-fi
-if [ -n "$(git -C "$ESP_SKILLS_DIR" status --porcelain)" ]; then
-  echo "refusing to build: esp-skills checkout at $ESP_SKILLS_DIR is dirty" >&2
-  exit 1
+  if [ -n "$(git -C "$ESP_SKILLS_DIR" status --porcelain)" ]; then
+    echo "refusing to build: esp-skills checkout at $ESP_SKILLS_DIR is dirty" >&2
+    exit 1
+  fi
 fi
 
 if find "$PLUGIN" -type l -print | grep -q .; then
@@ -94,10 +99,27 @@ zip_deterministic() { # $1 = staging dir, $2 = output zip
       | zip -qX "$2" -@ )
 }
 
-# Full Git-backed plugin (includes .mcp.json).
+# Full Git-backed plugin (includes .mcp.json). Its manifest must advertise
+# only what this archive contains: the ESP starter prompts belong to the
+# portal artifact, whose archive actually carries those skills (2026-09-05
+# review, R2).
 FULL_STAGE="$(mktemp -d)"
 stage_common "$FULL_STAGE"
 install -m 0644 "$PLUGIN/.mcp.json" "$FULL_STAGE/email-love/.mcp.json"
+python3 - "$FULL_STAGE/email-love/.codex-plugin/plugin.json" <<'PYEOF'
+import json, sys
+path = sys.argv[1]
+manifest = json.load(open(path))
+prompts = manifest.get("interface", {}).get("defaultPrompt", [])
+ESP_MARKERS = ("Klaviyo", "AMPscript", "Braze", "Liquid", "Handlebars", "Jinja", "Zephyr", "ZML", "HubL", "Velocity")
+kept = [p for p in prompts if not any(m in p for m in ESP_MARKERS)]
+kept.append("Install emaillove-esp skills separately for ESP templating help.")
+manifest["interface"]["defaultPrompt"] = kept
+with open(path, "w") as handle:
+    json.dump(manifest, handle, indent=2)
+    handle.write("\n")
+PYEOF
+chmod 0644 "$FULL_STAGE/email-love/.codex-plugin/plugin.json"
 zip_deterministic "$FULL_STAGE" "$PWD/dist/email-love-codex-plugin-full-$VERSION.zip"
 rm -rf "$FULL_STAGE"
 echo "built dist/email-love-codex-plugin-full-$VERSION.zip"

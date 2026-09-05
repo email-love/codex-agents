@@ -1,5 +1,33 @@
 # Changelog
 
+## 4.11.2 - 2026-09-05
+
+Codex's own repository review (CLAUDE-HANDOFF-CODEX-IMPROVEMENTS-2026-09-05), applied.
+
+- **Setup by surface (R1):** the README separates the ChatGPT app (connector UI, no shell,
+  no assumption the listing carries an integration), Codex CLI public install (add + login),
+  and Git install (bundled declaration, login only), and distinguishes unconfigured,
+  unauthorized, and unavailable states before prescribing a remedy.
+- **Distribution-true metadata (R2):** the Git artifact's starter prompts no longer
+  advertise ESP skills its archive does not contain (build-time trim, verifier-asserted);
+  the portal artifact keeps them.
+- **Completion standard in Builder (R4):** probes the exporter tools before delegating
+  verification, and ends every build with exactly one of three evidence-backed states;
+  desktop never substitutes for mobile.
+- **Alignment summary (R5):** Step 6's checklist line carries the documented multi-column
+  top-align exception (the detailed references already did).
+- **One release record (R6):** sources.json gitRelease names the supported Git install tag;
+  the validator derives the required compatibility command from it instead of a stale
+  literal; README, AGENTS.md, and migration guidance all point at the tag released with this version.
+- **Release verification plumbing (R7):** CI checks out the pinned esp-skills commit once
+  and passes it to both build and verify; ESP byte-equality is required (the verifier clones
+  the pin itself when no checkout is supplied) instead of silently skipped; the drift check
+  fails hard instead of falling back to claude-skills main.
+- **Build safety:** a user-supplied ESP_SKILLS_DIR is validated, never checked out; only the
+  build's own temporary clone may be moved.
+- Deferred to their own decisions: the live MCP tool-boundary enforcement (R3, owner product
+  call) and recorded behavioral runs (R7's second half, the paid-eval lane).
+
 ## 4.11.1 - 2026-09-05
 
 Mirror of the claude-skills 1.7.0 usability and consistency pass; safeguards unchanged.
