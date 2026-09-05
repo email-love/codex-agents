@@ -7,7 +7,7 @@ This is the portal-ready submission brief for the `email-love` skills-and-MCP pl
 - **Type:** MCP server with skills
 - **Plugin name:** Email Love
 - **Publisher:** Email Love
-- **Version:** 4.11.3
+- **Version:** 4.11.4
 - **Publication status:** PUBLISHED to the public directory on 2026-09-05 (listing upgraded
   from 4.9.0: adds the Figma Quality Gates skill and the Email Love MCP connection at
   `https://mcp.emaillove.com/plugin/mcp`). Uploaded skills bundle sha256

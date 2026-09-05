@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.11.4 - 2026-09-05
+
+Repins the ESP templating skills to esp-skills 1.5.0: all ten gain the shared three-mode
+editing contract (edits preserve unrelated HTML byte-for-byte) and structural-only URL
+validation (personalized action links are never opened to check them). No other changes.
+
 ## 4.11.3 - 2026-09-05
 
 Server-enforced MCP tool boundary (2026-09-05 review, R3; owner-approved).

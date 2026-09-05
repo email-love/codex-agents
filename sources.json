@@ -21,8 +21,8 @@
     ],
     "espSkills": {
         "repository": "https://github.com/email-love/esp-skills",
-        "commit": "f1be804f810e9a8629ef29a0af8f4196a32f2afe",
-        "version": "1.4.2-candidate",
+        "commit": "a068e4868c95a22343d2573c869bcc52f589d9cc",
+        "version": "1.5.0",
         "skills": [
             "braze-liquid",
             "customerio-liquid",
@@ -37,5 +37,5 @@
         ],
         "distribution": "BUILD-TIME ONLY: these ten skills are staged into the OpenAI portal skills-only artifact by scripts/build_plugin.sh from an esp-skills checkout verified at the pinned commit. They are deliberately NOT committed into this repository and NOT part of the full Git-backed plugin artifact - esp-skills stays the single canonical home (owner decision, 2026-08-23). Runtime subset only: SKILL.md, references/*.md, agents/openai.yaml; no evals, workspaces, or build tooling."
     },
-    "gitRelease": "v4.11.3"
+    "gitRelease": "v4.11.4"
 }
