@@ -37,12 +37,12 @@ For development or testing an exact repository release, add this marketplace and
 plugin:
 
 ```bash
-codex plugin marketplace add email-love/codex-agents --ref v4.12.0
+codex plugin marketplace add email-love/codex-agents --ref v4.13.0
 codex plugin add email-love@email-love
 ```
 
 You can also open `/plugins` in Codex CLI, select the **Email Love** marketplace, and install
-the Git-backed plugin there. Replace `v4.12.0` with `main` only when testing unreleased work.
+the Git-backed plugin there. Replace `v4.13.0` with `main` only when testing unreleased work.
 
 The public and Git-backed installs are separate distribution paths. A GitHub push or marketplace
 refresh does not update the reviewed public plugin.
@@ -77,6 +77,13 @@ converts a Figma design or supplied screenshot through `emaillove_convert_design
 migration and repair workflows design-system access, headless export verification, and
 desktop/mobile previews.
 
+The public Email Love inspiration MCP (`emaillove-inspiration` at
+`https://chat.emaillove.com/mcp`) is the same campaign, brand and journey research over the
+public archive, with ChatGPT-style `search` and `fetch` tools and inline result cards in hosts
+that render MCP Apps. It needs an Email Love account (OAuth) but no plugin licence, so it is the
+right connection for inspiration-only use; the `emaillove` server stays the one that converts,
+exports and verifies.
+
 How you get that connection depends on which install you have. Check which case applies
 before prescribing or following a remedy; a missing tool can mean an unconfigured server, a
 configured server awaiting authorization, or an unavailable service, and each has a different
@@ -94,10 +101,13 @@ fix:
   ```bash
   codex mcp add emaillove --url https://mcp.emaillove.com/plugin/mcp
   codex mcp login emaillove
+  codex mcp add emaillove-inspiration --url https://chat.emaillove.com/mcp
+  codex mcp login emaillove-inspiration
   ```
 
 - **Codex CLI, developer Git install:** the Git-backed plugin bundles the server declaration
-  in `.mcp.json`, so it is already registered; authorize it with `codex mcp login emaillove`.
+  in `.mcp.json`, so both servers are already registered; authorize them with
+  `codex mcp login emaillove` and `codex mcp login emaillove-inspiration`.
   If the tools are missing after login, start a new task; if they are still missing, the
   server is unavailable rather than unauthorized.
 
@@ -209,8 +219,9 @@ not as the recommended installation path.
 Public plugin updates follow a release process:
 
 1. Validate and tag the GitHub release.
-2. Create a new skills-plus-MCP plugin version in the OpenAI submission portal, enter
-   `https://mcp.emaillove.com/mcp`, and upload the final skill bundle.
+2. Create a new skills-plus-MCP plugin version in the OpenAI submission portal, enter the
+   MCP server URLs (`https://mcp.emaillove.com/mcp` and the public inspiration server
+   `https://chat.emaillove.com/mcp`), and upload the final skill bundle.
 3. Submit it for review, then publish the approved version.
 4. Verify the public listing and start a new task before testing it.
 

@@ -3,6 +3,10 @@
     "emaillove": {
       "type": "http",
       "url": "https://mcp.emaillove.com/plugin/mcp"
+    },
+    "emaillove-inspiration": {
+      "type": "http",
+      "url": "https://chat.emaillove.com/mcp"
     }
   }
 }

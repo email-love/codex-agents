@@ -7,7 +7,7 @@ This is the portal-ready submission brief for the `email-love` skills-and-MCP pl
 - **Type:** MCP server with skills
 - **Plugin name:** Email Love
 - **Publisher:** Email Love
-- **Version:** 4.11.4
+- **Version:** 4.13.0 (pending upload; 4.11.4 is the published listing)
 - **Publication status:** PUBLISHED to the public directory on 2026-09-05 (listing upgraded
   from 4.9.0: adds the Figma Quality Gates skill and the Email Love MCP connection at
   `https://mcp.emaillove.com/plugin/mcp`). Uploaded skills bundle sha256
@@ -36,6 +36,13 @@ Figma.
   design-system access; `emaillove_convert_design` for source-led Figma AI Import; and
   `emaillove_export_figma` plus `emaillove_preview_email` for production export and
   desktop/mobile verification.
+- **Second server (added in 4.13.0):** `emaillove-inspiration` at `https://chat.emaillove.com/mcp`
+  (streamable HTTP, `chat.emaillove.com`, a subdomain of `emaillove.com`). OAuth 2.1 with PKCE
+  and dynamic client registration through the Email Love account flow; no plugin licence
+  needed. Public-archive research only: `search` and `fetch` (ChatGPT-compatible aliases),
+  `search_emails`, `fetch_email`, `search_brands`, `list_journeys`, `get_journey`,
+  `get_trend_report`, with MCP Apps result cards for hosts that render them. Enter it in the
+  portal as the plugin's second MCP server; the skill bundle itself carries no server config.
 - **Boundary:** `emaillove_convert_design` accepts a Figma `fileKey` and `nodeId`, or a
   supplied screenshot URL, and returns measured conversion output for an agent to transcribe.
   It is not a free-form HTML generator. The QA tools verify existing Email Love Figma artifacts

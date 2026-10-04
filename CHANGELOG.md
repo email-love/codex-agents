@@ -1,5 +1,17 @@
 # Changelog
 
+## 4.13.0 - 2026-10-04
+
+Adds the public Email Love inspiration MCP as a second bundled server.
+
+- `.mcp.json` now declares `emaillove-inspiration` at `https://chat.emaillove.com/mcp`
+  (OAuth 2.1 + PKCE, Email Love account, no plugin licence): public-archive campaign, brand and
+  journey research with ChatGPT-compatible `search`/`fetch` tools and MCP Apps result cards.
+  The `emaillove` server at `mcp.emaillove.com/plugin/mcp` is unchanged and remains the only
+  server that converts, exports and verifies.
+- README install steps, the submission brief and the validator cover both servers. The portal
+  skills-only artifact still carries no server config; both URLs are entered in the portal.
+
 ## 4.12.0 - 2026-10-04
 
 Dark mode, ported from claude-skills 3386d56 (figma-builder 2.13.0, eds-converter 1.48.0).
