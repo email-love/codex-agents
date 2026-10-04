@@ -235,8 +235,9 @@ module root.
 ## R9. Post-build checklist (run per module before handing off)
 
 1. **The root matches the shape you meant to build** (R2), and for a migration module that
-   means: shared `name = mj-wrapper`, **no `nodeType` key anywhere in the tree**, no theme
-   keys unless a designer asked for a dark-mode treatment on this block, layer name is the
+   means: shared `name = mj-wrapper`, **no `nodeType` key anywhere in the tree**, shared
+   `contentColor = transparent` on the root (or a deliberate band hex, with a black/white button
+   override when that band carries a button) and no other theme keys, layer name is the
    module name, and its direct children are `mj-section` frames. Read `nodeType` back off the
    root and confirm it is empty; a leftover `mainFrame` uploads as a whole email. (For the one
    email template foundations builds: shared `nodeType = mainFrame`, all theme color keys plus

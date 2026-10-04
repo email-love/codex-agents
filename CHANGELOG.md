@@ -1,5 +1,22 @@
 # Changelog
 
+## 4.12.0 - 2026-10-04
+
+Dark mode, ported from claude-skills 3386d56 (figma-builder 2.13.0, eds-converter 1.48.0).
+
+- **Root theme defaults are the tested dark setup:** black page and content, white text and
+  links, a mid-tone brand button with a white label. The older `#1F1F1F` content default and
+  white button are retired: black on black leaves no seams, and Mac Mail forces a white button
+  to dark grey. Only Apple Mail honours the six keys; other clients auto-invert.
+- **Every wrapper carries `contentColor = transparent`** in the shared namespace, the value the
+  plugin itself writes on new wrappers. A kept colour band is the one exception, with a
+  black/white button override on that wrapper. Validation checklists updated to match.
+- **Private plugin data wins over shared.** Measured on The Ultimate Email Design System: 77 of
+  180 legacy masters stored a private `#1f1f1f` and rendered as grey panels; no shared write
+  overrides it. Builder and migration now read a master's private keys over the Figma REST API
+  (`plugin_data=1387891288648822744`) before trusting a shared write, and record that the Email
+  Love MCP exporter reads shared data only.
+
 ## 4.11.4 - 2026-09-05
 
 Repins the ESP templating skills to esp-skills 1.5.0: all ten gain the shared three-mode

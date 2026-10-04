@@ -84,8 +84,8 @@ def validate_manifest() -> None:
     manifest = load_json(MANIFEST)
     if manifest.get("name") != "email-love":
         fail("plugin manifest name must be 'email-love'")
-    if manifest.get("version") != "4.11.4":
-        fail("plugin manifest version must be 4.11.4 for this plugin contract")
+    if manifest.get("version") != "4.12.0":
+        fail("plugin manifest version must be 4.12.0 for this plugin contract")
     if not re.fullmatch(r"\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?", manifest.get("version", "")):
         fail("plugin manifest version must be strict semver")
     if manifest.get("skills") != "./skills/":
@@ -442,7 +442,9 @@ def validate_skills() -> None:
         ],
         builder / "references" / "render-geometry.md": [
             "000502dec6215da200995a2367539bf8cc0d93b5",
-            "House default `#1F1F1F`",
+            "Recommended `#000000` (black on black, no seams",
+            "`contentColor = 'transparent'`",
+            "plugin_data=1387891288648822744",
             "The six theme keys are dark-mode values",
             "deliberate multi-column top-align case in R3.4",
             "Card and inset blocks",
@@ -526,16 +528,16 @@ def validate_provenance() -> None:
     if not re.fullmatch(r"[0-9a-f]{40}", commit):
         fail("sources.json upstream commit must be a full Git SHA")
     expected_upstream = {
-        "commit": "1a5cfb451990a82744f0815f00594023cb194769",
-        "builder_tag": "emaillove-figma-builder-v2.12.0",
-        "render_tag": "emaillove-eds-converter-v1.47.0",
+        "commit": "3386d56e88c7dd36c1955ccce84c9b7a974ef7d0",
+        "builder_tag": "emaillove-figma-builder-v2.13.0",
+        "render_tag": "emaillove-eds-converter-v1.48.0",
         "migration_tag": "emaillove-migration-audit-v1.25.0",
         "repair_tag": "emaillove-template-repair-v1.3.0",
         "quality_tag": "emaillove-figma-quality-gates-v1.1.1",
     }
     for key, expected in expected_upstream.items():
         if upstream.get(key) != expected:
-            fail(f"sources.json upstream.{key} must be {expected!r} for v4.11.4")
+            fail(f"sources.json upstream.{key} must be {expected!r} for v4.12.0")
     for snapshot in sources.get("legacy_snapshots", []):
         relative = snapshot.get("path", "")
         expected = snapshot.get("sha256", "")

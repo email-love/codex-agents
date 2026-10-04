@@ -821,9 +821,13 @@ An empty list is the only pass.
 - All nine required root values are real and non-empty: `nodeType='mainFrame'`,
   `backgroundColor`, `contentColor`, `textColor`, `linkColor`, `buttonTextColor`,
   `buttonContentColor`, `lightThemeBackgroundColor`, and `fallBackFontName`.
-  The six theme keys hold dark-mode values from the audit Palette's dark proposal or the house
-  defaults, never the light palette repeated; `lightThemeBackgroundColor` holds the light body
-  background.
+  The six theme keys hold dark-mode values from the audit Palette's dark proposal or the tested
+  defaults (black page and content, white text and links, mid-tone brand button with white
+  label), never the light palette repeated; `lightThemeBackgroundColor` holds the light body
+  background. Every wrapper in the campaign carries `contentColor = 'transparent'` or a
+  deliberate band hex; where a pre-existing master stores a private grey (read over the Figma
+  REST API with `plugin_data=1387891288648822744`), list it for the designer to set Transparent
+  in the plugin, because no shared write overrides it.
 - `emailSubject` and `emailPreHeader` are non-blank real copy, not a module name or TODO.
 - `fallBackFontName` is one family such as `Arial`, not a CSS stack.
 - Every campaign root has a specific name. Prefix scratch roots with `QA only, do not send`.

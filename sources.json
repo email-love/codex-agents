@@ -1,9 +1,9 @@
 {
     "upstream": {
         "repository": "https://github.com/email-love/claude-skills",
-        "commit": "1a5cfb451990a82744f0815f00594023cb194769",
-        "builder_tag": "emaillove-figma-builder-v2.12.0",
-        "render_tag": "emaillove-eds-converter-v1.47.0",
+        "commit": "3386d56e88c7dd36c1955ccce84c9b7a974ef7d0",
+        "builder_tag": "emaillove-figma-builder-v2.13.0",
+        "render_tag": "emaillove-eds-converter-v1.48.0",
         "migration_tag": "emaillove-migration-audit-v1.25.0",
         "repair_tag": "emaillove-template-repair-v1.3.0",
         "note": "Tags name the canonical skill versions this port tracks; the commit is the claude-skills revision the shared behavior was actually compared against and ported from (quality gates: source authority, mutation barrier, repair contract classes, five-state verification, acceptance matrix, forward-test-gated responsive rules). Tags are created at release time and may not exist yet at this commit.",
@@ -37,5 +37,5 @@
         ],
         "distribution": "BUILD-TIME ONLY: these ten skills are staged into the OpenAI portal skills-only artifact by scripts/build_plugin.sh from an esp-skills checkout verified at the pinned commit. They are deliberately NOT committed into this repository and NOT part of the full Git-backed plugin artifact - esp-skills stays the single canonical home (owner decision, 2026-08-23). Runtime subset only: SKILL.md, references/*.md, agents/openai.yaml; no evals, workspaces, or build tooling."
     },
-    "gitRelease": "v4.11.4"
+    "gitRelease": "v4.12.0"
 }

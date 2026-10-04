@@ -544,12 +544,12 @@ email is meant to be reused; nothing below changes.
   | key | value |
   | --- | --- |
   | `nodeType` | `mainFrame` (how the plugin recognizes the template; without it nothing else matters) |
-  | `backgroundColor` | dark-mode page background. House default `#000000` |
-  | `contentColor` | dark-mode content/section background. House default `#1F1F1F` |
-  | `textColor` | dark-mode text color. House default `#FFFFFF` |
-  | `linkColor` | dark-mode link color. House default `#FFFFFF` |
-  | `buttonTextColor` | dark-mode button label color. House default `#000000` |
-  | `buttonContentColor` | dark-mode button background. House default `#FFFFFF` |
+  | `backgroundColor` | dark-mode page background. Recommended `#000000` |
+  | `contentColor` | dark-mode wrapper background. Recommended `#000000` (black on black, no seams; the plugin's older default `#1F1F1F` shows the content column as a grey block) |
+  | `textColor` | dark-mode text color. Recommended `#FFFFFF` |
+  | `linkColor` | dark-mode link color. Recommended `#FFFFFF` |
+  | `buttonContentColor` | dark-mode button background. A MID-TONE brand colour, never white or light (Mac Mail forces light backgrounds to dark grey even in the dark theme) |
+  | `buttonTextColor` | dark-mode button label color. `#FFFFFF` with the mid-tone button; set both |
   | `lightThemeBackgroundColor` | the light mj-body background; the one light value in the set |
   | `fallBackFontName` | `Arial` |
 
@@ -608,21 +608,25 @@ moduleRoot.setSharedPluginData('emaillove', 'name', 'mj-wrapper')    // the ONLY
   `mainFrame` anywhere in the subtree.
 - **Component properties live here** (R8), because this is the component that directly owns
   the section, column, and leaf nodes.
-- **Theme color keys: leave them off** unless a designer asked for a dark-mode treatment on
-  this specific block. On a wrapper they are per-node dark-mode *overrides*, not the email
-  theme. The plugin writes `backgroundColor` / `contentColor` / `textColor` / `linkColor`
-  onto every wrapper component it creates (`UiParser.ts:1570`), so those four are legitimate
-  here, but they only ever mean "override the enclosing email for this block".
-  `buttonContentColor` and `buttonTextColor` are worse: the exporter emits them
-  unconditionally whenever they are non-empty, without comparing them to the enclosing email,
-  so a module carrying them ships its own dark-mode CSS into every email it is placed in. A
-  module inherits nothing and conflicts with everything, so the safe default for a converted
-  module is **no theme keys at all**; the email root supplies them. One sanctioned exception is
-  a surface that keeps the same brand color in both themes. Write `contentColor` once on the
-  module's main component; instances mirror that shared plugin data. The conditional
-  `backgroundColor`, `contentColor`, `textColor`, and `linkColor` keys are safe when explicitly
-  required, while `buttonContentColor` and `buttonTextColor` remain unconditional and should
-  stay absent.
+- **Theme color keys: exactly one, `contentColor = 'transparent'`,** in the shared namespace on
+  the module root. That is the value the plugin writes on every wrapper it creates, and it is
+  what lets the exporter clear the wrapper's light fill in dark mode so the email's black shows
+  through with no seams. The email root supplies everything else. On a wrapper the other keys
+  are per-node dark-mode *overrides*, not the email theme, and `buttonContentColor` and
+  `buttonTextColor` are emitted unconditionally whenever non-empty, so a module carrying them
+  ships its own dark-mode CSS into every email it is placed in. The one sanctioned deviation is
+  a surface that keeps the same brand color in both themes (an offer bar, a dark footer): write
+  that hex as `contentColor` once on the module's main component, and when that band carries a
+  button also write `buttonContentColor = '#000000'` and `buttonTextColor = '#FFFFFF'` on the
+  same main, the only place the unconditional pair is correct. Instances mirror the main's shared
+  plugin data. **Precedence, measured 2026-10-04:** the plugin keeps a PRIVATE copy of these keys
+  and reads it first; shared is read only when private is empty. 77 of 180 legacy masters in The
+  Ultimate Email Design System stored a private `#1f1f1f` and rendered as grey panels in Apple
+  Mail; no shared write overrides that. Read private data over the Figma REST API
+  (`plugin_data=1387891288648822744,shared`) before trusting a shared write on a pre-existing
+  master, and treat a stored hex the design did not choose as a one-time Appearance-tab fix by a
+  human. The Email Love MCP exporter reads the shared namespace only and cannot confirm or deny
+  a private value.
 
 ### R2.3 The evidence, so this reads as ground truth rather than preference
 

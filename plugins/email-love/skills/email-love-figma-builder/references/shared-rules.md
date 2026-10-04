@@ -72,20 +72,34 @@ neutral: the exporter substitutes its own dark defaults, which may not match the
 ```js
 frame.setSharedPluginData('emaillove', 'nodeType', 'mainFrame')
 frame.setSharedPluginData('emaillove', 'backgroundColor', '#000000')        // dark-mode page bg
-frame.setSharedPluginData('emaillove', 'contentColor', '#1F1F1F')           // dark-mode section bg
+frame.setSharedPluginData('emaillove', 'contentColor', '#000000')           // dark-mode wrapper bg
 frame.setSharedPluginData('emaillove', 'textColor', '#FFFFFF')
 frame.setSharedPluginData('emaillove', 'linkColor', '#FFFFFF')
-frame.setSharedPluginData('emaillove', 'buttonTextColor', '#000000')
-frame.setSharedPluginData('emaillove', 'buttonContentColor', '#FFFFFF')
+frame.setSharedPluginData('emaillove', 'buttonContentColor', '#EF3E5D')     // a MID-TONE brand colour
+frame.setSharedPluginData('emaillove', 'buttonTextColor', '#FFFFFF')
 frame.setSharedPluginData('emaillove', 'lightThemeBackgroundColor', '#FFFFFF') // light mj-body bg
-frame.setSharedPluginData('emaillove', 'fallBackFontName', 'Arial')
+frame.setSharedPluginData('emaillove', 'fallBackFontName', 'Arial')         // one family name, never a stack
 ```
 
-The six theme keys are dark-mode-only values. Use the file's established dark treatment when
-one exists; otherwise use the house defaults above and flag them for review. Never repeat the
-light palette into those keys, which can produce light-on-light content. The one light value in
-the set is `lightThemeBackgroundColor`. All of these stay editable in the plugin's settings
-panel afterward.
+The six theme keys are dark-mode-only values, and only Apple Mail honours them (Gmail, Outlook
+and Yahoo auto-invert and ignore them). Use the file's established dark treatment when one
+exists; otherwise use the tested defaults above and flag them for review: black page, black
+content (black on black leaves no seams; the plugin's older `#1F1F1F` default shows the content
+column as a grey block), white text and links, and a button in a MID-TONE brand colour with a
+white label. Never a white or light button: Mac Mail forces light backgrounds to dark grey even
+inside the dark theme, so a white pill becomes a grey pill with unreadable text. Never repeat
+the light palette into those keys, which produces light-on-light content. The one light value in
+the set is `lightThemeBackgroundColor`. Do not add head CSS or color-scheme meta of your own; the
+exporter already writes what the clients need. All of these stay editable in the plugin's
+settings panel afterward.
+
+**Every wrapper carries its own dark Content Color, and it must be `transparent`.** The plugin
+writes `contentColor = transparent` on every wrapper it creates; in dark mode the exporter then
+clears the wrapper's light fill so the frame's black shows through. A wrapper that stores a hex
+instead (older libraries store `#1f1f1f`) is painted that hex on the black frame as a grey
+panel. On Path A read the masters you instance first (the dark-mode overrides rule below); on
+Path B write `contentColor = transparent` on every wrapper you create, in the shared namespace,
+exactly as you write the `name` tag.
 
 ## Links, alt text, subject, and preheader
 
@@ -178,11 +192,29 @@ work, and never add a page or a token as a side effect of a build. If an email g
 something the foundations do not carry, that is a request for the designer, so name it in your
 report and build the closest correct thing meanwhile.
 
-**Dark mode overrides are read-only.** Per-node `contentColor`, `textColor`, `linkColor`,
-`buttonContentColor`, `buttonTextColor` on a child node are a deliberate treatment someone
-chose. Never clear or overwrite them, and do not strip them when you duplicate a donor. Name
-the sections that carry them in your report. If the user explicitly asks you to set dark mode
-on a section, write the keys and tell them to verify in the plugin's dark mode preview.
+**Dark mode overrides: the plugin's own value wins, so read before you write.** Per-wrapper
+`contentColor`, `textColor`, `linkColor`, `buttonContentColor`, `buttonTextColor` live in two
+places: the plugin's PRIVATE plugin data (what the Appearance tab shows and what the real export
+reads first) and the shared `emaillove` namespace (what you can write, read only when the
+private value is empty). The Figma MCP cannot read or write the private copy, but the Figma REST
+API can read it: `GET /v1/files/<key>/nodes?ids=<ids>&plugin_data=1387891288648822744,shared`
+(the Email Love plugin id). Do that once for every master you instance, and act on the result:
+
+- Private `contentColor` is `transparent` or empty: correct. Writing shared `transparent` on the
+  master is harmless and matches what the plugin writes on new wrappers.
+- Private `contentColor` is a hex the design did not choose (`#1f1f1f`, `#1e1e1e`, `#000000` on
+  a plain light module): that master predates the plugin's transparent default and renders as a
+  grey panel in Apple Mail dark mode. It cannot be fixed from outside the plugin; name those
+  masters so the user sets Content Color to Transparent once in the Appearance tab.
+- A deliberate band colour (an offer bar, a navy strip, a dark footer) is the one sanctioned
+  per-wrapper override: keep it, and when the band carries a button give the wrapper
+  `buttonContentColor = #000000` and `buttonTextColor = #FFFFFF` so the button stays visible.
+  Write both on the MAIN component, never per instance.
+
+Never clear or overwrite a value the user set deliberately, and do not strip overrides when you
+duplicate a donor. Name the wrappers that carry overrides in your report. The Email Love MCP
+exporter reads shared data only, so its render is not evidence about private keys; the REST
+read above or an export from the plugin itself is the proof.
 
 ## Writing the content
 

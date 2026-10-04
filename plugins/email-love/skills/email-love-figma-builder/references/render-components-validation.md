@@ -222,7 +222,8 @@ module root.
      `lightThemeBackgroundColor` and `fallBackFontName`, no `name` key, and its direct
      children are `mj-wrapper` components.
    - **DESIGN-SYSTEM MODULE:** shared `name = mj-wrapper`, **no `nodeType` key anywhere in
-     the tree**, no theme keys unless a designer asked for a dark-mode treatment, layer name
+     the tree**, shared `contentColor = transparent` on the root (or a deliberate band hex, with
+     a black/white button override when that band carries a button) and no other theme keys, layer name
      is the module name, and its direct children are `mj-section` frames. Read `nodeType`
      back off the root and confirm it is empty.
 2. Every FRAME/RECT/LINE/TEXT you created has shared `name` set to exactly one known tag;

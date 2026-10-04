@@ -31,12 +31,14 @@ references contain the full rules.
 | --- | --- | --- |
 | `name` | every tagged node | Exact MJML tag, including `-Frame` where required; never rely on the layer-name fallback |
 | `nodeType` | whole-email root only | `'mainFrame'`; forbidden everywhere in a reusable module |
-| `backgroundColor` | mainFrame | Dark-mode page background; house default `#000000` |
-| `contentColor` | mainFrame | Dark-mode content background; house default `#1F1F1F` |
-| `textColor` | mainFrame | Dark-mode text; house default `#FFFFFF` |
-| `linkColor` | mainFrame | Dark-mode link; house default `#FFFFFF` |
-| `buttonTextColor` | mainFrame | Dark-mode button label; house default `#000000` |
-| `buttonContentColor` | mainFrame | Dark-mode button background; house default `#FFFFFF` |
+| `backgroundColor` | mainFrame | Dark-mode page background; recommended `#000000` |
+| `contentColor` | mainFrame | Dark-mode wrapper background; recommended `#000000` (the plugin's older `#1F1F1F` default shows the content column as a grey block) |
+| `textColor` | mainFrame | Dark-mode text; recommended `#FFFFFF` |
+| `linkColor` | mainFrame | Dark-mode link; recommended `#FFFFFF` |
+| `buttonContentColor` | mainFrame | Dark-mode button background; a mid-tone brand colour, never white or light (Mac Mail forces light backgrounds to dark grey) |
+| `buttonTextColor` | mainFrame | Dark-mode button label; `#FFFFFF` with the mid-tone button, set both |
+| `contentColor` | every `mj-wrapper` module root | `'transparent'`, REQUIRED: the plugin writes it on every wrapper it creates, and it lets the exporter clear the wrapper's light fill in dark mode. A surface that keeps its colour in both modes stores its band hex here instead, once, on the main component |
+| `buttonContentColor` + `buttonTextColor` | an `mj-wrapper` with a kept band and a button | `'#000000'` + `'#FFFFFF'` so the button stays visible on the band; absent everywhere else |
 | `lightThemeBackgroundColor` | mainFrame | The light `mj-body` background; the one light value in the set |
 | `fallBackFontName` | mainFrame | One family such as `Arial`, never a CSS stack |
 | `emailSubject` | mainFrame | Plain subject string |
@@ -477,9 +479,11 @@ Build the scaffold every later batch depends on:
    contentColor, textColor, linkColor, buttonTextColor, buttonContentColor,
    lightThemeBackgroundColor, and fallBackFontName (render rule R2.1 has all nine and what each
    one is for). **The six theme keys are dark-mode values: take them from the audit Palette's
-   dark-mode proposal, or use the house defaults (`#000000` page, `#1F1F1F` content, `#FFFFFF`
-   text and links, `#FFFFFF` button with `#000000` label). Never repeat the light palette in
-   these keys**, because they fire only in dark mode and doing so ships light-on-light.
+   dark-mode proposal, or use the tested defaults (`#000000` page, `#000000` content, `#FFFFFF`
+   text and links, a mid-tone brand colour for the button with a `#FFFFFF` label; never a white
+   or light button, which Mac Mail forces to dark grey). Never repeat the light palette in
+   these keys**, because they fire only in dark mode and doing so ships light-on-light. Only
+   Apple Mail honours them; Gmail, Outlook and Yahoo auto-invert and ignore them.
    `lightThemeBackgroundColor` is the one light value in the set. Sanity-check `contentColor`
    before writing it: it is global and should stay neutral unless the proposed brand treatment
    covers most filled surfaces. A one-off footer or card color belongs as `contentColor` on that
@@ -487,7 +491,8 @@ Build the scaffold every later batch depends on:
    **This is the only `mainFrame` foundations produces, and it is an email, not a module.**
    It exists so batch 1 has somewhere to drop modules and see them in context. The modules
    themselves are a different shape entirely (Phase 3, and render rule R2): each one is an
-   `mj-wrapper` COMPONENT with **no** `mainFrame` marker and no theme keys. Do not copy this
+   `mj-wrapper` COMPONENT with **no** `mainFrame` marker and a single theme key of its own,
+   `contentColor = 'transparent'` (or the band hex for a surface that keeps its colour). Do not copy this
    frame as a starting point for a module.
 
    **A wrapper is FIXED at the target email width, as a component and as every instance of it.**
