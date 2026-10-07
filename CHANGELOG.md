@@ -1,5 +1,25 @@
 # Changelog
 
+## 4.14.0 - 2026-10-07
+
+Documentation design, ported from claude-skills b9c2851 (eds-converter 1.49.0).
+
+- **Design System Migration builds its documentation pages from a fixed design** instead of
+  inventing a layout on each run. New `references/documentation.md` is the visual spec (canvas,
+  type scale, color roles, building blocks, a section list per page, writing rules, gotchas and
+  an acceptance check), taken from the Prada build and the Email Love covers on the Prada and
+  Ultimate Email Design System files. New `references/doc-kit.js` is the builder pasted into
+  `use_figma`: `buildCover`, `buildScaffoldPage` (with a Buttons stage), `buildModulePage` and
+  `buildCampaignsPage`. Every doc color binds to the library's semantic variables; each builder
+  reports missing tokens and stray nodes and deletes nothing it didn't make.
+- Foundations builds the scaffolding pages with the kit and its checklist gains a documentation
+  design check; the Cover contract is the 1280 x 720 Email Love cover with "Email Design
+  System" under the brand name. Each batch rebuilds its category pages with spec cards and
+  status badges from the acceptance matrix before reporting; hand-off adds a full-file
+  documentation pass.
+- `build_plugin.sh` and `verify_plugin_dist.sh` ship `.js` files under a skill so `doc-kit.js`
+  reaches both artifacts.
+
 ## 4.13.0 - 2026-10-04
 
 Adds the public Email Love inspiration MCP as a second bundled server.

@@ -70,20 +70,20 @@ stage_common() { # $1 = staging root
   install -m 0644 "$PLUGIN/.codex-plugin/plugin.json" "$root/.codex-plugin/plugin.json"
   install -m 0644 "$PLUGIN/assets/email-love-logo.png" "$root/assets/email-love-logo.png"
   install -m 0644 LICENSE "$root/LICENSE"
-  # Skills: SKILL.md, references/*.md, agents/*.yaml — the runtime allowlist.
+  # Skills: SKILL.md, references/*.md (plus the .js doc-kit builder), agents/*.yaml: the runtime allowlist.
   for dir in "$PLUGIN"/skills/*/; do
     local short; short="$(basename "$dir")"
     mkdir -p "$root/skills/$short"
     install -m 0644 "$dir/SKILL.md" "$root/skills/$short/SKILL.md"
     for sub in references agents scripts; do
       [ -d "$dir/$sub" ] || continue
-      ( cd "$dir" && find "$sub" -type f \( -name '*.md' -o -name '*.yaml' -o -name '*.py' \) -print0 ) \
+      ( cd "$dir" && find "$sub" -type f \( -name '*.md' -o -name '*.yaml' -o -name '*.py' -o -name '*.js' \) -print0 ) \
         | while IFS= read -r -d '' f; do
             mkdir -p "$root/skills/$short/$(dirname "$f")"
             install -m 0644 "$dir/$f" "$root/skills/$short/$f"
           done
       local unshipped
-      unshipped="$(cd "$dir" && find "$sub" -type f ! -name '*.md' ! -name '*.yaml' ! -name '*.py' 2>/dev/null || true)"
+      unshipped="$(cd "$dir" && find "$sub" -type f ! -name '*.md' ! -name '*.yaml' ! -name '*.py' ! -name '*.js' 2>/dev/null || true)"
       if [ -n "$unshipped" ]; then
         echo "refusing to build: files the allowlist would drop in $short/$sub:" >&2
         echo "$unshipped" >&2
@@ -169,7 +169,7 @@ for esp in $ESP_LIST; do
   install -m 0644 "$src/SKILL.md" "$dest/SKILL.md"
   for sub in references agents scripts; do
     [ -d "$src/$sub" ] || continue
-    ( cd "$src" && find "$sub" -type f \( -name '*.md' -o -name '*.yaml' -o -name '*.py' \) -print0 ) \
+    ( cd "$src" && find "$sub" -type f \( -name '*.md' -o -name '*.yaml' -o -name '*.py' -o -name '*.js' \) -print0 ) \
       | while IFS= read -r -d '' f; do
           mkdir -p "$dest/$(dirname "$f")"
           install -m 0644 "$src/$f" "$dest/$f"

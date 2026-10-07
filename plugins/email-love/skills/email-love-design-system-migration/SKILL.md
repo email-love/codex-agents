@@ -62,6 +62,8 @@ Read references completely before acting in the corresponding phase:
 - **Any run longer than a couple of minutes:** [progress.md](references/progress.md)
 - **Conversion entry and gates:** [conversion-overview.md](references/conversion-overview.md)
 - **Foundations:** [foundations.md](references/foundations.md)
+- **Documentation pages (foundations and every batch):** [documentation.md](references/documentation.md),
+  the visual spec, and [doc-kit.js](references/doc-kit.js), the builder you paste into `use_figma`
 - **Module batches:** [module-conversion.md](references/module-conversion.md)
 - **Before any module transcription, all three render references:**
   - [render-geometry.md](references/render-geometry.md)

@@ -51,7 +51,7 @@ for a in "$FULL" "$SKILLS_ONLY"; do
     rel="${f#"$PLUGIN/"}"
     grep -qxF "email-love/$rel" <<<"$listing" || {
       echo "$a is missing source file $rel" >&2; exit 1; }
-  done < <(find "$PLUGIN/skills" -type f \( -name '*.md' -o -name '*.yaml' -o -name '*.py' \) -print0)
+  done < <(find "$PLUGIN/skills" -type f \( -name '*.md' -o -name '*.yaml' -o -name '*.py' -o -name '*.js' \) -print0)
   # Reverse parity: no archive skill file without a source counterpart.
   # ESP paths are exempt here: their counterpart is the pinned esp-skills
   # checkout, byte-compared below.
