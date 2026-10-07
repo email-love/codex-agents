@@ -84,8 +84,8 @@ def validate_manifest() -> None:
     manifest = load_json(MANIFEST)
     if manifest.get("name") != "email-love":
         fail("plugin manifest name must be 'email-love'")
-    if manifest.get("version") != "4.13.0":
-        fail("plugin manifest version must be 4.13.0 for this plugin contract")
+    if manifest.get("version") != "4.14.0":
+        fail("plugin manifest version must be 4.14.0 for this plugin contract")
     if not re.fullmatch(r"\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?", manifest.get("version", "")):
         fail("plugin manifest version must be strict semver")
     if manifest.get("skills") != "./skills/":
@@ -532,16 +532,16 @@ def validate_provenance() -> None:
     if not re.fullmatch(r"[0-9a-f]{40}", commit):
         fail("sources.json upstream commit must be a full Git SHA")
     expected_upstream = {
-        "commit": "3386d56e88c7dd36c1955ccce84c9b7a974ef7d0",
+        "commit": "b9c28513f5337fdd94a04f88f6d7a8ac1b1df61a",
         "builder_tag": "emaillove-figma-builder-v2.13.0",
-        "render_tag": "emaillove-eds-converter-v1.48.0",
+        "render_tag": "emaillove-eds-converter-v1.49.0",
         "migration_tag": "emaillove-migration-audit-v1.25.0",
         "repair_tag": "emaillove-template-repair-v1.3.0",
         "quality_tag": "emaillove-figma-quality-gates-v1.1.1",
     }
     for key, expected in expected_upstream.items():
         if upstream.get(key) != expected:
-            fail(f"sources.json upstream.{key} must be {expected!r} for v4.13.0")
+            fail(f"sources.json upstream.{key} must be {expected!r} for v4.14.0")
     for snapshot in sources.get("legacy_snapshots", []):
         relative = snapshot.get("path", "")
         expected = snapshot.get("sha256", "")

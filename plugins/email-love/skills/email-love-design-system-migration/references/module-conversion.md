@@ -775,6 +775,18 @@ instead of re-verifying or, worse, re-trusting.
 
 ### 7. Batch report and gate
 
+**Document the batch before you report it.** Rebuild every category page this batch touched with
+`buildModulePage` from [doc-kit.js](doc-kit.js). Do the whole page in one call, with every module
+on the page and not only the new ones, so the page stays in inventory order. Write each spec card
+from what you just built and verified: its purpose, where to use it, the properties it actually
+has, the specs you read back, and the source node. Set each card's badge from the acceptance
+matrix below, never from memory ([documentation.md](documentation.md) section 2 lists the three
+badge values). A Buttons-category module goes on the Buttons page stage instead. Then rebuild the
+Cover so its status line and email preview are current, rebuild Campaigns, and run
+documentation.md section 5 on every page you touched. A module that is built but not documented
+isn't finished: the next person can't tell what it's for or how to use it without opening its
+layers.
+
 One report per batch. **Open with the Group 0 parity table:** for every module, show the source
 `T/I` census beside the built counts and leave the delta column blank when they agree. Any
 unexplained row fails the gate regardless of the remaining groups. **Every module row then
@@ -812,6 +824,14 @@ geometry, and incomplete BOOLEAN properties mechanically, and its verdict is evi
 the review, not a replacement for it.
 
 ## Hand-off after the final batch
+
+### Documentation pass on the whole file
+
+Before the hand-off conversation, take a full-height screenshot of every page in canonical order,
+look at each one, and run [documentation.md](documentation.md) section 5 across all of them.
+Check that the Cover's status line matches the inventory, that every module has a spec card with
+an accurate badge, and that the Campaigns guide names every root on the page. This is the file
+the customer opens first, so it has to look finished.
 
 ### Send-readiness pass
 

@@ -258,18 +258,29 @@ Build the scaffold every later batch depends on:
    checklist below. If the target file already had pages before you arrived, move them into
    position rather than appending, and delete nothing you did not create.
 
-   **Each scaffolding page has a CONTRACT.** Layout and polish are yours; the listed content is
-   not. Two runs of this workflow on two customers must produce the same page doing the same job.
+   **Each scaffolding page has a CONTRACT, and a fixed design.** The content listed below is
+   the contract. The layout, type scale, colors and building blocks are fixed by
+   [documentation.md](documentation.md). Two runs of this workflow on two customers must produce
+   the same page doing the same job **and looking the same**. Build every scaffolding page with
+   the builders in [doc-kit.js](doc-kit.js) (`buildCover`, `buildScaffoldPage` for Getting
+   Started, Foundations, Type and Buttons, and `buildCampaignsPage`), using the section list for
+   that page in documentation.md section 2. Paste the whole kit into one `use_figma` call per
+   page and end the call with the one builder. Don't come up with a new layout on each run: when
+   the agent chooses the design, the docs come out looking different every time, and a page laid
+   out on the spot is the version that clips, overlaps and loses its bindings. If either file is
+   missing, tell the user the pages will meet the content contracts below but won't match the
+   standard Email Love layout, then carry on.
 
    - **Cover.** The first thing anyone opening the file sees, and it answers "what is this and
      what width is it" without anyone having to ask. Required: the customer's brand name set
-     large; "Email Love Design System" beneath it; and a single metadata line carrying three
-     facts, the design system's own version (`v1.0` on a first build, never this workflow's version
-     number), the email width the system is built at, and the month and year
+     large; "Email Design System" beneath it, under the Email Love mark; and a single metadata
+     line carrying three facts, the design system's own version (`v1.0` on a first build, never
+     this workflow's version number), the email width the system is built at, and the month and year
      (for example `v1.0 · 600px · July 2026`). **The width is required because it is the single
      most useful fact about an email design system:** it decides whether a module dropped in from
-     anywhere else fits. Put the content on a full-bleed frame whose fill is bound to
-     `color/bg/brand`, so the cover is on brand color and moves when the brand color moves. No
+     anywhere else fits. Put the content on a 1280 x 720 frame whose fill is bound to
+     `color/bg/brand`, so the cover is on brand color and moves when the brand color moves.
+     `buildCover` builds it, and after batch 1 it renders the Campaigns root on the right. No
      module lives on this page.
    - **Getting Started.** How to use the library, in prose a designer or marketer new to the file
      can follow. **Its frame is vertical HUG with `clipsContent` off, never fixed height.** Take a
@@ -550,7 +561,7 @@ Pages, in canonical order:
       inventory's order, with none added, none missing, and none renamed, except Buttons, which
       has its page in the Foundations group instead.
 - [ ] The three divider pages are empty.
-- [ ] **Cover:** brand name set large, "Email Love Design System" beneath it, and one metadata
+- [ ] **Cover:** brand name set large, "Email Design System" beneath it, and one metadata
       line stating version, email width, and month and year. The width printed there matches the
       width the root frame was actually built at. Its frame fill is bound to `color/bg/brand`.
 - [ ] **Getting Started:** the frame is vertical HUG with `clipsContent` off and a full-page
@@ -580,6 +591,12 @@ Pages, in canonical order:
 - [ ] **Buttons:** one component per audit button style, each labeled, each a styled frame with a
       single text node, the label's TEXT property on the component itself, no loose instances left
       on the page.
+- [ ] **Documentation design:** Cover, Getting Started, Foundations, Type, Buttons and Campaigns
+      were built with `doc-kit.js` from the section lists in documentation.md section 2, and every
+      page passes documentation.md section 5: a full-height screenshot of each page was looked at,
+      nothing is clipped or overlapping, `missingTokens` came back empty (which includes a
+      `color/border/hairline` token created if the palette lacked one), and `strays` came back
+      empty or each entry was explained to the user.
 - [ ] **Campaigns:** exactly one root frame, `nodeType = 'mainFrame'`, at the target email width,
       with all eight theme keys set (the nine of step 7 less the `nodeType` marker itself) and not
       one of them empty. The six dark keys match the audit's dark-mode proposal or the house dark
