@@ -139,14 +139,12 @@ manifest.pop("mcpServers", None)
 # The bundled-connection sentence is true only for the Git-backed artifact;
 # the portal skills-only upload configures no server (2026-08-30 review, F1).
 BUNDLED = ("Bundles the Email Love MCP for real campaign research, lifecycle journeys, "
-           "and brand insights, plus authenticated Figma conversion, design-system "
-           "access, headless export verification, and desktop and mobile previews for "
-           "migration and repair. Conversion begins with a Figma design or supplied "
+           "and brand insights. Export runs in the Email Love Figma plugin. "
+           "Conversion begins with a Figma design or supplied "
            "screenshot; it is not a free-form HTML generator for chat. Sign in with "
            "your Email Love account when prompted.")
-SEPARATE = ("Email Love campaign research, Figma conversion, and migration and repair "
-            "export verification require a separately configured Email Love MCP "
-            "connection. These skills do not configure that connection; authorization "
+SEPARATE = ("Email Love campaign research requires a separately configured Email Love MCP "
+            "connection. Export runs in the Email Love Figma plugin. These skills do not configure that connection; authorization "
             "is required after the server is connected. Conversion begins with a Figma "
             "design or supplied screenshot; it is not a free-form HTML generator for "
             "chat.")

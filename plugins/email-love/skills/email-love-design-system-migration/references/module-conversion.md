@@ -19,8 +19,12 @@ render runs through `emaillove_preview_email`. Its v1 coverage is the core tag s
 `mj-wrapper`, `mj-section`, `mj-group`, `mj-column`, `mj-column-inner`, `mj-text`, `mj-image`,
 `mj-button`, `mj-divider`, and `mj-spacer`. It rejects `mj-hero`, `mj-social`, `mj-navbar`, and
 `mj-table` with a CoverageError naming the node; only those modules still need a human plugin
-Export. When the tool is absent, say in the batch-1 opening that a paid-seat human must run the
-Export sniff. Maintain one Deferred verification list for checks that neither the MCP nor a human
+Export. Use the tool when it is already available; do not ask the user to add, sign in to, or
+reconnect the Email Love MCP to get it. It reads Figma with Email Love's own access, not the
+user's, so it cannot open most customer files. When the tool is absent, or cannot read the file
+(a Figma API 403 or 404, "Token expired", or "File not accessible"), do not troubleshoot
+the connection: say in the batch-1 opening that a paid-seat human must run the Export sniff in
+the Email Love plugin. Maintain one Deferred verification list for checks that neither the MCP nor a human
 can run rather than discovering this limitation after several batches.
 
 ### 0. What you are building: a module, not a small email
@@ -741,8 +745,8 @@ file key, the module wrapper's node id, and `operationType: "preview"`. It accep
 and returns the HTML plus a token accepted by `emaillove_preview_email` for a per-module mobile
 render. Its output is golden-diffed against real plugin exports on every worker deploy. On a
 production proof it was HTML-equivalent with an identical dark-mode CSS block. On a
-CoverageError for `mj-hero`, `mj-social`, `mj-navbar`, or `mj-table`, or when the tool is absent,
-fall back to the plugin: put an instance in the temporary Campaigns root and ask a human to click
+CoverageError for `mj-hero`, `mj-social`, `mj-navbar`, or `mj-table`, or when the tool is absent or
+cannot read the file, fall back to the plugin: put an instance in the temporary Campaigns root and ask a human to click
 Export. Save and inspect the HTML either way. Confirm:
 
 - body width matches foundations;

@@ -71,56 +71,45 @@ export FIGMA_TOKEN=figd_...
 Create it in Figma Account Settings with Current user, File content, File metadata, and
 Library content scopes, then launch Codex from the same environment.
 
-The consolidated Email Love MCP (`emaillove` at `https://mcp.emaillove.com/plugin/mcp`) searches real
-campaigns, individual emails, brands, and lifecycle journeys; accesses saved collections;
-converts a Figma design or supplied screenshot through `emaillove_convert_design`; and gives
-migration and repair workflows design-system access, headless export verification, and
-desktop/mobile previews.
+The Email Love MCP (`emaillove-inspiration` at `https://chat.emaillove.com/mcp`) searches real
+campaigns, individual emails, brands, and lifecycle journeys over the public archive, with
+ChatGPT-style `search` and `fetch` tools and inline result cards in hosts that render MCP Apps.
+It needs an Email Love account (OAuth) but no plugin licence. It is research only: it does not
+convert, export, or verify.
 
-The public Email Love inspiration MCP (`emaillove-inspiration` at
-`https://chat.emaillove.com/mcp`) is the same campaign, brand and journey research over the
-public archive, with ChatGPT-style `search` and `fetch` tools and inline result cards in hosts
-that render MCP Apps. It needs an Email Love account (OAuth) but no plugin licence, so it is the
-right connection for inspiration-only use; the `emaillove` server stays the one that converts,
-exports and verifies.
+Export runs in the Email Love Figma plugin. Select the email frame in Figma and click Preview
+or Export; the build, repair, and migration skills hand that step to you. No MCP connection is
+needed for it.
 
-How you get that connection depends on which install you have. Check which case applies
-before prescribing or following a remedy; a missing tool can mean an unconfigured server, a
-configured server awaiting authorization, or an unavailable service, and each has a different
-fix:
+How you get the research connection depends on which install you have:
 
 - **ChatGPT app (public directory install):** whether the connection exists depends on the
   published listing's own integration configuration, not on the skill upload. If the listing
   offers an Email Love connection, authorize it in ChatGPT's connector UI when prompted (the
   sign-in screen is Email Love's normal account flow); there is no shell to run. If the
-  listing carries no integration, the research and verification tools are simply unavailable
-  there, and the workflows fall back as documented below.
+  listing carries no integration, the research tools are simply unavailable there.
 - **Codex CLI, public directory install:** the skill upload itself registers no server. Add
   and authorize it once:
 
   ```bash
-  codex mcp add emaillove --url https://mcp.emaillove.com/plugin/mcp
-  codex mcp login emaillove
   codex mcp add emaillove-inspiration --url https://chat.emaillove.com/mcp
   codex mcp login emaillove-inspiration
   ```
 
 - **Codex CLI, developer Git install:** the Git-backed plugin bundles the server declaration
-  in `.mcp.json`, so both servers are already registered; authorize them with
-  `codex mcp login emaillove` and `codex mcp login emaillove-inspiration`.
+  in `.mcp.json`, so the server is already registered; authorize it with
+  `codex mcp login emaillove-inspiration`.
   If the tools are missing after login, start a new task; if they are still missing, the
   server is unavailable rather than unauthorized.
 
 Completing the sign-in authorizes the MCP connection, not the Figma plugin. Start a new task
 after connecting.
 
-If the `emaillove` QA connection is unavailable or not authorized, migration and repair fall
-back to a human-run Email Love plugin Export for the production batch check.
-
-The MCP is source-led: conversion starts from a Figma node or supplied screenshot, and the QA
-tools verify existing Email Love Figma artifacts. It is not a free-form HTML generator for
-chat, and on this endpoint that boundary is SERVER-ENFORCED: `/plugin/mcp` serves only the
-research, conversion, and verification tools, with no generation tools exposed.
+Earlier versions also bundled `emaillove` at `https://mcp.emaillove.com/plugin/mcp` for
+conversion and headless export checks. It was removed because its Figma export reads files with
+Email Love's own Figma access and cannot open customer files. If you still have it configured,
+remove it with `codex mcp remove emaillove`. Conversion now uses the design-converter worker
+route described in the Builder skill.
 
 ### 3. Install Email Love in Figma
 
@@ -220,8 +209,8 @@ Public plugin updates follow a release process:
 
 1. Validate and tag the GitHub release.
 2. Create a new skills-plus-MCP plugin version in the OpenAI submission portal, enter the
-   MCP server URLs (`https://mcp.emaillove.com/mcp` and the public inspiration server
-   `https://chat.emaillove.com/mcp`), and upload the final skill bundle.
+   MCP server URL (`https://chat.emaillove.com/mcp`; remove `https://mcp.emaillove.com/mcp`
+   if an earlier version listed it), and upload the final skill bundle.
 3. Submit it for review, then publish the approved version.
 4. Verify the public listing and start a new task before testing it.
 

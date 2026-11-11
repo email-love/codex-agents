@@ -1,8 +1,9 @@
 # Changelog
 
-## 4.14.0 - 2026-10-07
+## 4.14.0 - 2026-11-11
 
-Documentation design, ported from claude-skills b9c2851 (eds-converter 1.49.0).
+Documentation design, ported from claude-skills b9c2851 (eds-converter 1.49.0), and the plugin
+stops using `mcp.emaillove.com` for customers.
 
 - **Design System Migration builds its documentation pages from a fixed design** instead of
   inventing a layout on each run. New `references/documentation.md` is the visual spec (canvas,
@@ -19,6 +20,22 @@ Documentation design, ported from claude-skills b9c2851 (eds-converter 1.49.0).
   documentation pass.
 - `build_plugin.sh` and `verify_plugin_dist.sh` ship `.js` files under a skill so `doc-kit.js`
   reaches both artifacts.
+
+**MCP changes.** The skills no longer ask users to add, sign in to, or reconnect the Email Love MCP for export
+checks.
+
+- `emaillove_export_figma` reads Figma with Email Love's own access, not the user's, so it
+  cannot open most customer files and failed with errors such as "Token expired". The Builder,
+  Template Repair and Design System Migration skills still use the export tools when they are
+  available. When the tools are absent or cannot read the file, they send the export check to
+  Preview or Export in the Email Love Figma plugin without troubleshooting the connection.
+- `.mcp.json` no longer bundles `emaillove` at `mcp.emaillove.com/plugin/mcp`. The plugin now
+  bundles one server, `emaillove-inspiration` at `chat.emaillove.com/mcp`, for research. The
+  validator, manifest description, README, SECURITY and submission brief match. Conversion uses
+  the design-converter worker route. If you still have the old server configured, remove it
+  with `codex mcp remove emaillove`.
+- Portal step for the next submission: remove `https://mcp.emaillove.com/mcp` from the listing's
+  MCP servers.
 
 ## 4.13.0 - 2026-10-04
 

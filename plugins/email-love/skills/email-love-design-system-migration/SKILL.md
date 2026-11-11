@@ -170,14 +170,13 @@ Read the module-conversion reference and all render references.
 1. Before the first module, establish how the batch checks will run. Probe the Email Love MCP
    for `emaillove_export_figma`. When present, use it with `operationType: "preview"` for a
    quota-free headless export and use its token with `emaillove_preview_email`; no plugin click
-   is needed for covered core tags. The Email Love MCP (server name `emaillove`) may be
-   connected separately from this skill's install, so when its tools are absent, determine
-   which case applies before prescribing setup: the server may be UNCONFIGURED (a directory
-   or skills-only install carries no MCP configuration; add it with `codex mcp add emaillove
-   --url https://mcp.emaillove.com/mcp`), UNAUTHORIZED (configured but not signed in; run
-   `codex mcp login emaillove`, and explain that the sign-in screen is Email Love's normal
-   account flow, the same sign-in the Figma plugin uses), or UNAVAILABLE (configured and
-   authorized but not responding). Start a fresh task after any change so the tools appear.
+   is needed for covered core tags. Use these tools when they are already available; do not
+   ask the user to add, sign in to, or reconnect the Email Love MCP to get them. The exporter
+   reads Figma with Email Love's own access, not the user's, so it cannot open most customer
+   files. When the tools are absent, or `emaillove_export_figma` cannot read the file
+   (a Figma API 403 or 404, "Token expired", or "File not accessible"), do not
+   troubleshoot the connection: ask a human to select the frame in Figma and click Export in
+   the Email Love plugin instead.
    An unavailable renderer means verification is deferred, not passed. Do not confuse this server with the Email Love inspiration/library MCP;
    the two are not interchangeable. If the tool raises a CoverageError for `mj-hero`,
    `mj-social`, `mj-navbar`, or `mj-table`, ask a human to run the paid-seat plugin Export and
