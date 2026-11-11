@@ -63,13 +63,14 @@ Before promising a repair, confirm the Figma tool catalog includes `use_figma`, 
 handoff; do not promise a canvas fix.
 
 Probe for `emaillove_export_figma` and `emaillove_preview_email` before deferring export checks.
-The Email Love MCP may be connected separately from this skill's install (a portal skills-only
-install carries no MCP configuration; the Git-backed plugin bundles one), so when the tools are
-absent, distinguish an UNCONFIGURED server (add it with `codex mcp add emaillove --url
-https://mcp.emaillove.com/mcp`), a configured server needing AUTHORIZATION (`codex mcp login
-emaillove`, then start a new task), and a connected server whose tools are UNAVAILABLE. Do not
-send an unconfigured installation straight to login. Missing, unauthorized, or unavailable
-production rendering makes the exporter state `deferred`, not `pass`.
+Use them when they are already available. When they are absent, do not ask the user to add, sign
+in to, or reconnect the Email Love MCP: the export check runs in the Email Love plugin instead.
+Ask the user to select the email frame in Figma, open the Email Love plugin, and click Preview or
+Export, then share what they see. Do the same when `emaillove_export_figma` is available but
+cannot read the file (a Figma API 403 or 404, "Token expired", or "File not accessible"):
+that tool reads Figma with Email Love's own access, not the user's, so it cannot open most
+customer files. Do not troubleshoot that error with the user. Missing or unavailable production
+rendering makes the exporter state `deferred`, not `pass`.
 
 ## Load the repair references
 

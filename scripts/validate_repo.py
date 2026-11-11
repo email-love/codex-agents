@@ -96,12 +96,10 @@ def validate_manifest() -> None:
     if set(mcp_config) != {"mcpServers"}:
         fail(".mcp.json must use the mcpServers wrapper")
     servers = mcp_config.get("mcpServers", {})
-    if set(servers) != {"emaillove", "emaillove-inspiration"}:
-        fail(".mcp.json must declare exactly the emaillove and emaillove-inspiration MCP servers")
-    elif servers["emaillove"].get("type") != "http":
-        fail(".mcp.json emaillove server type must be http")
-    elif servers["emaillove"].get("url") != "https://mcp.emaillove.com/plugin/mcp":
-        fail(".mcp.json emaillove server must use the trimmed plugin endpoint (server-enforced tool boundary)")
+    # mcp.emaillove.com is internal QA infrastructure: its Figma export reads files with
+    # Email Love's own token and cannot open customer files, so the plugin must not bundle it.
+    if set(servers) != {"emaillove-inspiration"}:
+        fail(".mcp.json must declare exactly one MCP server, emaillove-inspiration (do not bundle mcp.emaillove.com)")
     elif servers["emaillove-inspiration"].get("type") != "http":
         fail(".mcp.json emaillove-inspiration server type must be http")
     elif servers["emaillove-inspiration"].get("url") != "https://chat.emaillove.com/mcp":

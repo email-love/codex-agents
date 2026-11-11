@@ -40,8 +40,13 @@ regulated, confidential, or personally identifiable material:
 
 ## Email Love MCP (optional, authenticated)
 
-If the `emaillove` MCP connection is configured (`https://mcp.emaillove.com/mcp`), its tools run
-under the customer's Email Love account. What each sends:
+The plugin bundles only the research server (`emaillove-inspiration` at
+`https://chat.emaillove.com/mcp`); its tools query the public emaillove.com library and send
+search terms, not designs.
+
+The plugin no longer bundles `emaillove` (`https://mcp.emaillove.com/mcp`). If that connection
+is still configured from an earlier version, its tools run under the customer's Email Love
+account. What each sends:
 
 - `emaillove_convert_design` performs the same conversion as the direct route above, but
   authenticated and server-side: it receives a Figma file key and node id, renders the node
