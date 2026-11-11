@@ -10,7 +10,13 @@ checks.
   Template Repair and Design System Migration skills still use the export tools when they are
   available. When the tools are absent or cannot read the file, they send the export check to
   Preview or Export in the Email Love Figma plugin without troubleshooting the connection.
-- `.mcp.json` is unchanged: the plugin still bundles both servers.
+- `.mcp.json` no longer bundles `emaillove` at `mcp.emaillove.com/plugin/mcp`. The plugin now
+  bundles one server, `emaillove-inspiration` at `chat.emaillove.com/mcp`, for research. The
+  validator, manifest description, README, SECURITY and submission brief match. Conversion uses
+  the design-converter worker route. If you still have the old server configured, remove it
+  with `codex mcp remove emaillove`.
+- Portal step for the next submission: remove `https://mcp.emaillove.com/mcp` from the listing's
+  MCP servers.
 
 ## 4.13.0 - 2026-10-04
 

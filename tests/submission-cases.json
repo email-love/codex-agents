@@ -52,7 +52,7 @@
     "Do not call the design converter for this research-only prompt or claim the MCP can generate, preview, validate, or export the user's HTML without a Figma source or supplied screenshot."
    ],
    "expected_result_shape": "Three sourced campaign examples followed by a concise, original summary of patterns that can inform the user's own brief.",
-   "fixture_requirements": "A reviewer Email Love account authorized for https://mcp.emaillove.com/mcp."
+   "fixture_requirements": "A reviewer Email Love account authorized for https://chat.emaillove.com/mcp."
   },
   {
    "id": "repair_flattened_template",
