@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+The skills no longer ask users to add, sign in to, or reconnect the Email Love MCP for export
+checks.
+
+- `emaillove_export_figma` reads Figma with Email Love's own access, not the user's, so it
+  cannot open most customer files and failed with errors such as "Token expired". The Builder,
+  Template Repair and Design System Migration skills still use the export tools when they are
+  available. When the tools are absent or cannot read the file, they send the export check to
+  Preview or Export in the Email Love Figma plugin without troubleshooting the connection.
+- `.mcp.json` is unchanged: the plugin still bundles both servers.
+
 ## 4.13.0 - 2026-10-04
 
 Adds the public Email Love inspiration MCP as a second bundled server.

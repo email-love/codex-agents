@@ -57,9 +57,9 @@ is visible the moment you look at it.
 5. Check whether the Email Love MCP tools (`emaillove_convert_design`,
    `emaillove_export_figma`, `emaillove_preview_email`) are available, and tell the user in
    one line which of Figma writing, conversion, and export verification this session
-   actually has. When they are absent, distinguish an unconfigured server, one awaiting
-   authorization, and unavailable tools before prescribing a remedy; a skills-only install
-   carries no MCP configuration, so never send it straight to a login command.
+   actually has. When they are absent, do not ask the user to add, sign in to, or reconnect
+   the Email Love MCP: the build still works, and export verification moves to the Email
+   Love plugin at hand-off.
 6. Treat a request to audit or migrate a whole legacy library as a different job. Use
    `$email-love-design-system-migration`.
 
@@ -224,8 +224,13 @@ spacing, missing content, incorrect color, and alignment flips. Fix failures bef
 Verify through the production exporter first when you can. Probe for
 `emaillove_export_figma` and `emaillove_preview_email` before delegating verification to the
 user: when connected, run the desktop preview export on the root, run the mobile preview,
-fix anything either render disproves, and include the preview link in the report. End every
-build with exactly one completion state:
+fix anything either render disproves, and include the preview link in the report. When the
+tools are absent, or `emaillove_export_figma` cannot read the file
+(a Figma API 403 or 404, "Token expired", or "File not accessible"), do not troubleshoot
+the connection or ask the user to reconnect. That tool reads Figma with Email Love's own
+access, not the user's, so it cannot open most customer files. Report `built in Figma, export
+verification pending` and ask the user to select the email frame in Figma and click Preview or
+Export in the Email Love plugin. End every build with exactly one completion state:
 
 - `desktop and mobile export verified`: both production renders exist and pass; desktop
   success never substitutes for untested mobile output.
